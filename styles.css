@@ -270,6 +270,7 @@ body::before { display: none; }
 .hero-copy { color: var(--ink); }
 .eyebrow { color: var(--coral-soft); }
 h1, h2, h3 { color: var(--ink); }
+.hero h1 .title-word { white-space: nowrap; }
 .hero-paper-title { color: #536277; }
 .authors { color: var(--ink); }
 .affiliation { color: #6b788b; }
