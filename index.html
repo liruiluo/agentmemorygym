@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f4ef" />
+    <meta name="description" content="Coding Agent Memory Post-training: unlocking the memory potential of pre-trained file operations for long-horizon tasks via reinforcement learning." />
+    <meta property="og:title" content="Coding Agent Memory Gym | CAMG-RL" />
+    <meta property="og:description" content="Learning to use ordinary files as memory for long-horizon tasks through reinforcement learning." />
+    <meta property="og:type" content="website" />
+    <link rel="canonical" href="https://liruiluo.github.io/agentmemorygym/" />
+    <title>CAMG-RL | Coding Agent Memory Gym</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="CAMG home">
+          <span class="brand-mark" aria-hidden="true">/</span>
+          <span>CAMG<span class="brand-dot">.</span>RL</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#idea">Idea</a>
+          <a href="#gym">The Gym</a>
+          <a href="#method">Method</a>
+          <a href="#evidence">Evidence</a>
+          <a href="#paper">Paper</a>
+        </nav>
+        <a class="topbar-cta" href="https://arxiv.org/abs/2609.34422" target="_blank" rel="noreferrer">
+          <span>arXiv:2609.34422</span>
+          <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+        </a>
+      </header>
+
+      <main id="top">
+        <section class="hero section-pad">
+          <div class="hero-copy reveal">
+            <p class="eyebrow"><span class="eyebrow-line"></span> Research project / arXiv:2609.34422</p>
+            <h1>Coding Agent<br /><em>Memory Gym</em></h1>
+            <p class="hero-paper-title">Coding Agent Memory Post-training: Unlocking the Memory Potential of Pre-trained File Operations for Long-Horizon Tasks via Reinforcement Learning.</p>
+            <p class="authors"><span>Lirui Luo</span><span>Kelong Mao</span><span>Heming Xia</span><span>Rongqing Li</span><span>Xinwei Yang</span><span>Luyu Chen</span><span>Kieran Wong</span><span>Yudong Guo</span><span>Xinrui Wang</span><span>Jiayin Zhu</span><span>Simiu Gu</span><span>Sulong Xu</span><span>Cong Fang</span></p>
+            <p class="affiliation">JD.com</p>
+            <p class="hero-thesis"><span>Research thesis</span> Files are not just artifacts. They are memory.</p>
+            <p class="hero-lede">
+              CAMG-RL trains a task-acting policy to create, revise, search, and reuse ordinary workspace files
+              across context boundaries - using the same file operations that code-pretrained agents already know.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="https://arxiv.org/abs/2609.34422" target="_blank" rel="noreferrer">Read the paper <i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
+              <a class="button button-quiet" href="#evidence">Explore results <i data-lucide="arrow-down" aria-hidden="true"></i></a>
+            </div>
+            <div class="hero-facts" aria-label="Project facts">
+              <div><strong>4</strong><span>task environments</span></div>
+              <div><strong>2</strong><span>model scales</span></div>
+              <div><strong>54.4%</strong><span>average success</span></div>
+            </div>
+          </div>
+
+          <div class="hero-visual reveal reveal-delay-1">
+            <div class="visual-label"><span class="status-dot"></span> memory loop / active</div>
+            <figure class="teaser-frame">
+              <img src="assets/teaser.png" alt="CAMG-RL compares context-only work with file-backed memory across a context boundary." />
+              <figcaption><span>FIG. 01</span> A continuation file keeps the work alive when context does not.</figcaption>
+            </figure>
+            <div class="visual-note"><span class="note-index">01</span><span>ordinary shell actions</span><span class="note-arrow">+</span><span>persistent workspace</span></div>
+          </div>
+        </section>
+
+        <section class="marquee-band" aria-label="Project metadata">
+          <div class="marquee-track">
+            <span>CAMG</span><b>/</b><span>CAMG-RL</span><b>/</b><span>ARXIV:2609.34422</span><b>/</b><span>JD.COM</span><b>/</b><span>2026</span>
+          </div>
+        </section>
+
+        <section id="idea" class="section section-pad idea-section">
+          <div class="section-kicker reveal">01 / The idea</div>
+          <div class="split-heading reveal reveal-delay-1">
+            <h2>When the prompt<br /><span>runs out of room.</span></h2>
+            <div>
+              <p class="section-intro">A long task does not fail only because the model forgets. It fails because the useful state has nowhere durable to live.</p>
+              <p class="muted-copy">CAMG gives the policy a persistent workspace and lets reinforcement learning discover when to write a plan, preserve evidence, or read a decision back. The interface is familiar before training begins.</p>
+            </div>
+          </div>
+          <div class="idea-grid">
+            <article class="idea-card idea-card-large reveal">
+              <div class="card-topline"><span class="card-number">01</span><span class="card-tag">context boundary</span></div>
+              <div class="context-diagram" aria-hidden="true">
+                <div class="context-row"><span class="context-block">task</span><span class="context-arrow">-></span><span class="context-block">work</span><span class="context-arrow">-></span><span class="context-block">context full</span></div>
+                <div class="boundary-line"><span>active context ends here</span></div>
+                <div class="context-row context-row-after"><span class="context-file">.agent_memory/CONTINUATION.md</span><span class="context-arrow">-></span><span class="context-block context-block-live">read + continue</span></div>
+              </div>
+              <h3>Make the state explicit.</h3>
+              <p>Before replacement, the policy writes a bounded continuation file. After replacement, it receives the path - not a hidden summary - and reads the state back through a normal file action.</p>
+            </article>
+            <article class="idea-card reveal reveal-delay-1">
+              <div class="card-topline"><span class="card-number">02</span><span class="card-tag">pre-training prior</span></div>
+              <div class="quote-mark">“</div>
+              <h3>Use what the model already knows.</h3>
+              <p>Shell commands, text files, search, and revision are native coding-agent behavior. CAMG-RL turns that prior into deliberate long-horizon memory with task reward.</p>
+              <div class="mini-code"><span>$</span> cat .agent_memory/CONTINUATION.md</div>
+            </article>
+            <article class="idea-card idea-card-accent reveal reveal-delay-2">
+              <div class="card-topline"><span class="card-number">03</span><span class="card-tag">learning signal</span></div>
+              <h3>Memory earns its keep.</h3>
+              <p>There is no separate memory reward. The only question is whether the saved state helps the downstream task succeed.</p>
+              <div class="signal-line"><span class="signal-dot"></span><span>task reward</span><i data-lucide="arrow-right" aria-hidden="true"></i><span>policy update</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="gym" class="section section-pad gym-section">
+          <div class="section-kicker reveal">02 / The gym</div>
+          <div class="split-heading reveal reveal-delay-1">
+            <h2>One interface.<br /><span>Four kinds of work.</span></h2>
+            <p class="section-intro">Each environment keeps its native task semantics while sharing executable shell access and an episode-persistent workspace.</p>
+          </div>
+
+          <div class="environment-layout reveal">
+            <div class="env-tabs" role="tablist" aria-label="CAMG environments">
+              <button class="env-tab is-active" id="tab-shop" role="tab" aria-selected="true" data-env="shop"><span class="env-index">01</span><span class="env-name">Shop</span><span class="env-short">WebShop</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+              <button class="env-tab" id="tab-coding" role="tab" aria-selected="false" data-env="coding"><span class="env-index">02</span><span class="env-name">Coding</span><span class="env-short">SWE-smith</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+              <button class="env-tab" id="tab-research" role="tab" aria-selected="false" data-env="research"><span class="env-index">03</span><span class="env-name">DeepResearch</span><span class="env-short">LiteResearcher</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+              <button class="env-tab" id="tab-auto" role="tab" aria-selected="false" data-env="auto"><span class="env-index">04</span><span class="env-name">AutoResearch</span><span class="env-short">OpenMLE</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+            </div>
+            <div class="env-detail" role="tabpanel" aria-live="polite">
+              <div class="env-detail-header"><span class="detail-label" id="env-type">native task + file memory</span><span class="detail-counter" id="env-counter">01 / 04</span></div>
+              <h3 id="env-title">Shop</h3>
+              <p id="env-description">Search, compare, and purchase under a budget while keeping product evidence and constraints available over a long interaction.</p>
+              <div class="env-meta-grid">
+                <div><span>Native task</span><strong id="env-native">browse + buy</strong></div>
+                <div><span>Memory role</span><strong id="env-memory">preferences, evidence</strong></div>
+                <div><span>Shared action</span><strong>shell_command</strong></div>
+              </div>
+              <div class="env-prompt"><span class="prompt-label">episode workspace</span><code id="env-file">.agent_memory/preferences.md</code><span class="prompt-cursor"></span></div>
+              <div class="env-footer"><span id="env-footer-copy">A task-native world, one shared memory substrate.</span><button class="icon-button" type="button" id="env-next" aria-label="Next environment"><i data-lucide="arrow-right" aria-hidden="true"></i></button></div>
+            </div>
+          </div>
+          <figure class="framework-wide reveal reveal-delay-1">
+            <img src="assets/framework.png" alt="CAMG-RL architecture: rollout GPUs, task environments, memory files, an episode queue, and PPO learner GPUs." />
+            <figcaption><span>FIG. 02</span> A single policy samples native task actions and filesystem actions into one asynchronous PPO loop.</figcaption>
+          </figure>
+        </section>
+
+        <section id="method" class="section section-pad method-section">
+          <div class="section-kicker reveal">03 / The method</div>
+          <div class="method-header reveal reveal-delay-1">
+            <h2>Memory as<br /><span>reasoning.</span></h2>
+            <p class="section-intro">The policy does not emit a separate hidden reasoning channel. It writes the reasoning state it needs into files that can be inspected, revised, and reused.</p>
+          </div>
+          <div class="method-flow">
+            <div class="flow-step reveal"><span class="flow-index">A</span><div><span class="flow-label">act</span><h3>Work on the task</h3><p>Use the native tool and ordinary shell actions in the same response space.</p></div></div>
+            <div class="flow-connector" aria-hidden="true"><i data-lucide="arrow-down" aria-hidden="true"></i></div>
+            <div class="flow-step reveal reveal-delay-1"><span class="flow-index">B</span><div><span class="flow-label">write</span><h3>Save what matters</h3><p>Record the objective, evidence, open questions, and next step in editable files.</p></div></div>
+            <div class="flow-connector" aria-hidden="true"><i data-lucide="arrow-down" aria-hidden="true"></i></div>
+            <div class="flow-step reveal reveal-delay-2"><span class="flow-index">C</span><div><span class="flow-label">return</span><h3>Read it back</h3><p>After context replacement, retrieve the state with a normal file read and keep going.</p></div></div>
+          </div>
+          <div class="terminal-card reveal reveal-delay-1">
+            <div class="terminal-head"><span class="terminal-title">.agent_memory/CONTINUATION.md</span><span class="terminal-status"><span class="status-dot status-dot-green"></span> persisted</span></div>
+            <div class="terminal-body"><span class="terminal-comment"># checkpoint before context replacement</span><span><b>objective:</b> fix response logging after recent changes</span><span><b>evidence:</b> added _mqpush in scrapy/core/scheduler.py</span><span><b>tested:</b> no _mqpush error</span><span><b>next:</b> run tests, confirm logging, submit</span><span class="terminal-prompt">$ cat .agent_memory/CONTINUATION.md <i class="cursor"></i></span></div>
+          </div>
+        </section>
+
+        <section id="evidence" class="section section-pad evidence-section">
+          <div class="section-kicker reveal">04 / The evidence</div>
+          <div class="split-heading reveal reveal-delay-1">
+            <h2>Small moves.<br /><span>Longer memory.</span></h2>
+            <p class="section-intro">The trained 4B policy moves a little, but its behavior changes where it counts: toward complete memory chains and better long-horizon task outcomes.</p>
+          </div>
+          <div class="metrics-strip reveal">
+            <div class="metric metric-primary"><span>Average CAMG success</span><strong>54.4<span>%</span></strong><small>+6.4 pts vs. CompactionRL</small></div>
+            <div class="metric"><span>Complete memory chains</span><strong>20.9<span>%</span></strong><small>last training quarter</small></div>
+            <div class="metric"><span>External transfer</span><strong>15.8<span>%</span></strong><small>SWE-bench Verified</small></div>
+            <div class="metric"><span>Model size</span><strong>4<span>B</span></strong><small>Qwen3.5 base</small></div>
+          </div>
+
+          <div class="chart-panel reveal reveal-delay-1">
+            <div class="chart-header"><div><span class="chart-kicker">native held-out panel</span><h3>Files beat dedicated memory tools.</h3></div><div class="legend" aria-label="Chart legend"><button class="legend-button is-active" data-series="camg"><span class="legend-swatch swatch-camg"></span>CAMG-RL</button><button class="legend-button" data-series="compact"><span class="legend-swatch swatch-compact"></span>CompactionRL</button><button class="legend-button" data-series="base"><span class="legend-swatch swatch-base"></span>Frozen 4B</button></div></div>
+            <div class="bar-chart" role="img" aria-label="Success rate comparison across four CAMG environments">
+              <div class="chart-row" data-route="shop"><div class="chart-label"><span>Shop</span><small>WebShop</small></div><div class="bar-track"><span class="bar bar-camg" style="--value: 97.1%"></span><span class="bar bar-compact is-hidden" style="--value: 97.5%"></span><span class="bar bar-base is-hidden" style="--value: 11.6%"></span></div><strong class="bar-value">97.1%</strong></div>
+              <div class="chart-row" data-route="coding"><div class="chart-label"><span>Coding</span><small>SWE-smith</small></div><div class="bar-track"><span class="bar bar-camg" style="--value: 26.6%"></span><span class="bar bar-compact is-hidden" style="--value: 19.5%"></span><span class="bar bar-base is-hidden" style="--value: 10.9%"></span></div><strong class="bar-value">26.6%</strong></div>
+              <div class="chart-row" data-route="research"><div class="chart-label"><span>DeepResearch</span><small>LiteResearcher</small></div><div class="bar-track"><span class="bar bar-camg" style="--value: 55.5%"></span><span class="bar bar-compact is-hidden" style="--value: 50.8%"></span><span class="bar bar-base is-hidden" style="--value: 36.7%"></span></div><strong class="bar-value">55.5%</strong></div>
+              <div class="chart-row" data-route="auto"><div class="chart-label"><span>AutoResearch</span><small>OpenMLE</small></div><div class="bar-track"><span class="bar bar-camg" style="--value: 38.3%"></span><span class="bar bar-compact is-hidden" style="--value: 24.2%"></span><span class="bar bar-base is-hidden" style="--value: 10.2%"></span></div><strong class="bar-value">38.3%</strong></div>
+            </div>
+            <p class="chart-footnote">Greedy decoding on the frozen 128-task panel per environment. Success rates are the paper's reader-facing values.</p>
+          </div>
+
+          <div class="evidence-grid">
+            <figure class="evidence-figure evidence-figure-wide reveal"><img src="assets/coding-case.png" alt="Four-stage coding episode showing a reproducer, patch, continuation file, and verification." /><figcaption><span>CASE STUDY</span> A coding episode carries the task state through a context replacement.</figcaption></figure>
+            <figure class="evidence-figure reveal reveal-delay-1"><img src="assets/interface-prior.png" alt="Analysis of filesystem memory actions versus dedicated memory tools." /><figcaption><span>INTERFACE PRIOR</span> The base policy already finds file operations familiar.</figcaption></figure>
+            <figure class="evidence-figure reveal reveal-delay-2"><img src="assets/ablation.png" alt="CAMG-RL ablation results across environments." /><figcaption><span>ABLATION</span> Memory-action gradients and general files both matter.</figcaption></figure>
+          </div>
+        </section>
+
+        <section class="section section-pad transfer-section">
+          <div class="transfer-copy reveal"><div class="section-kicker">05 / Beyond the gym</div><h2>Train on memory.<br /><span>Transfer the behavior.</span></h2><p class="section-intro">The final CAMG-RL checkpoint is evaluated beyond its training distribution on software engineering and machine-learning engineering tasks.</p><a class="text-link" href="#paper">See the evaluation protocol <i data-lucide="arrow-up-right" aria-hidden="true"></i></a></div>
+          <div class="transfer-table-wrap reveal reveal-delay-1"><table><thead><tr><th>Model / policy</th><th>SWE-bench<br />Verified</th><th>MLE-bench<br />Lite</th><th>Average</th></tr></thead><tbody><tr><td>Qwen3.5-4B</td><td>7.6%</td><td>0.0%</td><td>3.8%</td></tr><tr><td>Qwen3.5-35B-A3B</td><td>15.6%</td><td>4.5%</td><td>10.1%</td></tr><tr class="table-highlight"><td><strong>CAMG-RL-4B</strong></td><td><strong>15.8%</strong></td><td><strong>4.5%</strong></td><td><strong>10.2%</strong></td></tr><tr><td>Qwen3.5-122B-A10B</td><td>22.0%</td><td>9.1%</td><td>15.6%</td></tr><tr class="table-highlight"><td><strong>CAMG-RL-9B</strong></td><td><strong>27.6%</strong></td><td><strong>9.1%</strong></td><td><strong>18.4%</strong></td></tr><tr><td>Qwen3.5-397B-A17B</td><td>34.4%</td><td>13.6%</td><td>24.0%</td></tr></tbody></table><p class="table-note">Matched task assignments, decoding budgets, environments, and graders.</p></div>
+        </section>
+
+        <section id="paper" class="section section-pad paper-section">
+          <div class="paper-card reveal">
+            <div class="paper-card-main"><p class="eyebrow"><span class="eyebrow-line"></span> Project release</p><h2>Coding Agent Memory Gym</h2><p class="paper-long-title">Coding Agent Memory Post-training: Unlocking the Memory Potential of Pre-trained File Operations for Long-Horizon Tasks via Reinforcement Learning.</p><div class="paper-meta"><span>CAMG / CAMG-RL</span><span>Qwen3.5-4B / 9B</span><span>Agentic RL</span></div></div>
+            <div class="paper-card-actions"><a class="button button-primary" href="assets/paper.pdf" target="_blank" rel="noreferrer">Read PDF <i data-lucide="arrow-up-right" aria-hidden="true"></i></a><button class="button button-outline" id="copy-citation" type="button"><i data-lucide="copy" aria-hidden="true"></i><span>Copy citation</span></button><span class="release-note">Code release: preparing the public snapshot.</span></div>
+          </div>
+          <div class="footer-line"><span>CAMG-RL / 2026</span><span>File memory for long-horizon agents</span><a href="#top">Back to top <i data-lucide="arrow-up" aria-hidden="true"></i></a></div>
+        </section>
+      </main>
+    </div>
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
