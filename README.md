@@ -21,7 +21,7 @@ The site uses the paper's checked figure exports and a local PDF copy. The train
 
 ## Slides
 
-The 15-slide English talk follows the white academic style of the author's earlier
+The 16-slide English talk follows the white academic style of the author's earlier
 project presentations. Its figures and results come from the public paper
 `arXiv:2609.34422v1`. The [outline](slides/outline.md) records the source for each slide.
 
@@ -33,6 +33,8 @@ python3 scripts/build_slides.py --out /tmp/camg-slides/deck.pptx
 python3 scripts/render_slides_pdf.py /tmp/camg-slides/deck.pptx /tmp/camg-slides/deck.pdf
 ```
 
-The PDF renderer uses macOS Arial fonts and reports any overflowing text boxes.
+The PDF renderer uses macOS Arial and Menlo fonts and reports any overflowing text boxes.
+The editable diagrams and tables follow the CRG/SPHERE reference; results are
+redrawn at presentation scale with prominent metric callouts.
 Review all rendered pages before replacing the published PDF and PPTX together
 in `assets/slides/`.
