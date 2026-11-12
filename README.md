@@ -6,6 +6,8 @@ Live page: <https://liruiluo.github.io/agentmemorygym/>
 
 Paper: <https://arxiv.org/abs/2609.34422>
 
+Code: <https://github.com/jd-opensource/CodingAgentMemoryGym>
+
 Slides: [PDF](https://liruiluo.github.io/agentmemorygym/assets/slides/coding-agent-memory-post-training-slides.pdf) · [Editable PowerPoint](https://liruiluo.github.io/agentmemorygym/assets/slides/coding-agent-memory-post-training-slides.pptx)
 
 ## Run locally
@@ -17,7 +19,7 @@ python3 -m http.server 4173 --bind 127.0.0.1
 
 Open <http://127.0.0.1:4173>.
 
-The site uses the paper's checked figure exports and a local PDF copy. The training repository and unpublished code are intentionally not linked from the page.
+The site uses the paper's checked figure exports and a local PDF copy. The Code buttons link to the shared CodingAgentMemoryGym repository.
 
 ## Slides
 
