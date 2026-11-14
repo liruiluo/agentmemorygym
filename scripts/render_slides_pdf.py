@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import io
+import hashlib
+import fitz
 import json
 import math
 from html import escape
@@ -48,7 +50,11 @@ def main():
     prs = Presentation(args.pptx)
     sw, sh = pt(prs.slide_width), pt(prs.slide_height)
     args.pdf.parent.mkdir(parents=True, exist_ok=True)
-    pdf = canvas.Canvas(str(args.pdf), pagesize=(sw, sh), initialFontName="Arial", invariant=1)
+    buffer = io.BytesIO()
+    root=Path(__file__).resolve().parents[1]
+    assets=json.loads((root/'slides/figure-assets.json').read_text())
+    vector_figures=[]
+    pdf = canvas.Canvas(buffer, pagesize=(sw, sh), initialFontName="Arial", invariant=1)
     pdf.setTitle(prs.core_properties.title)
     pdf.setAuthor(prs.core_properties.author)
     overflow = []
@@ -56,6 +62,12 @@ def main():
         for shape in slide.shapes:
             x, y, w, h = map(pt, (shape.left, shape.top, shape.width, shape.height))
             if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
+                if shape.name.startswith('paper-figure:'):
+                    key=shape.name.split(':',1)[1];a=assets[key];source=root/a['pdf']
+                    assert hashlib.sha256(source.read_bytes()).hexdigest()==a['pdf_sha256'],f'Figure drift: {key}'
+                    assert hashlib.sha256(shape.image.blob).hexdigest()==a['png_sha256'],f'Picture drift: {key}'
+                    vector_figures.append((index-1,fitz.Rect(x,y,x+w,y+h),source))
+                    continue
                 pdf.drawImage(ImageReader(io.BytesIO(shape.image.blob)), x, sh-y-h, w, h, mask="auto")
                 continue
             if shape.shape_type == MSO_SHAPE_TYPE.LINE:
@@ -153,6 +165,11 @@ def main():
                 yy -= height+gap
         pdf.showPage()
     pdf.save()
+    doc=fitz.open(stream=buffer.getvalue(),filetype='pdf')
+    for page,box,source in vector_figures:
+        with fitz.open(source) as original:
+            doc[page].show_pdf_page(box,original,0,keep_proportion=True)
+    doc.save(args.pdf,garbage=4,deflate=True,no_new_id=True)
     print(json.dumps({"pages":len(prs.slides),"pdf":str(args.pdf),"overflow":overflow}, ensure_ascii=False))
     if overflow:
         raise SystemExit(1)

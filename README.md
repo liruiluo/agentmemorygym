@@ -1,6 +1,6 @@
 # Coding Agent Memory Post-training
 
-The public **CAMP V1 / CAMG-RL** research page and editable 16-slide talk.
+The public **CAMP V1 / CAMG-RL** research page and editable 17-slide talk.
 
 - [Website](https://liruiluo.github.io/agentmemorygym/)
 - [Paper and version history](https://arxiv.org/abs/2609.34422)
@@ -10,7 +10,9 @@ The public **CAMP V1 / CAMG-RL** research page and editable 16-slide talk.
 ## Build and check
 
 Use Python 3.9+ with the packages in `requirements-presentation.txt`. The default
-headless PDF exporter uses the macOS Arial and Menlo font files. On another OS,
+headless PDF exporter uses the macOS Arial and Menlo font files and the two
+hash-bound vector figure PDFs in `assets/slides/figures/`. It checks that the
+PPTX pictures match those originals before placing the vectors. On another OS,
 export the generated PPTX with PowerPoint/LibreOffice or adapt the renderer's font
 registration to licensed local equivalents, then repeat the visual and font checks.
 No frontend dependencies, external fonts or CDN scripts are needed at runtime.
@@ -45,7 +47,8 @@ scientific boundaries. Displayed paper averages are retained rather than recompu
 from rounded environment values.
 
 - `scripts/site.template.html` + `build_website.py`: semantic, responsive static page.
-- `scripts/build_slides.py`: native editable text, diagrams and charts, plus speaker notes.
+- `scripts/build_slides.py` + `slide_story.py`: the story order, chapter trail, native editable charts and text, plus speaker notes.
+- `slides/figure-assets.json`: exact hashes of the two original paper figures. PPTX uses high-resolution pictures; PDF retains their original vectors. The rest of the deck is editable native content.
 - `scripts/render_slides_pdf.py`: deterministic vector/text PDF export, fail on text overflow.
 - `scripts/build_social_card.py`: source-generated social preview, no research data fabrication.
 - `slides/outline.md`, `slides/speaker-notes.md`: the current talk, not an older release's outline.
@@ -61,17 +64,23 @@ Use a small set of figures with clear takeaways. Keep provenance/version checks,
 seed accounting and acceptance notes in the data and internal verification rather
 than the rendered page. Project editing rules are in `AGENTS.md`.
 
+The talk opens with a real Scrapy case, then follows background → environments →
+method → results and analysis. Background explains why CAMP is needed; a contribution
+page distinguishes CAMG, CAMG-RL and the empirical study. Original Figures 1 and 2
+anchor the idea and method. Results answer effectiveness, mechanism and transfer,
+then return to the case. Secondary checks stay in speaker notes.
+
 The shared result file retains the source references for each experiment. Website
-selection does not change the data used by the 16-slide talk. The paper link leads
+selection does not change the data used by the 17-slide talk. The paper link leads
 to arXiv; `assets/paper.pdf` remains available for existing links. CAMP-II is linked
 as related work and keeps its own methods and five-environment suite.
 
 ## Release procedure
 
-1. Rebuild and run the checks above. Inspect **all 16 slides** and desktop/mobile screenshots;
+1. Rebuild and run the checks above. Inspect **all 17 slides** and desktop/mobile screenshots;
    passing structural checks alone does not establish visual quality.
 2. Copy the checked PDF/PPTX together into `assets/slides/` using their existing filenames.
-3. Copy the generated `speaker-notes.md` into `slides/`, update `slides/outline.md`, then run
+3. Copy the generated `speaker-notes.md` and `outline.md` into `slides/`, then run
    `python3 scripts/write_release_manifest.py`.
 4. Re-run `verify_release.py` on the release pair. Commit source, data and outputs together.
 5. Push `main`; verify the GitHub Pages build is for that exact commit, then verify live HTML,

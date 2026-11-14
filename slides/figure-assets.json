@@ -1,0 +1,24 @@
+{
+  "fig1_camg_teaser": {
+    "reference": "Figure 1",
+    "pdf": "assets/slides/figures/fig1_camg_teaser.pdf",
+    "png": "assets/slides/figures/fig1_camg_teaser.png",
+    "pdf_sha256": "3645eb1d1a31a6f6961e52d68d8f7fe9702c90e843477294483c98916673804d",
+    "png_sha256": "c664d20233b407cea5d2932ab214f09cc316d5058ce2204377a1d80f81a91c60",
+    "width_pt": 1536.0,
+    "height_pt": 900.0,
+    "raster_width_px": 2400,
+    "source_note": "Unmodified original CAMP paper figure. PPTX uses a high-resolution picture; PDF exporter places the original vector PDF."
+  },
+  "fig2_camg_framework": {
+    "reference": "Figure 2",
+    "pdf": "assets/slides/figures/fig2_camg_framework.pdf",
+    "png": "assets/slides/figures/fig2_camg_framework.png",
+    "pdf_sha256": "f7c74d1b8ba71d213ca9b5be6a51fa6cc15885a4b0d2304bcf356e12a534e5cd",
+    "png_sha256": "234018fd2cbc97b1703ede52c68fc655b83921e0f5cc0bdda39ec47d15fd26b7",
+    "width_pt": 1152.0,
+    "height_pt": 768.0,
+    "raster_width_px": 2400,
+    "source_note": "Unmodified original CAMP paper figure. PPTX uses a high-resolution picture; PDF exporter places the original vector PDF."
+  }
+}

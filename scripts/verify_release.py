@@ -10,6 +10,7 @@ from pptx.enum.shapes import MSO_SHAPE_TYPE
 from research_data import load,stats,ROOT
 from build_website import build
 from presentation_policy import assert_public_story
+from slide_story import STORY,assert_slide_story
 
 class Page(HTMLParser):
     def __init__(self):super().__init__();self.ids=[];self.links=[]
@@ -33,20 +34,26 @@ def verify(root,pptx,pdf):
     assert d['sources']['additional']['independently_run_verified'] is False
     assert 'no separate reasoning' not in html.lower()
     assert not any(x in html for x in ['/Users/','/dev/shm','teacher.key','18.0%'])
-    deck=Presentation(pptx);assert len(deck.slides)==16
+    deck=Presentation(pptx);assert len(deck.slides)==len(STORY);assert_slide_story(deck)
     assert sha(root/'data/research.json') in deck.core_properties.comments
-    shapes=0;min_font=100
+    shapes=0;min_font=100;pictures=0
+    figure_assets=json.loads((root/'slides/figure-assets.json').read_text())
     for i,s in enumerate(deck.slides,1):
         assert s.notes_slide.notes_text_frame.text.strip(),f'Missing notes {i}'
         assert not any(x in s.notes_slide.notes_text_frame.text for x in ['/Users/','/dev/shm','18.0 baseline'])
         for o in s.shapes:
-            shapes+=1;assert o.shape_type!=MSO_SHAPE_TYPE.PICTURE,'Unexpected raster'
+            shapes+=1
+            if o.shape_type==MSO_SHAPE_TYPE.PICTURE:
+                pictures+=1;assert o.name.startswith('paper-figure:'),'Unexpected picture'
+                asset=figure_assets[o.name.split(':',1)[1]]
+                assert hashlib.sha256(o.image.blob).hexdigest()==asset['png_sha256']
+                for kind in ('pdf','png'):assert sha(root/asset[kind])==asset[kind+'_sha256']
             assert min(o.left,o.top)>=0 and o.left+o.width<=deck.slide_width+5 and o.top+o.height<=deck.slide_height+5,(i,o.name)
             if o.has_text_frame:
                 for pa in o.text_frame.paragraphs:
                     for run in pa.runs:
                         if run.font.size:min_font=min(min_font,run.font.size.pt)
-    doc=fitz.open(pdf);assert len(doc)==16
+    doc=fitz.open(pdf);assert len(doc)==len(STORY);assert pictures==2
     alltext='\n'.join(p.get_text() for p in doc)
     assert '54.4' in alltext and '+6.4 pp' in alltext and '+11.4 pp' in alltext
     assert '18.0 baseline' not in alltext and '\ufffd' not in alltext
@@ -65,7 +72,7 @@ def verify(root,pptx,pdf):
     from research_data import stats as get_stats
     other=deepcopy(d);other['main']['rows'][-1][-1]+=1
     assert float(get_stats(other)['MAIN_AVG'])==float(k['MAIN_AVG'])+1
-    return {'passed':True,'slides':16,'native_shapes':shapes,'raster_images':0,'minimum_font_pt':min_font,'data_sha256':sha(root/'data/research.json'),'pptx_sha256':sha(pptx),'pdf_sha256':sha(pdf),'html_sha256':sha(root/'index.html'),'local_links':len(p.links),'fonts':font_report}
+    return {'passed':True,'slides':len(STORY),'native_shapes':shapes-pictures,'paper_figure_pictures':pictures,'pdf_raster_images':0,'minimum_font_pt':min_font,'data_sha256':sha(root/'data/research.json'),'pptx_sha256':sha(pptx),'pdf_sha256':sha(pdf),'html_sha256':sha(root/'index.html'),'local_links':len(p.links),'fonts':font_report}
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('--pptx',type=Path,required=True);ap.add_argument('--pdf',type=Path,required=True);ap.add_argument('--out',type=Path);a=ap.parse_args()

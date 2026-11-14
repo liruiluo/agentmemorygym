@@ -1,41 +1,31 @@
-# CAMP V1 · 16-slide public research talk
+# CAMP · 17-slide public research talk
 
 Updated 2026-11-14. English, approximately 15 minutes.
 
-Story: familiar file interface → task-reward learning → useful memory → transfer.
-White 16:9 academic style, native editable exhibits, one main argument per slide.
-The recorded Scrapy episode opens and closes the story. No references or appendix tail.
+Story: why memory → why CAMP → contributions → task environments → learning method → effectiveness → mechanism → transfer → the case carried to completion.
 
-| # | Action title | Evidence |
-|---|---|---|
-| 1 | Coding Agent Memory Post-training | CAMP V1 · 14 November 2026 · arXiv:2609.34422 |
-| 2 | What should survive a context boundary? | Published · Figure 5 / Appendix A.4.3 · recorded training trajectory |
-| 3 | The file interface is familiar before RL | Published · Figure 3a · frozen Qwen3.5-4B · rounded point estimates |
-| 4 | One shared policy, four kinds of work | CAMG environments · V1 suite · four domains |
-| 5 | Task reward trains both acting and remembering | CAMG-RL method · ordinary file operations · fully asynchronous PPO |
-| 6 | CAMG-RL reaches 54.4% average task success | Published · Table 2 · 4 × 128 held-out tasks · equal-weight environment average |
-| 7 | Fixing syntax does not eliminate the interface gap | ADDITIONAL · November 2026 · revised Appendix D.16 · author-reported |
-| 8 | Training increases complete memory chains | Published · Figure 3b · designated-interface metric · continuation writes excluded |
-| 9 | The saved content changes what happens next | Published · Appendix D.3 · same-state continuations · eligible tasks only |
-| 10 | Memory actions need the learning signal | Published · Figure 4 · average task success (%) |
-| 11 | The learned memory policy transfers across interfaces | ADDITIONAL · November 2026 · revised Appendix D.10 · author-reported |
-| 12 | Learned file memory beats a 262K-context reference | ADDITIONAL · November 2026 · revised Appendix D.14 · author-reported |
-| 13 | The advantage persists across training runs | Published · Appendix D.8 |
-| 14 | Gains carry over to external benchmarks | Published · Table 3 · benchmark success (%) · no compute-equivalence claim |
-| 15 | The remembered state becomes the next action | Published · Figure 5 / Appendix A.4.3 · shortened training-episode excerpts |
-| 16 | Familiar operations. Learned memory. | CAMP V1 · published paper + labelled November additions · data/research.json |
+The roadmap follows the opening Scrapy case. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.
 
-## Evidence and version boundaries
+| # | Chapter | Role | Action title | Exhibit |
+|---|---|---|---|---|
+| 1 | Opening / roadmap | Identity | Coding Agent Memory Post-training | Full title, authors, affiliation and links |
+| 2 | Background | Opening case | What should survive a context boundary? | Recorded Scrapy continuation write/read |
+| 3 | Opening / roadmap | Roadmap | The story in four questions | Four chapters and the questions they answer |
+| 4 | Background | Why CAMP | Why learn memory through familiar file operations? | Interface and training-setting gaps → research question |
+| 5 | Background | Why files | The file interface is familiar before RL | Frozen-model file vs. dedicated-tool likelihood |
+| 6 | Background | Core idea | Use files to carry working state beyond the context | Original Figure 1, both contrast rows |
+| 7 | Background | Contributions | Three contributions to learning reusable memory | Environment suite / learning method / empirical study |
+| 8 | Environments | Task demands | One shared policy, four kinds of work | Four task families and the state each must retain |
+| 9 | Method | Learning mechanism | Task reward trains both acting and remembering | Original Figure 2 + shared policy/reward/PPO callouts |
+| 10 | Results & analysis | Effectiveness | CAMG-RL reaches 54.4% average task success | Six-method main comparison |
+| 11 | Results & analysis | Effectiveness | Learned file memory beats a 262K-context reference | 262K-context practical reference |
+| 12 | Results & analysis | Mechanism | Memory actions need the learning signal | Memory-action gradient and continuation ablations |
+| 13 | Results & analysis | Mechanism | The saved content changes what happens next | Blank/shuffled memory from the same state |
+| 14 | Results & analysis | Transfer | The learned memory policy transfers across interfaces | New memory interfaces, fixed task executor |
+| 15 | Results & analysis | Transfer | Gains carry over to external benchmarks | Matched base vs. trained external results |
+| 16 | Results & analysis | Case payoff | The remembered state becomes the next action | Scrapy edit → write → read → successful finish |
+| 17 | Opening / roadmap | Conclusion | Familiar operations. Learned memory. | Three takeaways and project link |
 
-- Published results refer to arXiv v2 (30 September 2026); the main result is Table 2 there, Table 1 in the revised manuscript.
-- November additions are clearly labelled, author-reported revised-manuscript results. Raw run receipts were not independently re-verified for this update.
-- Slide 8 counts designated-interface chains and excludes mandatory continuation writes; native workspace use is a different metric.
-- Slide 9 is a same-state local intervention over eligible tasks, not the entire task population.
-- Slide 10 uses published ablations, not the omitted additional content-quality success panel.
-- Slide 11 changes only the memory policy with a fixed task executor; no further training.
-- Slide 12 changes both context window and compaction procedure; it is a practical reference, not a single-factor causal test.
-- Slide 13 uses published Appendix D.8 mean ± SD across five runs; no invented per-run points or confidence intervals.
-- Slide 14 shows matched base-to-trained improvements, not compute-equivalent comparisons.
-- Slides 2/15 use shortened excerpts from one real training episode, not a held-out or counterfactual comparison.
+## Speaking and source notes
 
-See [speaker notes](speaker-notes.md) and [shared data](../data/research.json) for the complete speaking guide and experiment-specific protocols.
+The contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, chain counts and the syntax-only probe are optional Q&A material, not additional talk pages.

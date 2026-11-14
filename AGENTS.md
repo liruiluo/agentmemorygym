@@ -9,3 +9,11 @@ The website tells the research story: the problem, the central idea, a concrete 
 - Keep scientific source/version details in the shared data and internal checks. Do not couple provenance validation to visible source badges.
 - Update the template and generator, not only index.html; test that report-style prose does not return.
 - Keep the existing scientific identity, links, and exact released slide files unless their revision is separately requested.
+
+## Public research talk
+
+- The talk starts with a concrete case, then explains the application need, the gap in existing work, and why CAMP is needed. A directory does not replace this motivation.
+- Preserve the actual contribution structure: CAMG environments, CAMG-RL learning method, and the empirical study. Use the original paper's core figures when they best explain the idea and method.
+- Keep the roadmap short. Use lightweight chapter markers; group results by effectiveness, mechanism and transfer rather than listing every experiment. The main deck ends on takeaways, not an automatic appendix.
+- Charts and values remain source-grounded. Keep detailed provenance, seed accounting and audit prose in the data and speaker notes, not audience-facing version badges.
+- Rebuild both formats, notes and outline. Declare the editability boundary honestly: native text/charts/case diagrams, two paper-figure pictures in PPTX and original vectors in PDF.
