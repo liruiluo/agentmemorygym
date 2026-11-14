@@ -4,7 +4,7 @@ Updated 2026-11-14. English, approximately 15 minutes.
 
 Story: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → Q1 effectiveness → Q2 mechanism and complete case → Q3 transfer.
 
-The roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case closes Q2. A lightweight four-chapter trail marks progress before Results; each result page carries its Q1, Q2 or Q3 question in the top navigation row, above a larger conclusion-led title. Chapter navigation is above the title throughout. Experimental plots carry one readable comparison/intervention line between the title and exhibit; the recorded case retains its task and action sequence. There are no full-page chapter dividers, references or appendix tail.
+The roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case closes Q2 with the complete original Figure 5. A lightweight four-chapter trail marks progress before Results; each result page carries its Q1, Q2 or Q3 question in the top navigation row, above a larger conclusion-led title. Chapter navigation is above the title throughout. Experimental plots carry one readable comparison/intervention line between the title and exhibit; the case page displays the complete original Figure 5 at full width, keeping all four panels and the context-replacement boundary. There are no full-page chapter dividers, references or appendix tail.
 
 | # | Chapter | Question | Role | Action title | Exhibit |
 |---|---|---|---|---|---|
@@ -21,7 +21,7 @@ The roadmap follows the title. Background ends at the research question; the sep
 | 11 | Results & analysis | Q2 | Prior evidence | The file interface is familiar before RL | Frozen-model file vs. dedicated-tool likelihood |
 | 12 | Results & analysis | Q2 | Mechanism | Memory actions need the learning signal | Memory-action gradient and continuation ablations |
 | 13 | Results & analysis | Q2 | Mechanism | The saved content changes what happens next | Blank/shuffled memory from the same state |
-| 14 | Results & analysis | Q2 | Case study | Case study: carry a Scrapy fix across contexts | Scrapy saved note + read/check actions + successful finish |
+| 14 | Results & analysis | Q2 | Case study | Case study: carry a Scrapy fix across contexts | Complete original Figure 5: error, repair, memory write and readback, success |
 | 15 | Results & analysis | Q3 | Transfer | The learned memory policy transfers across interfaces | New memory interfaces, fixed task executor |
 | 16 | Results & analysis | Q3 | Transfer | Gains carry over to external benchmarks | Matched base vs. trained external results |
 | 17 | Conclusion | — | Conclusion | Takeaways | Three takeaways and project link |

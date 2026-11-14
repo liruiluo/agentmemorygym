@@ -9,7 +9,7 @@ def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def main():
     folder=ROOT/'assets/slides';pptx=folder/'coding-agent-memory-post-training-slides.pptx';pdf=folder/'coding-agent-memory-post-training-slides.pdf'
     deck=Presentation(pptx);data_sha=sha(ROOT/'data/research.json');assert data_sha in deck.core_properties.comments,'Stale PPTX data'
-    paths=['data/research.json','index.html','styles.css','script.js','scripts/build_slides.py','scripts/render_slides_pdf.py','scripts/build_website.py','scripts/site.template.html','scripts/research_data.py','scripts/presentation_policy.py','scripts/verify_release.py','scripts/test_research_data.py','AGENTS.md','slides/outline.md','slides/speaker-notes.md','assets/social-card.png',str(pptx.relative_to(ROOT)),str(pdf.relative_to(ROOT))]
+    paths=['assets/paper.pdf','data/research.json','index.html','styles.css','script.js','scripts/build_slides.py','scripts/render_slides_pdf.py','scripts/build_website.py','scripts/site.template.html','scripts/research_data.py','scripts/presentation_policy.py','scripts/verify_release.py','scripts/test_research_data.py','AGENTS.md','slides/outline.md','slides/speaker-notes.md','assets/social-card.png',str(pptx.relative_to(ROOT)),str(pdf.relative_to(ROOT))]
     paths+=['scripts/slide_story.py','scripts/test_slide_story.py','scripts/write_release_manifest.py','slides/figure-assets.json','README.md','requirements-presentation.txt']
     figures=json.loads((ROOT/'slides/figure-assets.json').read_text())
     paths += [a[k] for a in figures.values() for k in ('pdf','png')]

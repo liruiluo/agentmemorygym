@@ -54,5 +54,26 @@
       1140,
       480
     ]
+  },
+  "fig5_coding_case": {
+    "reference": "Figure 5",
+    "pdf": "assets/slides/figures/fig5_coding_case.pdf",
+    "png": "assets/slides/figures/fig5_coding_case.png",
+    "pdf_sha256": "9a8c17ef692adb304cc92f271bbd70b9bcce1d5d1409b7a3f12e522dfc4688f5",
+    "png_sha256": "b69872829dc6de484450ef59696bda6f71f1e86248db433a85be14b25881c9f6",
+    "width_pt": 1611.75,
+    "height_pt": 735.0,
+    "raster_width_px": 3200,
+    "source_note": "Complete original Figure 5, unmodified and uncropped. The content stream and embedded font programs match the Figure 5 Form XObject in the released paper. PPTX uses the rendered original; PDF keeps its vectors.",
+    "source_paper": "assets/paper.pdf",
+    "source_paper_sha256": "57e7a9f3b66ad322a98a7745f932df55b82fa514ad950be4043fa8a19bd98c8a",
+    "source_page": 9,
+    "source_form_xobject": 1060,
+    "content_stream_sha256": "04abdf8f5ad7de748f2eb4411c38549b9bd80f7f64b659dc6184f7cd997f8cfc",
+    "font_program_sha256": {
+      "f-0-0": "95026daabc74f6c1a0664a9bbba5da11b6ec5ec97303e3245f09bd2e558fab7f",
+      "f-1-0": "409519013f7f94bc3e10d1aa21d9a74906c1205bf5c9198f8d1d8a6f85160c55",
+      "f-2-0": "3f38e95e2fc4fde5fb2db9072a5e7d756a0e3ae611f6112adf64174327cc9103"
+    }
   }
 }

@@ -53,12 +53,17 @@ class SlideStoryTest(unittest.TestCase):
         self.assertEqual(d.slides[1].shapes[0].text,'The story in four questions')
         d.slides[1].shapes[0].text='What should survive a context boundary?'
         with self.assertRaises(AssertionError):assert_slide_story(d)
-    def test_merged_case_must_keep_the_memory_read(self):
+    def test_case_cannot_be_replaced_by_a_redraw(self):
         d=Presentation(self.path)
         case_index=next(i for i,e in enumerate(STORY) if e['role']=='Case study')
-        for o in d.slides[case_index].shapes:
-            if o.has_text_frame:o.text=o.text.replace('CONTINUATION.md','state-file')
-        with self.assertRaisesRegex(AssertionError,'Merged case is incomplete'):assert_slide_story(d)
+        pic=next(o for o in d.slides[case_index].shapes if o.name=='paper-figure:fig5_coding_case')
+        pic.name='custom-redraw'
+        with self.assertRaisesRegex(AssertionError,'Case must use the complete original'):assert_slide_story(d)
+    def test_case_panels_cannot_be_cropped(self):
+        d=Presentation(self.path)
+        pic=next(o for o in d.slides[13].shapes if o.name=='paper-figure:fig5_coding_case')
+        pic.crop_left=.1
+        with self.assertRaisesRegex(AssertionError,'Do not crop the case figure'):assert_slide_story(d)
     def test_chapters_match_story(self):
         for s,entry in zip(self.deck.slides,STORY):
             if entry['phase']:
@@ -152,11 +157,27 @@ class SlideStoryTest(unittest.TestCase):
                     self.assertEqual(hashlib.sha256(o.image.blob).hexdigest(),a['png_sha256'])
                     for kind in ('png','pdf'):
                         self.assertEqual(hashlib.sha256((ROOT/a[kind]).read_bytes()).hexdigest(),a[kind+'_sha256'])
-        self.assertEqual(seen,['fig1_context_only','fig2_environments','fig1_camg_teaser','fig2_camg_framework'])
+        self.assertEqual(seen,['fig1_context_only','fig2_environments','fig1_camg_teaser','fig2_camg_framework','fig5_coding_case'])
         crop=assets['fig1_context_only'];self.assertEqual(crop['clip_pt'],[0,0,1536,400])
         self.assertEqual(crop['pdf_sha256'],assets['fig1_camg_teaser']['pdf_sha256'])
         picture=next(o for o in self.deck.slides[2].shapes if o.name=='paper-figure:fig1_context_only')
         self.assertAlmostEqual(picture.crop_bottom,5/9,places=5)
+    def test_case_original_is_bound_to_published_figure(self):
+        from verify_release import verify_original_case_asset
+        self.assertTrue(verify_original_case_asset(ROOT))
+        a=json.loads((ROOT/'slides/figure-assets.json').read_text())['fig5_coding_case']
+        self.assertNotIn('clip_pt',a)
+        self.assertEqual([a['width_pt'],a['height_pt']],[1611.75,735.0])
+    def test_case_figure_wrong_source_hash_is_rejected(self):
+        from verify_release import verify_original_case_asset
+        import shutil
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'slides').mkdir();(root/'assets/slides/figures').mkdir(parents=True)
+            data=json.loads((ROOT/'slides/figure-assets.json').read_text());a=data['fig5_coding_case']
+            shutil.copy2(ROOT/a['pdf'],root/a['pdf']);shutil.copy2(ROOT/a['source_paper'],root/a['source_paper'])
+            a['source_paper_sha256']='0'*64
+            (root/'slides/figure-assets.json').write_text(json.dumps(data))
+            with self.assertRaisesRegex(AssertionError,'Case paper source drift'):verify_original_case_asset(root)
     def test_environment_panel_is_exact_crop(self):
         a=json.loads((ROOT/'slides/figure-assets.json').read_text())
         self.assertEqual(a['fig2_environments']['clip_pt'],[802,68,1140,480])

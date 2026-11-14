@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build the 17-slide CAMP story from data/research.json.
 
-Text, charts and case diagrams are native PowerPoint objects. Four paper-figure
-placements (two focused crops and two full figures) use high-resolution pictures
+Text and charts are native PowerPoint objects. Five paper-figure
+placements (two focused crops and three full figures) use high-resolution pictures
 in PPTX and original vectors in PDF. One GPT-image-2 background visual is a raster
 asset. PDF export is a separate checked step; see render_slides_pdf.py.
 """
@@ -331,18 +331,9 @@ def build(out,root=ROOT):
 
 
     # Q2 closes with a complete case: save, recover, check, finish.
-    s=slide('Case study: carry a Scrapy fix across contexts','Figure 5 / Appendix A.4.3 · recorded training episode · shortened excerpts',
-       d['case']['boundary']+' Use this case to close Q2: show the memory behavior behind the preceding mechanism results, then turn to Q3 and generalization. Task: fix response logging in Scrapy. At round 12 the agent edits scheduler.py; at round 18 it saves the diagnosis and next steps to CONTINUATION.md. After context replacement it reads the file at round 19, then performs subsequent checks and finishes at round 30 within a 40-round budget. The tests are later actions, not all at round 19. Hidden tests passed; terminal return is 1.00. The excerpts are shortened. No matched no-memory failure is claimed.')
-    text(s,'Task: fix response logging in Scrapy',.55,1.13,8.9,.39,19)
-    steps=[('12','Edit','Add _mqpush'),('18','Write','Save working state'),('19','Read','Recover after reset'),('30','Finish','Hidden tests passed')]
-    for i,(n,verb,detail) in enumerate(steps):
-        x=.55+i*2.31
-        text(s,f'{n} · {verb}',x,1.72,1.85,.35,18,BLUE,bold=True)
-        text(s,detail,x,2.11,2.12,.25,12,MID)
-        if i<3:line(s,x+1.65,1.93,x+2.14,1.93,LINE,1,True)
-    filebox(s,'ROUND 18 / SAVED WORKING STATE',d['case']['note'],.55,2.58,4.2,1.94,11)
-    filebox(s,'AFTER RESET / READ, THEN CHECK',d['case']['commands'][0]+'\n\n'+'\n'.join(d['case']['commands'][1:]),5.07,2.58,4.43,1.94,10.4)
-    takeaway(s,'Hidden tests passed · terminal return 1.00')
+    s=slide('Case study: carry a Scrapy fix across contexts','Figure 5 / Appendix A.4.3 · recorded training episode · complete original figure',
+       d['case']['boundary']+' Use this case to close Q2: show the memory behavior behind the preceding mechanism results, then turn to Q3 and generalization. Task: fix response logging in Scrapy. At round 12 the agent edits scheduler.py; at round 18 it saves the diagnosis and next steps to CONTINUATION.md. After context replacement it reads the file at round 19, then performs subsequent checks and finishes at round 30 within a 40-round budget. The tests are later actions, not all at round 19. Hidden tests passed; terminal return is 1.00. The complete original Figure 5 is displayed without cropping, rewriting or panel recomposition. Follow its four panels from initial error through repair, memory write, context replacement, readback and success. No matched no-memory failure is claimed.')
+    paper_figure(s,'fig5_coding_case',.45,.99,9.1)
 
 
     # Interface transfer with fixed task executor.
@@ -382,21 +373,21 @@ def build(out,root=ROOT):
         if entry['chapter']:chapter_trail(s,entry['chapter'],entry.get('phase'))
     assert_slide_story(prs)
     out.parent.mkdir(parents=True,exist_ok=True);prs.save(out)
-    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
+    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Text and charts are editable. The Figure 1 context crop, Figure 2 environment crop and full Figures 1, 2 and 5 are pictures in PPTX and original vectors in PDF. The case page displays the complete original Figure 5. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         notes+=f'## {n:02}. {t or d["project"]}\n\n**Chapter:** {entry["chapter"] or entry["role"]} · **Role:** {entry["role"]} · **Target:** {entry["seconds"]} seconds\n\n**Source:** {src}\n\n'
         if entry['phase']:notes+=f"**Experimental question:** {question_label(entry['phase'])}\n\n"
         notes+=body+'\n\n'
     notes+='## Additional Q&A material (not extra slides)\n\nThe Background uses the Figure 1 context-only row and a visual failure story to motivate the problem. The AgeMem arm’s zero designated memory-chain observation remains supporting material for questions, not an on-slide statistic. The shared data also retains the CAMG-RL acquisition trajectory (7.97% to 20.9%), the syntax-constrained frozen-model comparison (Bash 20.3% vs. AgeMem 16.0%), and five-run robustness (CAMG-RL 55.3 ± 2.9 vs. CompactionRL 47.1 ± 3.5, mean ± SD). These are omitted from the main talk to preserve the motivation → method → effectiveness → mechanism → transfer story. Refer to each experiment’s own protocol before using these numbers.\n'
     (out.parent/'speaker-notes.md').write_text(notes)
-    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → Q1 effectiveness → Q2 mechanism and complete case → Q3 transfer.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case closes Q2. A lightweight four-chapter trail marks progress before Results; each result page carries its Q1, Q2 or Q3 question in the top navigation row, above a larger conclusion-led title. Chapter navigation is above the title throughout. Experimental plots carry one readable comparison/intervention line between the title and exhibit; the recorded case retains its task and action sequence. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Question | Role | Action title | Exhibit |\n|---|---|---|---|---|---|\n'
+    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → Q1 effectiveness → Q2 mechanism and complete case → Q3 transfer.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case closes Q2 with the complete original Figure 5. A lightweight four-chapter trail marks progress before Results; each result page carries its Q1, Q2 or Q3 question in the top navigation row, above a larger conclusion-led title. Chapter navigation is above the title throughout. Experimental plots carry one readable comparison/intervention line between the title and exhibit; the case page displays the complete original Figure 5 at full width, keeping all four panels and the context-replacement boundary. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Question | Role | Action title | Exhibit |\n|---|---|---|---|---|---|\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         outline_md+=f'| {n} | {entry["chapter"] or entry["role"]} | {entry["phase"] or "—"} | {entry["role"]} | {t or d["project"]} | {entry["exhibit"]} |\n'
     outline_md+='\n## Speaking and source notes\n\nThe contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, the CAMG-RL acquisition trajectory and the syntax-only probe remain optional Q&A material, not additional talk pages. The background shows unused memory tools, a lost constraint and task failure; it carries no isolated zero statistic or defensive labels. Image-generation provenance is in the asset manifest.\n'
     (out.parent/'outline.md').write_text(outline_md)
-    manifest={'slides':len(prs.slides),'data_sha256':sha,'paper_figure_pictures':4,'generated_illustrations':1,'pdf_figures':'original vectors','updated':d['updated'],'slides_outline':[dict(number=n,title=t or d['project'],provenance=src,**entry) for (n,t,src,_),entry in zip(outline,STORY)]}
+    manifest={'slides':len(prs.slides),'data_sha256':sha,'paper_figure_pictures':5,'generated_illustrations':1,'pdf_figures':'original vectors','updated':d['updated'],'slides_outline':[dict(number=n,title=t or d['project'],provenance=src,**entry) for (n,t,src,_),entry in zip(outline,STORY)]}
     (out.parent/'deck-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-    print(json.dumps({'pptx':str(out),'slides':len(prs.slides),'paper_figure_pictures':4,'generated_illustrations':1,'data_sha256':sha}))
+    print(json.dumps({'pptx':str(out),'slides':len(prs.slides),'paper_figure_pictures':5,'generated_illustrations':1,'data_sha256':sha}))
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--site-root',type=Path,default=ROOT);a=p.parse_args();build(a.out,a.site_root)

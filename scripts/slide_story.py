@@ -42,7 +42,7 @@ STORY=[
     entry('Results & analysis','Prior evidence','Frozen-model file vs. dedicated-tool likelihood','Interface familiarity · Figure 3a · frozen Qwen3.5-4B','Q2','prior'),
     entry('Results & analysis','Mechanism','Memory-action gradient and continuation ablations','Ablations · Figure 4 · average task success','Q2','ablation'),
     entry('Results & analysis','Mechanism','Blank/shuffled memory from the same state','Memory-content intervention · same-state continuations · eligible tasks','Q2','intervention'),
-    entry('Results & analysis','Case study','Scrapy saved note + read/check actions + successful finish','Scrapy case · Figure 5 · recorded training episode','Q2'),
+    entry('Results & analysis','Case study','Complete original Figure 5: error, repair, memory write and readback, success','Scrapy case · Figure 5 · recorded training episode','Q2'),
     entry('Results & analysis','Transfer','New memory interfaces, fixed task executor','Frozen task executor · memory policy changed · no further training','Q3','transfer'),
     entry('Results & analysis','Transfer','Matched base vs. trained external results','SWE-bench Verified / MLE-bench Lite · matched model scales','Q3','external'),
     entry(None,'Conclusion','Three takeaways and project link','CAMP · paper, code and slides'),
@@ -92,8 +92,11 @@ def assert_slide_story(deck):
     case=page_for('Case study')
     assert max(i+1 for i,e in enumerate(STORY) if e['role']=='Mechanism')<case<min(i+1 for i,e in enumerate(STORY) if e['role']=='Transfer'),'Case study closes Q2 before transfer'
     assert [n for n in range(1,len(STORY)+1) if 'Scrapy' in text_at(n)]==[case],'The technical case must appear once, at the end of Q2'
-    for word in ['CONTINUATION.md','objective: fix response logging','Hidden tests passed','1.00','pytest']:
-        assert word in text_at(case),f'Merged case is incomplete: {word}'
+    case_pictures=[o for o in deck.slides[case-1].shapes if o.name.startswith('paper-figure:')]
+    assert len(case_pictures)==1 and case_pictures[0].name=='paper-figure:fig5_coding_case','Case must use the complete original Figure 5'
+    pic=case_pictures[0]
+    assert not any([pic.crop_left,pic.crop_top,pic.crop_right,pic.crop_bottom]),'Do not crop the case figure panels'
+    assert pic.width>=Inches(9) and pic.top>=Inches(.99) and pic.top+pic.height<Inches(5.23),'Original case figure must fill the body without colliding with header/footer'
     assert [e['phase'] for e in STORY if e['chapter']=='Results & analysis']==['Q1']*2+['Q2']*4+['Q3']*2,'Experimental questions must form three contiguous groups'
     for i,e in enumerate(STORY):
         design=[o for o in deck.slides[i].shapes if o.name.startswith('experiment-design:')]

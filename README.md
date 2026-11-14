@@ -10,7 +10,7 @@ The public **CAMP V1 / CAMG-RL** research page and editable 17-slide talk.
 ## Build and check
 
 Use Python 3.9+ with the packages in `requirements-presentation.txt`. The default
-headless PDF exporter uses the macOS Arial and Menlo font files and the two
+headless PDF exporter uses the macOS Arial and Menlo font files and the three
 hash-bound vector figure PDFs in `assets/slides/figures/`. It checks that the
 PPTX pictures and crop rectangles match those originals before placing the vectors. The memory-underuse background image is a separately hash-bound raster asset. On another OS,
 export the generated PPTX with PowerPoint/LibreOffice or adapt the renderer's font
@@ -48,8 +48,8 @@ from rounded environment values.
 
 - `scripts/site.template.html` + `build_website.py`: semantic, responsive static page.
 - `scripts/build_slides.py` + `slide_story.py`: the story order, chapter trail, native editable charts and text, plus speaker notes.
-- `slides/figure-assets.json`: exact hashes of the two original paper figures and the focused crop rectangles used in Background and Environments. Four placements use pictures in PPTX and original vectors in PDF.
-- `slides/illustration-assets.json`: the GPT-image-2 memory-underuse image, prompt and generation metadata. This one asset remains raster in both formats; other text, charts and case diagrams are editable native content.
+- `slides/figure-assets.json`: exact hashes of the three original paper figures and the focused crop rectangles used in Background and Environments. Five placements use pictures in PPTX and original vectors in PDF.
+- `slides/illustration-assets.json`: the GPT-image-2 memory-underuse image, prompt and generation metadata. This one asset remains raster in both formats; other text and charts are editable native content.
 - `scripts/render_slides_pdf.py`: deterministic vector/text PDF export, fail on text overflow.
 - `scripts/build_social_card.py`: source-generated social preview, no research data fabrication.
 - `slides/outline.md`, `slides/speaker-notes.md`: the current talk, not an older release's outline.
@@ -72,14 +72,14 @@ The environment page uses Figure 2’s right-hand panel, paired with what each t
 file-memory idea and learning mechanism. The frozen-model interface-prior experiment
 appears within Q2 of Results. The experimental story is Q1: does CAMP improve
 long-horizon task performance; Q2: why does it work; Q3: does the learned memory
-behavior generalize. A complete Scrapy case closes Q2 before the two transfer
+behavior generalize. The complete original Figure 5 shows the Scrapy case and closes Q2 before the two transfer
 slides in Q3. Each result page keeps its conclusion-led title and chart, with a
 small question header; no divider pages are added. Chapter navigation and questions
 sit above the larger slide title. Each experimental plot now has one readable
 comparison/intervention line below its title: what is compared, what changes and
 which factors are held fixed. The chart remains dominant and the takeaway states
-the finding. The recorded case keeps its task/action sequence instead of a
-protocol line. The final slide is titled **Takeaways** and retains the three
+the finding. The recorded case uses the complete original Figure 5 at full width, with all four
+panels and the context-replacement boundary intact. It has no added protocol line. The final slide is titled **Takeaways** and retains the three
 summary points and project link. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
 
 The shared result file retains the source references for each experiment. Website

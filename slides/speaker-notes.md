@@ -1,6 +1,6 @@
 # CAMP · 17-slide research story
 
-Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
+Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Text and charts are editable. The Figure 1 context crop, Figure 2 environment crop and full Figures 1, 2 and 5 are pictures in PPTX and original vectors in PDF. The case page displays the complete original Figure 5. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
 
 ## 01. Coding Agent Memory Post-training
 
@@ -130,11 +130,11 @@ Forked continuations from the same post-reset state, within eligible tasks only.
 
 **Chapter:** Results & analysis · **Role:** Case study · **Target:** 80 seconds
 
-**Source:** Figure 5 / Appendix A.4.3 · recorded training episode · shortened excerpts
+**Source:** Figure 5 / Appendix A.4.3 · recorded training episode · complete original figure
 
 **Experimental question:** Q2 · Why does CAMP work?
 
-An illustrative training episode, not a held-out comparison or a counterfactual failure without memory. Use this case to close Q2: show the memory behavior behind the preceding mechanism results, then turn to Q3 and generalization. Task: fix response logging in Scrapy. At round 12 the agent edits scheduler.py; at round 18 it saves the diagnosis and next steps to CONTINUATION.md. After context replacement it reads the file at round 19, then performs subsequent checks and finishes at round 30 within a 40-round budget. The tests are later actions, not all at round 19. Hidden tests passed; terminal return is 1.00. The excerpts are shortened. No matched no-memory failure is claimed.
+An illustrative training episode, not a held-out comparison or a counterfactual failure without memory. Use this case to close Q2: show the memory behavior behind the preceding mechanism results, then turn to Q3 and generalization. Task: fix response logging in Scrapy. At round 12 the agent edits scheduler.py; at round 18 it saves the diagnosis and next steps to CONTINUATION.md. After context replacement it reads the file at round 19, then performs subsequent checks and finishes at round 30 within a 40-round budget. The tests are later actions, not all at round 19. Hidden tests passed; terminal return is 1.00. The complete original Figure 5 is displayed without cropping, rewriting or panel recomposition. Follow its four panels from initial error through repair, memory write, context replacement, readback and success. No matched no-memory failure is claimed.
 
 ## 15. The learned memory policy transfers across interfaces
 

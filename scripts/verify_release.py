@@ -22,7 +22,23 @@ class Page(HTMLParser):
 
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 
+def verify_original_case_asset(root):
+    asset=json.loads((root/'slides/figure-assets.json').read_text())['fig5_coding_case']
+    assert not asset.get('clip_pt'),'Complete case figure must not have a crop'
+    assert sha(root/asset['pdf'])==asset['pdf_sha256'],'Case PDF drift'
+    assert sha(root/asset['source_paper'])==asset['source_paper_sha256'],'Case paper source drift'
+    with fitz.open(root/asset['pdf']) as figure,fitz.open(root/asset['source_paper']) as paper:
+        page=figure[0];assert [page.rect.width,page.rect.height]==[asset['width_pt'],asset['height_pt']]
+        content=b''.join(figure.xref_stream(x) for x in page.get_contents())
+        assert content==paper.xref_stream(asset['source_form_xobject']),'Case figure differs from published Figure 5'
+        assert hashlib.sha256(content).hexdigest()==asset['content_stream_sha256']
+        fonts={x[4]:hashlib.sha256(figure.extract_font(x[0])[3]).hexdigest() for x in page.get_fonts()}
+        source_fonts={x[4]:hashlib.sha256(paper.extract_font(x[0])[3]).hexdigest() for x in paper[asset['source_page']-1].get_fonts(full=True) if x[-1]==asset['source_form_xobject']}
+        assert fonts==source_fonts==asset['font_program_sha256'],'Case figure font-program drift'
+    return True
+
 def verify(root,pptx,pdf):
+    assert verify_original_case_asset(root)
     d=load(root);k=stats(d);html=(root/'index.html').read_text();assert html==build(),'Stale website'
     p=Page();p.feed(html);assert not [i for i,n in Counter(p.ids).items() if n>1],'Duplicate IDs'
     for href in p.links:
@@ -67,7 +83,11 @@ def verify(root,pptx,pdf):
                 for pa in o.text_frame.paragraphs:
                     for run in pa.runs:
                         if run.font.size:min_font=min(min_font,run.font.size.pt)
-    doc=fitz.open(pdf);assert len(doc)==len(STORY);assert (paper_pictures,generated_pictures,pictures)==(4,1,5)
+    doc=fitz.open(pdf);assert len(doc)==len(STORY);assert (paper_pictures,generated_pictures,pictures)==(5,1,6)
+    # The original case is an image in PPTX but vector/searchable text in PDF.
+    case_text=doc[13].get_text()
+    for phrase in ['TASK + FIRST REPRODUCTION','REPRODUCER + PATCH','CHECKPOINT BEFORE CONTEXT REPLACEMENT','FRESH CONTEXT: READ BACK + VERIFY','CONTINUATION.md','CONTEXT REPLACEMENT','hidden tests passed','return 1.00']:
+        assert phrase in case_text,'Missing original case content: '+phrase
     alltext='\n'.join(p.get_text() for p in doc)
     for page,slide,entry in zip(doc,deck.slides,STORY):
         if entry['phase']:
