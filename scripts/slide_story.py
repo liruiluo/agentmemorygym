@@ -13,8 +13,20 @@ def question_label(phase):
     return f'{phase} · {QUESTIONS[phase]}'
 
 
-def entry(chapter,role,exhibit,source,phase=None):
-    return dict(chapter=chapter,role=role,exhibit=exhibit,source=source,phase=phase)
+# One audience-facing line identifies the comparison, not a protocol inventory.
+EXPERIMENT_DESIGNS = {
+    'main': 'Compare six approaches with Qwen3.5-4B on the same held-out tasks.',
+    'long_context': 'Same base, PPO, task rewards and 200 updates; context and compaction differ.',
+    'prior': 'Score file and dedicated-tool memory actions with frozen Qwen3.5-4B.',
+    'ablation': 'Remove memory-action actor gradients (keep rewards/critic), or use only CONTINUATION.md.',
+    'intervention': 'Resume from the same post-reset state with intact, blank or shuffled memory.',
+    'transfer': 'Keep the task executor fixed; replace only the memory policy, with no further training.',
+    'external': 'Compare frozen base and trained policies at the same 4B and 9B model scales.',
+}
+
+
+def entry(chapter,role,exhibit,source,phase=None,experiment=None):
+    return dict(chapter=chapter,role=role,exhibit=exhibit,source=source,phase=phase,experiment=experiment)
 
 STORY=[
     entry(None,'Identity','Full title, authors, affiliation and links','CAMP · arXiv:2609.34422'),
@@ -25,14 +37,14 @@ STORY=[
     entry('Environments','Task demands','Figure 2 environment panel + what each task family must remember','CAMG · Figure 2 · environment panel'),
     entry('Method','Core idea','Original Figure 1, both contrast rows','Figure 1 · conceptual illustration'),
     entry('Method','Learning mechanism','Original Figure 2 + shared policy/reward/PPO callouts','CAMG-RL · Figure 2 · fully asynchronous PPO'),
-    entry('Results & analysis','Effectiveness','Six-method main comparison','Task success · Qwen3.5-4B · 128 held-out tasks per environment','Q1'),
-    entry('Results & analysis','Effectiveness','262K-context practical reference','Same base, PPO, rewards and updates; context and compaction differ','Q1'),
-    entry('Results & analysis','Prior evidence','Frozen-model file vs. dedicated-tool likelihood','Interface familiarity · Figure 3a · frozen Qwen3.5-4B','Q2'),
-    entry('Results & analysis','Mechanism','Memory-action gradient and continuation ablations','Ablations · Figure 4 · average task success','Q2'),
-    entry('Results & analysis','Mechanism','Blank/shuffled memory from the same state','Memory-content intervention · same-state continuations · eligible tasks','Q2'),
+    entry('Results & analysis','Effectiveness','Six-method main comparison','Task success · Qwen3.5-4B · 128 held-out tasks per environment','Q1','main'),
+    entry('Results & analysis','Effectiveness','262K-context practical reference','Same base, PPO, rewards and updates; context and compaction differ','Q1','long_context'),
+    entry('Results & analysis','Prior evidence','Frozen-model file vs. dedicated-tool likelihood','Interface familiarity · Figure 3a · frozen Qwen3.5-4B','Q2','prior'),
+    entry('Results & analysis','Mechanism','Memory-action gradient and continuation ablations','Ablations · Figure 4 · average task success','Q2','ablation'),
+    entry('Results & analysis','Mechanism','Blank/shuffled memory from the same state','Memory-content intervention · same-state continuations · eligible tasks','Q2','intervention'),
     entry('Results & analysis','Case study','Scrapy saved note + read/check actions + successful finish','Scrapy case · Figure 5 · recorded training episode','Q2'),
-    entry('Results & analysis','Transfer','New memory interfaces, fixed task executor','Frozen task executor · memory policy changed · no further training','Q3'),
-    entry('Results & analysis','Transfer','Matched base vs. trained external results','SWE-bench Verified / MLE-bench Lite · matched model scales','Q3'),
+    entry('Results & analysis','Transfer','New memory interfaces, fixed task executor','Frozen task executor · memory policy changed · no further training','Q3','transfer'),
+    entry('Results & analysis','Transfer','Matched base vs. trained external results','SWE-bench Verified / MLE-bench Lite · matched model scales','Q3','external'),
     entry(None,'Conclusion','Three takeaways and project link','CAMP · paper, code and slides'),
 ]
 
@@ -84,6 +96,17 @@ def assert_slide_story(deck):
         assert word in text_at(case),f'Merged case is incomplete: {word}'
     assert [e['phase'] for e in STORY if e['chapter']=='Results & analysis']==['Q1']*2+['Q2']*4+['Q3']*2,'Experimental questions must form three contiguous groups'
     for i,e in enumerate(STORY):
+        design=[o for o in deck.slides[i].shapes if o.name.startswith('experiment-design:')]
+        if e['experiment']:
+            assert len(design)==1 and design[0].name=='experiment-design:'+e['experiment'],'Missing experiment design line'
+            box=design[0]
+            assert box.text==EXPERIMENT_DESIGNS[e['experiment']],'Experiment design text drift'
+            title=deck.slides[i].shapes[0]
+            assert title.top+title.height<box.top and box.top+box.height<=Inches(1.31),'Design must be visible between title and exhibit'
+            runs=[r for p in box.text_frame.paragraphs for r in p.runs]
+            assert runs and all(r.font.size is not None and r.font.size.pt>=14 for r in runs),'Experiment design must be readable'
+        else:
+            assert not design,'Do not impose experimental design on a case or non-experimental page'
         labels=[o for o in deck.slides[i].shapes if o.name.startswith('result-question:')]
         if e['phase']:
             assert len(labels)==1 and labels[0].name=='result-question:'+e['phase'],'Missing or wrong experimental question label'

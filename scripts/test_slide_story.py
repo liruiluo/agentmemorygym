@@ -4,7 +4,7 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.util import Inches
 from build_slides import build,ROOT
-from slide_story import STORY,QUESTIONS,question_label,assert_slide_story
+from slide_story import STORY,QUESTIONS,EXPERIMENT_DESIGNS,question_label,assert_slide_story
 
 class SlideStoryTest(unittest.TestCase):
     @classmethod
@@ -95,6 +95,46 @@ class SlideStoryTest(unittest.TestCase):
         d=Presentation(self.path);ids=d.slides._sldIdLst
         case=ids[13];ids.remove(case);ids.insert(15,case)
         with self.assertRaisesRegex(AssertionError,'technical case'):assert_slide_story(d)
+    def test_experiment_design_is_on_stage(self):
+        self.assertEqual([i+1 for i,e in enumerate(STORY) if e['experiment']],[9,10,11,12,13,15,16])
+        for i,e in enumerate(STORY):
+            shapes=[o for o in self.deck.slides[i].shapes if o.name.startswith('experiment-design:')]
+            if not e['experiment']:
+                self.assertFalse(shapes);continue
+            self.assertEqual(shapes[0].text,EXPERIMENT_DESIGNS[e['experiment']])
+            self.assertIn(shapes[0].text,self.deck.slides[i].notes_slide.notes_text_frame.text)
+            self.assertIn(shapes[0].text,(self.path.parent/'speaker-notes.md').read_text())
+    def test_missing_design_rejected(self):
+        d=Presentation(self.path)
+        o=next(o for o in d.slides[12].shapes if o.name.startswith('experiment-design:'))
+        o.name='ordinary-text'
+        with self.assertRaisesRegex(AssertionError,'Missing experiment design'):assert_slide_story(d)
+    def test_key_control_omission_rejected(self):
+        d=Presentation(self.path)
+        o=next(o for o in d.slides[14].shapes if o.name.startswith('experiment-design:'))
+        o.text=o.text.replace('task executor fixed','task executor trained')
+        with self.assertRaisesRegex(AssertionError,'Experiment design text drift'):assert_slide_story(d)
+    def test_design_cannot_be_buried_in_footer(self):
+        d=Presentation(self.path)
+        o=next(o for o in d.slides[12].shapes if o.name.startswith('experiment-design:'))
+        o.top=Inches(5.3)
+        with self.assertRaisesRegex(AssertionError,'Design must be visible'):assert_slide_story(d)
+    def test_design_cannot_be_tiny(self):
+        from pptx.util import Pt
+        d=Presentation(self.path)
+        o=next(o for o in d.slides[10].shapes if o.name.startswith('experiment-design:'))
+        o.text_frame.paragraphs[0].runs[0].font.size=Pt(9)
+        with self.assertRaisesRegex(AssertionError,'Experiment design must be readable'):assert_slide_story(d)
+    def test_design_conditions_are_specific(self):
+        self.assertIn('context and compaction differ',EXPERIMENT_DESIGNS['long_context'])
+        self.assertIn('frozen Qwen3.5-4B',EXPERIMENT_DESIGNS['prior'])
+        self.assertIn('keep rewards/critic',EXPERIMENT_DESIGNS['ablation'])
+        self.assertIn('or use only CONTINUATION.md',EXPERIMENT_DESIGNS['ablation'])
+        self.assertIn('same post-reset state',EXPERIMENT_DESIGNS['intervention'])
+        self.assertIn('intact, blank or shuffled',EXPERIMENT_DESIGNS['intervention'])
+        self.assertIn('replace only the memory policy',EXPERIMENT_DESIGNS['transfer'])
+        self.assertIn('no further training',EXPERIMENT_DESIGNS['transfer'])
+        self.assertIn('same 4B and 9B model scales',EXPERIMENT_DESIGNS['external'])
     def test_exact_original_figure_bindings(self):
         assets=json.loads((ROOT/'slides/figure-assets.json').read_text());seen=[]
         for s in self.deck.slides:

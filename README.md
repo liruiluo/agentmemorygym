@@ -75,8 +75,11 @@ long-horizon task performance; Q2: why does it work; Q3: does the learned memory
 behavior generalize. A complete Scrapy case closes Q2 before the two transfer
 slides in Q3. Each result page keeps its conclusion-led title and chart, with a
 small question header; no divider pages are added. Chapter navigation and questions
-sit above the larger slide title, leaving the title directly connected to its
-exhibit. Navigation is visually subordinate and the body layout is unchanged. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
+sit above the larger slide title. Each experimental plot now has one readable
+comparison/intervention line below its title: what is compared, what changes and
+which factors are held fixed. The chart remains dominant and the takeaway states
+the finding. The recorded case keeps its task/action sequence instead of a
+protocol line. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
 
 The shared result file retains the source references for each experiment. Website
 selection does not change the data used by the 17-slide talk. The paper link leads

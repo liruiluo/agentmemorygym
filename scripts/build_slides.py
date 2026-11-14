@@ -12,7 +12,7 @@ import hashlib
 import json
 from pathlib import Path
 from research_data import load, stats, source_caption
-from slide_story import STORY, visible_source, question_label, assert_slide_story
+from slide_story import STORY, EXPERIMENT_DESIGNS, visible_source, question_label, assert_slide_story
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.dml import MSO_LINE_DASH_STYLE
@@ -155,6 +155,12 @@ def build(out,root=ROOT):
         text(s,heading,.42,.48 if has_navigation else .18,8.65,.43 if has_navigation else .57,23,INK,bold=False)
         text(s,'JD.com',8.96,.53 if has_navigation else .23,.68,.25,11,RED,bold=True,align=PP_ALIGN.RIGHT)
         footer(s,visible_source(num),num)
+        experiment=STORY[num-1]['experiment']
+        if experiment:
+            design=EXPERIMENT_DESIGNS[experiment]
+            box=text(s,design,.55,1.0,8.95,.28,14,INK)
+            box.name='experiment-design:'+experiment
+            notes='Comparison / intervention: '+design+'\n\n'+notes
         s.notes_slide.notes_text_frame.text=notes+'\n\nSource: '+source+'\nData SHA256: '+sha
         outline.append((num,heading,source,notes))
         return s
@@ -274,7 +280,7 @@ def build(out,root=ROOT):
     # Main result.
     s=slide(f"CAMG-RL reaches {k['MAIN_AVG']}% average task success",source_caption(d,'main',slide=True)+' · 4 × 128 held-out tasks · equal-weight environment average',
        'All six original comparisons are visible. The same Qwen3.5-4B backbone reaches 54.4, compared with CompactionRL 48.0; paired 95% CI for the 6.4-point gap is 3.3 to 9.5. Shop is saturated and slightly favors CompactionRL; the largest improvements are Coding and AutoResearch. DeepResearch’s gap is not statistically significant. Displayed averages are from unrounded paper scores.')
-    label(s,'AVERAGE TASK SUCCESS (%)',.55,.99);hbars(s,[(r[0],r[-1]) for r in d['main']['rows']],y=1.5,row_h=.48)
+    label(s,'AVERAGE TASK SUCCESS (%)',.55,1.4);hbars(s,[(r[0],r[-1]) for r in d['main']['rows']],y=1.72,row_h=.44)
     big(s,f"+{k['MAIN_GAP']} pp",'vs. CompactionRL\non held-out tasks',y=1.9)
     takeaway(s,f"Largest gains: Coding +{k['CODING_GAIN']} pp · AutoResearch +{k['AUTO_GAIN']} pp")
 
@@ -282,18 +288,19 @@ def build(out,root=ROOT):
     # Practical long-context reference, not single-factor causal evidence.
     s=slide('Learned file memory beats a 262K-context reference',source_caption(d,'long_context',slide=True),
        d['long_context']['boundary']+' The reference scores 49.2 average and CAMG-RL scores 54.4 with 30,720 active tokens, a 5.2-point advantage. Do not describe this as strict isolation of memory, because compaction and context settings differ. Do not claim a cost advantage without cost measurements.')
-    label(s,'AVERAGE SUCCESS (%) · SAME BASE, PPO, REWARDS AND 200 UPDATES',.55,.99,8.8,BLUE)
+    label(s,'AVERAGE SUCCESS (%)',.55,1.4)
     hbars(s,[('262K + automatic\ncompaction',d['long_context']['rows'][0][-1]),('CAMG-RL\n30,720 active tokens',d['long_context']['rows'][1][-1])],y=2.03,w=6.3,row_h=.88,label_w=2.45)
     big(s,f"+{k['CONTEXT_GAIN']} pp",'Average task success\nwith 30,720 active tokens',y=1.85)
-    text(s,'The context budget and compaction procedure both differ.',.55,4.23,8.8,.24,11,MID)
     takeaway(s,'A larger window alone is not the only route to stronger execution.')
 
 
     # Interface prior.
     s=slide('The file interface is familiar before RL','Published · Figure 3a · frozen Qwen3.5-4B · rounded point estimates',
        'Lower negative log-likelihood means these valid action tokens are more likely under the frozen model. The strongest contrast here is retrieval. This is evidence of interface familiarity, not proof of which pre-training corpus caused it. No uncertainty bars have been reconstructed.')
-    label(s,'NEGATIVE LOG-LIKELIHOOD · NATS PER ACTION TOKEN · LOWER IS BETTER',.55,.99)
-    r=d['prior']['rows'];grouped(s,[x[0] for x in r],[('File operations',[x[1] for x in r],BLUE),('Dedicated tools',[x[2] for x in r],GRAY)],y=1.83,h=2.35,maximum=1.5,ticks=[0,.5,1,1.5],decimals=2)
+    text(s,'NEGATIVE LOG-LIKELIHOOD\nNATS / ACTION TOKEN\nLOWER IS BETTER',7.25,1.36,2.25,.55,10,MID)
+    for j,(lab,col) in enumerate([('File operations',BLUE),('Dedicated tools',GRAY)]):
+        rect(s,.8+j*3.05,1.43,.13,.13,col,col,0);text(s,lab,1.02+j*3.05,1.39,2.8,.27,12,MID)
+    r=d['prior']['rows'];grouped(s,[x[0] for x in r],[('File operations',[x[1] for x in r],BLUE),('Dedicated tools',[x[2] for x in r],GRAY)],y=1.83,h=2.35,maximum=1.5,ticks=[0,.5,1,1.5],decimals=2,legend=False)
     big(s,'0.08','Retrieval NLL with files\nvs. 0.47 with dedicated tools',y=2.05)
     takeaway(s,'Build on an interface the model already knows.')
 
@@ -301,22 +308,22 @@ def build(out,root=ROOT):
     # Learning signal: distinct memory-action and continuation ablations.
     s=slide('Memory actions need the learning signal',source_caption(d,'ablation',slide=True)+' · average task success (%)',
        d['ablation']['boundary']+' The four rows are distinct interventions. Full training reaches 54.4, no memory-action actor gradients reaches 21.1, restricting to continuation during both training and evaluation gives 41.8, and restricting only at evaluation gives 28.1.')
-    label(s,'AVERAGE TASK SUCCESS (%)',.55,.99)
-    hbars(s,[(name,row[1]) for name,row in zip(['CAMG-RL','No memory-action\nactor gradients','Continuation only:\ntrain + evaluate','Continuation only:\nevaluate'],d['ablation']['rows'])],y=1.53,w=8.7,row_h=.67,label_w=2.6)
+    label(s,'AVERAGE TASK SUCCESS (%)',.55,1.4)
+    hbars(s,[(name,row[1]) for name,row in zip(['CAMG-RL','No memory-action\nactor gradients','CONTINUATION.md only:\ntrain + evaluate','CONTINUATION.md only:\nevaluate'],d['ablation']['rows'])],y=1.78,w=8.7,row_h=.60,label_w=2.6)
     takeaway(s,'Task reward can train what to save—and how to use it.')
 
 
     # Same-state intervention, zero anchored.
     s=slide('The saved content changes what happens next','Published · Appendix D.3 · same-state continuations · eligible tasks only',
        d['intervention']['boundary']+' Negative bars are percentage-point changes relative to intact files. The eligible counts are 128, 29, 60, and 23. Equal-environment mean losses are 14.1 for blank and 11.5 for shuffled memory. This is stronger local evidence than an uncontrolled correlation between writing and success, but not a population-wide treatment effect.')
-    label(s,'CHANGE IN SUCCESS FROM INTACT MEMORY (PERCENTAGE POINTS)',.55,.99)
+    label(s,'CHANGE IN SUCCESS FROM INTACT MEMORY (PERCENTAGE POINTS)',.55,1.4)
     for j,(lab,col) in enumerate([('Blank',BLUE),('Shuffled',GRAY)]):
-        rect(s,1.95+j*2,1.43,.12,.12,col,col,0);text(s,lab,2.15+j*2,1.39,1.7,.27,12,MID)
-    left,right,top,bottom=1.95,6.5,1.93,4.32
+        rect(s,1.95+j*2,1.75,.12,.12,col,col,0);text(s,lab,2.15+j*2,1.71,1.7,.27,12,MID)
+    left,right,top,bottom=1.95,6.5,2.10,4.32
     for t in [-30,-20,-10,0]:
         x=right+t/32*(right-left);line(s,x,top-.1,x,bottom,LINE,.7);text(s,str(t),x-.18,bottom+.08,.42,.2,10,MID,align=PP_ALIGN.CENTER)
     for i,(name,b,sh,n) in enumerate(d['intervention']['rows']):
-        y=top+i*.58;text(s,name,.5,y-.03,1.36,.3,12.5);text(s,f'n = {n}',.5,y+.24,1.36,.2,9,MID)
+        y=top+i*.53;text(s,name,.5,y-.03,1.36,.3,12.5);text(s,f'n = {n}',.5,y+.24,1.36,.2,9,MID)
         for j,(v,col) in enumerate([(b,BLUE),(sh,GRAY)]):
             x=right+v/32*(right-left);rect(s,x,y+j*.23,right-x,.17,col,col,0);text(s,f'{v:.1f}',right+.13,y+j*.23-.03,.55,.23,11,col if col==BLUE else MID)
     big(s,f"−{k['BLANK_DROP']} pp",'Equal-environment mean\nwhen memory is blanked',x=7.35,y=2.05,w=2.1)
@@ -341,19 +348,21 @@ def build(out,root=ROOT):
     # Interface transfer with fixed task executor.
     s=slide('The learned memory policy transfers across interfaces',source_caption(d,'transfer',slide=True),
        d['transfer']['boundary']+' The gains are 11.4 points with Claude Code file tools and 6.4 with AgeMem memory tools. Only the memory-writing and reading policy changes. This is not a claim about changing the entire task actor, and no uncertainty or sample size should be invented.')
-    label(s,'AVERAGE SUCCESS (%) · FROZEN EXECUTOR · NO FURTHER TRAINING',.55,.99,8.8,BLUE)
-    r=d['transfer']['rows'];grouped(s,['Claude Code\nfile tools','AgeMem\nmemory tools'],[('Frozen memory policy',[r[0][-1],r[2][-1]],GRAY),('Trained memory policy',[r[1][-1],r[3][-1]],BLUE)],x=.9,y=1.83,w=5.7,h=2.35,maximum=32,ticks=[0,10,20,30])
+    label(s,'AVERAGE SUCCESS (%)',7.25,1.4,2.25)
+    for j,(lab,col) in enumerate([('Frozen memory policy',GRAY),('Trained memory policy',BLUE)]):
+        rect(s,.9+j*3.05,1.43,.13,.13,col,col,0);text(s,lab,1.12+j*3.05,1.39,2.8,.27,12,MID)
+    r=d['transfer']['rows'];grouped(s,['Claude Code\nfile tools','AgeMem\nmemory tools'],[('Frozen memory policy',[r[0][-1],r[2][-1]],GRAY),('Trained memory policy',[r[1][-1],r[3][-1]],BLUE)],x=.9,y=1.83,w=5.7,h=2.35,maximum=32,ticks=[0,10,20,30],legend=False)
     big(s,f"+{k['TRANSFER_FILE_GAIN']} pp",'Claude Code file tools',y=1.75,caption_h=.42);text(s,f"+{k['TRANSFER_TOOL_GAIN']} pp",7.25,3.43,2.25,.6,30,BLUE,bold=True);text(s,'AgeMem memory tools',7.25,4.04,2.25,.35,13,MID)
-    takeaway(s,'Keep task execution fixed; change only who manages memory.')
+    takeaway(s,'A trained memory policy improves success through both interfaces.')
 
 
     # External table with editable grouped bars, small and large base scales.
     s=slide('Gains carry over to external benchmarks','Published · Table 3 · benchmark success (%) · no compute-equivalence claim',
        d['external']['boundary']+' Focus on matched base-to-trained gains at each scale: SWE-bench Verified 7.6 to 15.8 for 4B and 14.8 to 27.6 for 9B; MLE-bench Lite 0.0 to 4.5 and 4.5 to 9.1. Larger frozen MoE models remain capability references in the paper; this slide shows only matched base-to-trained comparisons.')
-    label(s,'FROZEN BASE VS. CAMG-RL · SAME MODEL SCALE',.55,.99)
+    label(s,'BENCHMARK SUCCESS (%)',6.3,1.4,3.2)
     er=d['external']['rows']
     for j,(lab,col) in enumerate([('Frozen base',GRAY),('CAMG-RL',BLUE)]):
-        rect(s,.9+j*2.1,1.32,.13,.13,col,col,0);text(s,lab,1.12+j*2.1,1.28,1.8,.3,12,MID)
+        rect(s,.9+j*2.1,1.43,.13,.13,col,col,0);text(s,lab,1.12+j*2.1,1.39,1.8,.27,12,MID)
     grouped(s,['4B','9B'],[('Frozen base',[er[0][1],er[3][1]],GRAY),('CAMG-RL',[er[1][1],er[4][1]],BLUE)],x=.9,y=1.84,w=3.7,h=2.25,maximum=30,ticks=[0,10,20,30],legend=False,label_h=.24)
     grouped(s,['4B','9B'],[('Frozen base',[er[0][2],er[3][2]],GRAY),('CAMG-RL',[er[1][2],er[4][2]],BLUE)],x=5.85,y=1.84,w=3.65,h=2.25,maximum=10,ticks=[0,5,10],legend=False,label_h=.24)
     text(s,'SWE-bench Verified',.85,4.45,3.9,.3,14,INK,bold=True,align=PP_ALIGN.CENTER)
@@ -373,14 +382,14 @@ def build(out,root=ROOT):
         if entry['chapter']:chapter_trail(s,entry['chapter'],entry.get('phase'))
     assert_slide_story(prs)
     out.parent.mkdir(parents=True,exist_ok=True);prs.save(out)
-    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; the exhibit follows directly below. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
+    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         notes+=f'## {n:02}. {t or d["project"]}\n\n**Chapter:** {entry["chapter"] or entry["role"]} · **Role:** {entry["role"]} · **Target:** {entry["seconds"]} seconds\n\n**Source:** {src}\n\n'
         if entry['phase']:notes+=f"**Experimental question:** {question_label(entry['phase'])}\n\n"
         notes+=body+'\n\n'
     notes+='## Additional Q&A material (not extra slides)\n\nThe Background uses the Figure 1 context-only row and a visual failure story to motivate the problem. The AgeMem arm’s zero designated memory-chain observation remains supporting material for questions, not an on-slide statistic. The shared data also retains the CAMG-RL acquisition trajectory (7.97% to 20.9%), the syntax-constrained frozen-model comparison (Bash 20.3% vs. AgeMem 16.0%), and five-run robustness (CAMG-RL 55.3 ± 2.9 vs. CompactionRL 47.1 ± 3.5, mean ± SD). These are omitted from the main talk to preserve the motivation → method → effectiveness → mechanism → transfer story. Refer to each experiment’s own protocol before using these numbers.\n'
     (out.parent/'speaker-notes.md').write_text(notes)
-    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → Q1 effectiveness → Q2 mechanism and complete case → Q3 transfer.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case closes Q2. A lightweight four-chapter trail marks progress before Results; each result page carries its Q1, Q2 or Q3 question in the top navigation row, above a larger conclusion-led title. Chapter navigation is above the title throughout, with the exhibit directly below the title. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Question | Role | Action title | Exhibit |\n|---|---|---|---|---|---|\n'
+    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → Q1 effectiveness → Q2 mechanism and complete case → Q3 transfer.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case closes Q2. A lightweight four-chapter trail marks progress before Results; each result page carries its Q1, Q2 or Q3 question in the top navigation row, above a larger conclusion-led title. Chapter navigation is above the title throughout. Experimental plots carry one readable comparison/intervention line between the title and exhibit; the recorded case retains its task and action sequence. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Question | Role | Action title | Exhibit |\n|---|---|---|---|---|---|\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         outline_md+=f'| {n} | {entry["chapter"] or entry["role"]} | {entry["phase"] or "—"} | {entry["role"]} | {t or d["project"]} | {entry["exhibit"]} |\n'
     outline_md+='\n## Speaking and source notes\n\nThe contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, the CAMG-RL acquisition trajectory and the syntax-only probe remain optional Q&A material, not additional talk pages. The background shows unused memory tools, a lost constraint and task failure; it carries no isolated zero statistic or defensive labels. Image-generation provenance is in the asset manifest.\n'

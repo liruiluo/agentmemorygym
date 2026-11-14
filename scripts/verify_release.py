@@ -10,7 +10,7 @@ from pptx.enum.shapes import MSO_SHAPE_TYPE
 from research_data import load,stats,ROOT
 from build_website import build
 from presentation_policy import assert_public_story
-from slide_story import STORY,question_label,assert_slide_story
+from slide_story import STORY,EXPERIMENT_DESIGNS,question_label,assert_slide_story
 
 class Page(HTMLParser):
     def __init__(self):super().__init__();self.ids=[];self.links=[]
@@ -72,6 +72,15 @@ def verify(root,pptx,pdf):
     for page,slide,entry in zip(doc,deck.slides,STORY):
         if entry['phase']:
             assert question_label(entry['phase']) in page.get_text(),'Missing experimental question in PDF'
+        if entry['experiment']:
+            design=EXPERIMENT_DESIGNS[entry['experiment']]
+            rects=page.search_for(design)
+            assert len(rects)==1,'Experiment design must render as one complete line'
+            title_rects=page.search_for(slide.shapes[0].text)
+            assert title_rects and max(x.y1 for x in title_rects)<rects[0].y0,'PDF design must follow title'
+            assert rects[0].y1<=1.31*72,'PDF design must stay above plot labels'
+            spans=[span for b in page.get_text('dict')['blocks'] if b['type']==0 for ln in b['lines'] for span in ln['spans'] if span['text']==design]
+            assert len(spans)==1 and spans[0]['size']>=14,'Rendered design line must remain readable'
         if entry['chapter']:
             title_rects=page.search_for(slide.shapes[0].text)
             assert title_rects,'Missing slide title in PDF'

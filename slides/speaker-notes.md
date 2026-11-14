@@ -1,6 +1,6 @@
 # CAMP · 17-slide research story
 
-Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; the exhibit follows directly below. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
+Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
 
 ## 01. Coding Agent Memory Post-training
 
@@ -74,6 +74,8 @@ Start at the shared CAMG-RL policy, follow ordinary task/file actions into the f
 
 **Experimental question:** Q1 · Does CAMP improve long-horizon task performance?
 
+Comparison / intervention: Compare six approaches with Qwen3.5-4B on the same held-out tasks.
+
 All six original comparisons are visible. The same Qwen3.5-4B backbone reaches 54.4, compared with CompactionRL 48.0; paired 95% CI for the 6.4-point gap is 3.3 to 9.5. Shop is saturated and slightly favors CompactionRL; the largest improvements are Coding and AutoResearch. DeepResearch’s gap is not statistically significant. Displayed averages are from unrounded paper scores.
 
 ## 10. Learned file memory beats a 262K-context reference
@@ -83,6 +85,8 @@ All six original comparisons are visible. The same Qwen3.5-4B backbone reaches 5
 **Source:** ADDITIONAL · November 2026 · Revised Appendix D.14 · author-reported
 
 **Experimental question:** Q1 · Does CAMP improve long-horizon task performance?
+
+Comparison / intervention: Same base, PPO, task rewards and 200 updates; context and compaction differ.
 
 Same base model, PPO, task rewards and 200-update budget. Context windows and compaction procedures differ. The long-context policy retains native task files but has no dedicated file-memory interface. This is a practical system comparison, not an isolated causal test of memory. The reference scores 49.2 average and CAMG-RL scores 54.4 with 30,720 active tokens, a 5.2-point advantage. Do not describe this as strict isolation of memory, because compaction and context settings differ. Do not claim a cost advantage without cost measurements.
 
@@ -94,6 +98,8 @@ Same base model, PPO, task rewards and 200-update budget. Context windows and co
 
 **Experimental question:** Q2 · Why does CAMP work?
 
+Comparison / intervention: Score file and dedicated-tool memory actions with frozen Qwen3.5-4B.
+
 Lower negative log-likelihood means these valid action tokens are more likely under the frozen model. The strongest contrast here is retrieval. This is evidence of interface familiarity, not proof of which pre-training corpus caused it. No uncertainty bars have been reconstructed.
 
 ## 12. Memory actions need the learning signal
@@ -104,6 +110,8 @@ Lower negative log-likelihood means these valid action tokens are more likely un
 
 **Experimental question:** Q2 · Why does CAMP work?
 
+Comparison / intervention: Remove memory-action actor gradients (keep rewards/critic), or use only CONTINUATION.md.
+
 The no-gradient condition retains rewards, critic targets and critic learning. The two continuation conditions intervene at different stages. The four rows are distinct interventions. Full training reaches 54.4, no memory-action actor gradients reaches 21.1, restricting to continuation during both training and evaluation gives 41.8, and restricting only at evaluation gives 28.1.
 
 ## 13. The saved content changes what happens next
@@ -113,6 +121,8 @@ The no-gradient condition retains rewards, critic targets and critic learning. T
 **Source:** Published · Appendix D.3 · same-state continuations · eligible tasks only
 
 **Experimental question:** Q2 · Why does CAMP work?
+
+Comparison / intervention: Resume from the same post-reset state with intact, blank or shuffled memory.
 
 Forked continuations from the same post-reset state, within eligible tasks only. Shuffled donors are within-environment and length-matched. This is a local memory-content intervention, not a whole-distribution effect. Negative bars are percentage-point changes relative to intact files. The eligible counts are 128, 29, 60, and 23. Equal-environment mean losses are 14.1 for blank and 11.5 for shuffled memory. This is stronger local evidence than an uncontrolled correlation between writing and success, but not a population-wide treatment effect.
 
@@ -134,6 +144,8 @@ An illustrative training episode, not a held-out comparison or a counterfactual 
 
 **Experimental question:** Q3 · Does the learned memory behavior generalize?
 
+Comparison / intervention: Keep the task executor fixed; replace only the memory policy, with no further training.
+
 Task-execution policy stays frozen Qwen3.5-4B; only the memory-writing/reading policy changes. No further training. Sample counts, intervals and significance are not supplied. The gains are 11.4 points with Claude Code file tools and 6.4 with AgeMem memory tools. Only the memory-writing and reading policy changes. This is not a claim about changing the entire task actor, and no uncertainty or sample size should be invented.
 
 ## 16. Gains carry over to external benchmarks
@@ -143,6 +155,8 @@ Task-execution policy stays frozen Qwen3.5-4B; only the memory-writing/reading p
 **Source:** Published · Table 3 · benchmark success (%) · no compute-equivalence claim
 
 **Experimental question:** Q3 · Does the learned memory behavior generalize?
+
+Comparison / intervention: Compare frozen base and trained policies at the same 4B and 9B model scales.
 
 Benchmark success percentages. Larger frozen models are capability references, not compute-equivalent controls. These outcomes do not isolate a memory-only transfer effect. Focus on matched base-to-trained gains at each scale: SWE-bench Verified 7.6 to 15.8 for 4B and 14.8 to 27.6 for 9B; MLE-bench Lite 0.0 to 4.5 and 4.5 to 9.1. Larger frozen MoE models remain capability references in the paper; this slide shows only matched base-to-trained comparisons.
 
