@@ -14,12 +14,23 @@ class SlideStoryTest(unittest.TestCase):
     def tearDownClass(cls):cls.tmp.cleanup()
     def test_positive_story(self):self.assertTrue(assert_slide_story(self.deck))
     def test_report_labels_rejected(self):
-        d=Presentation(self.path);d.slides[6].shapes[0].text='ADDITIONAL November additions'
+        d=Presentation(self.path);d.slides[5].shapes[0].text='ADDITIONAL November additions'
         with self.assertRaises(AssertionError):assert_slide_story(d)
     def test_missing_contribution_rejected(self):
         d=Presentation(self.path)
-        for o in d.slides[6].shapes:
+        for o in d.slides[5].shapes:
             if o.has_text_frame:o.text=o.text.replace('Empirical study','Study')
+        with self.assertRaises(AssertionError):assert_slide_story(d)
+    def test_background_before_technical_case(self):
+        d=Presentation(self.path)
+        self.assertEqual(d.slides[1].shapes[0].text,'The story in four questions')
+        d.slides[1].shapes[0].text='What should survive a context boundary?'
+        with self.assertRaises(AssertionError):assert_slide_story(d)
+    def test_merged_case_must_keep_the_memory_read(self):
+        d=Presentation(self.path)
+        case_index=next(i for i,e in enumerate(STORY) if e['role']=='Case study')
+        for o in d.slides[case_index].shapes:
+            if o.has_text_frame:o.text=o.text.replace('CONTINUATION.md','state-file')
         with self.assertRaises(AssertionError):assert_slide_story(d)
     def test_chapters_match_story(self):
         for s,entry in zip(self.deck.slides,STORY):

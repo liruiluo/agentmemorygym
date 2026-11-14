@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the 17-slide CAMP story from data/research.json.
+"""Build the 16-slide CAMP story from data/research.json.
 
 Text, charts and case diagrams are native PowerPoint objects. Two original paper
 figures are high-resolution pictures in PPTX and original vectors in PDF. No
@@ -163,20 +163,9 @@ def build(out,root=ROOT):
     b=text(s,'Project · code · slides',.52,4.97,4,.23,10,BLUE);b.text_frame.paragraphs[0].runs[0].hyperlink.address=d['project_url']
 
 
-    # Motivate with the real sequence, no invented counterfactual.
-    s=slide('What should survive a context boundary?','Published · Figure 5 / Appendix A.4.3 · recorded training trajectory',
-       'Start with the real Scrapy episode. The agent has already edited scheduler.py. At round 18 it writes a continuation record. At round 19, after context replacement, it reads that record. The excerpts are shortened. Do not imply a measured failure of the same task without memory; that counterfactual was not run.')
-    text(s,'Task: fix response logging in Scrapy',.5,1.12,9,.42,21)
-    filebox(s,'ROUND 18 / SAVE THE STATE',d['case']['note'],.5,1.65,4.15,2.65,13)
-    line(s,5.04,1.62,5.04,4.32,GRAY,1,dash=True)
-    text(s,'context replaced',4.23,4.37,1.65,.22,9,MID,align=PP_ALIGN.CENTER)
-    filebox(s,'ROUND 19 / PICK UP THE WORK',d['case']['commands'][0]+'\n\n# resume the next checks',5.45,1.65,4.05,2.65,11.3)
-    takeaway(s,'Preserve the diagnosis, the evidence, and the next action.')
-
-
     # Roadmap: four chapters, phrased as questions the talk will answer.
     s=slide('The story in four questions','Talk roadmap',
-       'Keep this to about twenty seconds. Background explains why this work is needed, not just why memory matters. Environments explain what makes the task suite demand memory. Method explains how ordinary file operations learn from task reward. Results answer effectiveness, mechanism and transfer. Return to the Scrapy episode before closing.')
+       'Keep this to about twenty seconds. Background explains why this work is needed, not just why memory matters. Environments explain what makes the task suite demand memory. Method explains how ordinary file operations learn from task reward. Results answer effectiveness, mechanism and transfer. After the results, show a complete Scrapy case before closing.')
     rows=[('01','Background','Why CAMP?','Need → gap → familiar file operations'),
           ('02','Environments','What must the agent remember?','Four domains, one persistent workspace'),
           ('03','Method','How does memory become a learned skill?','Task reward + fully asynchronous PPO'),
@@ -188,20 +177,21 @@ def build(out,root=ROOT):
         text(s,q,3.9,y,5.6,.37,18)
         text(s,detail,3.9,y+.4,5.6,.28,12.5,MID)
         if i<3:line(s,1.35,y+.69,9.5,y+.69)
-    takeaway(s,'From a context-boundary problem to reusable memory behavior.')
+    takeaway(s,'Why memory matters → how it is learned → what it enables.')
 
 
     # Motivation: explain the specific research gap, not only context length.
     s=slide('Why learn memory through familiar file operations?','Introduction · motivation and research question',
        'Long tasks lose useful working state at context boundaries. The paper identifies two gaps in prior learned-memory work: it often introduces specialized memory tools and trains in domain-specific, relatively short-horizon settings. This is not a claim that all prior work has those limitations. CAMP asks whether task-reward RL can build on familiar file operations to learn memory across diverse long-horizon tasks. Coding agent describes the form of memory operations, not a restriction to programming tasks.')
-    label(s,'STARTING POINT IN PRIOR LEARNED-MEMORY WORK',.55,1.18,8.8)
+    text(s,'Long tasks outgrow the active context; earlier findings still matter.',.55,1.14,8.9,.4,17,INK)
+    label(s,'STARTING POINT IN PRIOR LEARNED-MEMORY WORK',.55,1.65,8.8)
     for i,(title,detail) in enumerate([
         ('A new memory-tool interface','The agent must learn how to store, retrieve and revise through dedicated tools.'),
         ('A narrow training setting','Memory learned in one domain or short horizon may not carry over to longer tasks.')]):
         x=.55+i*4.65
-        line(s,x,1.65,x+4.2,1.65,INK,1.4)
-        text(s,title,x,1.88,4.2,.44,21,bold=True)
-        text(s,detail,x,2.5,4.2,.98,17,MID)
+        line(s,x,1.98,x+4.2,1.98,INK,1.4)
+        text(s,title,x,2.17,4.2,.44,21,bold=True)
+        text(s,detail,x,2.72,4.2,.79,17,MID)
     label(s,'CAMP’S QUESTION',.55,3.68,8.8,BLUE)
     text(s,'Can task reward turn familiar file operations\ninto a reusable long-horizon memory skill?',.55,4.06,8.9,.87,25,BLUE,bold=True)
 
@@ -333,17 +323,19 @@ def build(out,root=ROOT):
     takeaway(s,'Improve the trained policy’s own base on both benchmarks.')
 
 
-    # Resolve the opening story, without making it a causal control.
-    s=slide('The remembered state becomes the next action','Published · Figure 5 / Appendix A.4.3 · shortened training-episode excerpts',
-       d['case']['boundary']+' Timeline: edit scheduler.py at round 12, write CONTINUATION.md at round 18, reset, read at round 19, later run test_spider.py and pytest tests/test_crawl.py -v, terminal round 30 within a 40-round budget with return 1.00 and hidden tests passed. Test commands are subsequent actions, not all asserted to occur at round 19.')
-    steps=[('12','Edit','Add _mqpush'),('18','Write','Preserve the state'),('19','Read','Recover the state'),('30','Finish','Hidden tests passed')]
-    for i,(n,t,desc) in enumerate(steps):
-        x=.65+i*2.36;rect(s,x,1.42,.48,.48,PALE,BLUE,1,True);text(s,n,x+.02,1.53,.44,.25,13,BLUE,bold=True,align=PP_ALIGN.CENTER)
-        if i<3:line(s,x+.52,1.66,x+2.2,1.66,LINE,1,True)
-        text(s,t,x,2.06,2.12,.35,21,bold=True);text(s,desc,x,2.54,2.1,.53,13,MID)
-    filebox(s,'SUBSEQUENT CHECKS','\n'.join(d['case']['commands'][1:]),.65,3.24,6.22,1.22,13)
-    text(s,'1.00',7.6,3.25,1.8,.63,37,BLUE,bold=True);label(s,'TERMINAL RETURN',7.6,4.02,1.8)
-    takeaway(s,'The file carries the work forward; the agent still has to do it.')
+    # One complete case after the result sequence: save, recover, check, finish.
+    s=slide('Case study: carry a Scrapy fix across contexts','Figure 5 / Appendix A.4.3 · recorded training episode · shortened excerpts',
+       d['case']['boundary']+' Introduce the case here, after the audience knows the problem and method. Task: fix response logging in Scrapy. At round 12 the agent edits scheduler.py; at round 18 it saves the diagnosis and next steps to CONTINUATION.md. After context replacement it reads the file at round 19, then performs subsequent checks and finishes at round 30 within a 40-round budget. The tests are later actions, not all at round 19. Hidden tests passed; terminal return is 1.00. The excerpts are shortened. No matched no-memory failure is claimed.')
+    text(s,'Task: fix response logging in Scrapy',.55,1.13,8.9,.39,19)
+    steps=[('12','Edit','Add _mqpush'),('18','Write','Save working state'),('19','Read','Recover after reset'),('30','Finish','Hidden tests passed')]
+    for i,(n,verb,detail) in enumerate(steps):
+        x=.55+i*2.31
+        text(s,f'{n} · {verb}',x,1.72,1.85,.35,18,BLUE,bold=True)
+        text(s,detail,x,2.11,2.12,.25,12,MID)
+        if i<3:line(s,x+1.65,1.93,x+2.14,1.93,LINE,1,True)
+    filebox(s,'ROUND 18 / SAVED WORKING STATE',d['case']['note'],.55,2.58,4.2,1.94,11)
+    filebox(s,'AFTER RESET / READ, THEN CHECK',d['case']['commands'][0]+'\n\n'+'\n'.join(d['case']['commands'][1:]),5.07,2.58,4.43,1.94,10.4)
+    takeaway(s,'Hidden tests passed · terminal return 1.00')
 
 
     # End on the scientific takeaways, not an unasked appendix.
@@ -358,12 +350,12 @@ def build(out,root=ROOT):
         if entry['chapter']:chapter_trail(s,entry['chapter'],entry.get('phase'))
     assert_slide_story(prs)
     out.parent.mkdir(parents=True,exist_ok=True);prs.save(out)
-    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable; Figures 1 and 2 are faithful paper-figure pictures in PPTX and vector originals in PDF. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
+    notes='# CAMP · 16-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable; Figures 1 and 2 are faithful paper-figure pictures in PPTX and vector originals in PDF. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         notes+=f'## {n:02}. {t or d["project"]}\n\n**Chapter:** {entry["chapter"] or "Opening / roadmap"} · **Role:** {entry["role"]} · **Target:** {entry["seconds"]} seconds\n\n**Source:** {src}\n\n{body}\n\n'
     notes+='## Additional Q&A material (not extra slides)\n\nThe shared data also retains the designated-interface acquisition metric (7.97% to 20.9%), the syntax-constrained frozen-model comparison (Bash 20.3% vs. AgeMem 16.0%), and five-run robustness (CAMG-RL 55.3 ± 2.9 vs. CompactionRL 47.1 ± 3.5, mean ± SD). These are omitted from the main talk to preserve the motivation → method → effectiveness → mechanism → transfer story. Refer to each experiment’s own protocol before using these numbers.\n'
     (out.parent/'speaker-notes.md').write_text(notes)
-    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: why memory → why CAMP → contributions → task environments → learning method → effectiveness → mechanism → transfer → the case carried to completion.\n\nThe roadmap follows the opening Scrapy case. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Role | Action title | Exhibit |\n|---|---|---|---|---|\n'
+    outline_md='# CAMP · 16-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: why memory → why CAMP → contributions → task environments → learning method → effectiveness → mechanism → transfer → the case carried to completion.\n\nThe roadmap follows the title and leads directly into background. The technical Scrapy case appears once, after the results. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Role | Action title | Exhibit |\n|---|---|---|---|---|\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         outline_md+=f'| {n} | {entry["chapter"] or "Opening / roadmap"} | {entry["role"]} | {t or d["project"]} | {entry["exhibit"]} |\n'
     outline_md+='\n## Speaking and source notes\n\nThe contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, chain counts and the syntax-only probe are optional Q&A material, not additional talk pages.\n'

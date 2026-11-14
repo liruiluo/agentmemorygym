@@ -1,6 +1,6 @@
 # Coding Agent Memory Post-training
 
-The public **CAMP V1 / CAMG-RL** research page and editable 17-slide talk.
+The public **CAMP V1 / CAMG-RL** research page and editable 16-slide talk.
 
 - [Website](https://liruiluo.github.io/agentmemorygym/)
 - [Paper and version history](https://arxiv.org/abs/2609.34422)
@@ -64,20 +64,20 @@ Use a small set of figures with clear takeaways. Keep provenance/version checks,
 seed accounting and acceptance notes in the data and internal verification rather
 than the rendered page. Project editing rules are in `AGENTS.md`.
 
-The talk opens with a real Scrapy case, then follows background → environments →
-method → results and analysis. Background explains why CAMP is needed; a contribution
+The talk opens with title → roadmap → background, then follows environments →
+method → results and analysis → a complete Scrapy case study. Background explains why CAMP is needed; a contribution
 page distinguishes CAMG, CAMG-RL and the empirical study. Original Figures 1 and 2
 anchor the idea and method. Results answer effectiveness, mechanism and transfer,
-then return to the case. Secondary checks stay in speaker notes.
+then show the case once with its saved note, read/check actions and outcome. Secondary checks stay in speaker notes.
 
 The shared result file retains the source references for each experiment. Website
-selection does not change the data used by the 17-slide talk. The paper link leads
+selection does not change the data used by the 16-slide talk. The paper link leads
 to arXiv; `assets/paper.pdf` remains available for existing links. CAMP-II is linked
 as related work and keeps its own methods and five-environment suite.
 
 ## Release procedure
 
-1. Rebuild and run the checks above. Inspect **all 17 slides** and desktop/mobile screenshots;
+1. Rebuild and run the checks above. Inspect **all 16 slides** and desktop/mobile screenshots;
    passing structural checks alone does not establish visual quality.
 2. Copy the checked PDF/PPTX together into `assets/slides/` using their existing filenames.
 3. Copy the generated `speaker-notes.md` and `outline.md` into `slides/`, then run

@@ -12,7 +12,7 @@ The website tells the research story: the problem, the central idea, a concrete 
 
 ## Public research talk
 
-- The talk starts with a concrete case, then explains the application need, the gap in existing work, and why CAMP is needed. A directory does not replace this motivation.
+- The talk starts with title → roadmap → background: explain the memory need, the gap in existing work, and why CAMP is needed. Do not insert a method-specific case before those concepts are explained. Keep one complete case study after the results. A directory does not replace the motivation.
 - Preserve the actual contribution structure: CAMG environments, CAMG-RL learning method, and the empirical study. Use the original paper's core figures when they best explain the idea and method.
 - Keep the roadmap short. Use lightweight chapter markers; group results by effectiveness, mechanism and transfer rather than listing every experiment. The main deck ends on takeaways, not an automatic appendix.
 - Charts and values remain source-grounded. Keep detailed provenance, seed accounting and audit prose in the data and speaker notes, not audience-facing version badges.
