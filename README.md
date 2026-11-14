@@ -70,8 +70,11 @@ memory tools may remain underused, the prior-mismatch hypothesis and the researc
 question. Background uses the upper row of Figure 1 and a memory-underuse failure graphic rather than a zero statistic; it stops at the problem. A separate contribution overview follows.
 The environment page uses Figure 2’s right-hand panel, paired with what each task family must remember. CAMG environments then lead into Method, where original Figures 1 and 2 explain the
 file-memory idea and learning mechanism. The frozen-model interface-prior experiment
-appears in Results, alongside effectiveness, mechanism and transfer. A complete
-Scrapy case follows the results once; secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
+appears within Q2 of Results. The experimental story is Q1: does CAMP improve
+long-horizon task performance; Q2: why does it work; Q3: does the learned memory
+behavior generalize. A complete Scrapy case closes Q2 before the two transfer
+slides in Q3. Each result page keeps its conclusion-led title and chart, with a
+small question header; no divider pages are added. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
 
 The shared result file retains the source references for each experiment. Website
 selection does not change the data used by the 17-slide talk. The paper link leads

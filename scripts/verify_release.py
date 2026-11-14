@@ -10,7 +10,7 @@ from pptx.enum.shapes import MSO_SHAPE_TYPE
 from research_data import load,stats,ROOT
 from build_website import build
 from presentation_policy import assert_public_story
-from slide_story import STORY,assert_slide_story
+from slide_story import STORY,question_label,assert_slide_story
 
 class Page(HTMLParser):
     def __init__(self):super().__init__();self.ids=[];self.links=[]
@@ -69,6 +69,9 @@ def verify(root,pptx,pdf):
                         if run.font.size:min_font=min(min_font,run.font.size.pt)
     doc=fitz.open(pdf);assert len(doc)==len(STORY);assert (paper_pictures,generated_pictures,pictures)==(4,1,5)
     alltext='\n'.join(p.get_text() for p in doc)
+    for page,entry in zip(doc,STORY):
+        if entry['phase']:
+            assert question_label(entry['phase']) in page.get_text(),'Missing experimental question in PDF'
     assert '54.4' in alltext and '+6.4 pp' in alltext and '+11.4 pp' in alltext
     assert '18.0 baseline' not in alltext and '\ufffd' not in alltext
     raster_counts=[len(p.get_images()) for p in doc]

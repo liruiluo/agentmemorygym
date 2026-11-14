@@ -3,7 +3,7 @@ import hashlib,json,tempfile,unittest
 from pathlib import Path
 from pptx import Presentation
 from build_slides import build,ROOT
-from slide_story import STORY,assert_slide_story
+from slide_story import STORY,QUESTIONS,question_label,assert_slide_story
 
 class SlideStoryTest(unittest.TestCase):
     @classmethod
@@ -54,6 +54,27 @@ class SlideStoryTest(unittest.TestCase):
         for s,entry in zip(self.deck.slides,STORY):
             if entry['phase']:
                 self.assertIn(entry['phase'],'\n'.join(o.text for o in s.shapes if o.has_text_frame))
+    def test_three_experimental_questions(self):
+        self.assertEqual(list(QUESTIONS),['Q1','Q2','Q3'])
+        self.assertEqual([e['phase'] for e in STORY[8:16]],['Q1']*2+['Q2']*4+['Q3']*2)
+        self.assertEqual(STORY[13]['role'],'Case study')
+        for i,entry in enumerate(STORY[8:16],8):
+            q=next(o for o in self.deck.slides[i].shapes if o.name.startswith('result-question:'))
+            self.assertEqual(q.text,question_label(entry['phase']))
+            self.assertNotEqual(self.deck.slides[i].shapes[0].text,q.text)
+            self.assertLess(q.top.inches,1)
+        notes=(self.path.parent/'speaker-notes.md').read_text()
+        for q,n in [('Q1',2),('Q2',4),('Q3',2)]:
+            self.assertEqual(notes.count('**Experimental question:** '+question_label(q)),n)
+    def test_wrong_question_rejected(self):
+        d=Presentation(self.path)
+        q=next(o for o in d.slides[10].shapes if o.name.startswith('result-question:'))
+        q.text=question_label('Q3')
+        with self.assertRaisesRegex(AssertionError,'question text drift'):assert_slide_story(d)
+    def test_case_after_transfer_rejected(self):
+        d=Presentation(self.path);ids=d.slides._sldIdLst
+        case=ids[13];ids.remove(case);ids.insert(15,case)
+        with self.assertRaisesRegex(AssertionError,'technical case'):assert_slide_story(d)
     def test_exact_original_figure_bindings(self):
         assets=json.loads((ROOT/'slides/figure-assets.json').read_text());seen=[]
         for s in self.deck.slides:

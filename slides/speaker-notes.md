@@ -16,7 +16,7 @@ The thesis is that ordinary file operations offer a familiar starting point, and
 
 **Source:** Talk roadmap
 
-Keep this to about twenty seconds. Background explains memory need, tool underuse and the prior-mismatch hypothesis, then ends at the research question. It does not explain the proposed solution. Environments explain what makes the task suite demand memory. Method explains how ordinary file operations learn from task reward. Results answer effectiveness, mechanism and transfer. After the results, show a complete Scrapy case before closing.
+Keep this to about twenty seconds. Background explains memory need, tool underuse and the prior-mismatch hypothesis, then ends at the research question. It does not explain the proposed solution. Environments explain what makes the task suite demand memory. Method explains how ordinary file operations learn from task reward. Results answer three questions: Q1, does CAMP improve long-horizon task performance; Q2, why does it work; Q3, does the learned memory behavior generalize. Close Q2 with the complete Scrapy case, then show transfer.
 
 ## 03. Long tasks need memory beyond the active context
 
@@ -72,6 +72,8 @@ Start at the shared CAMG-RL policy, follow ordinary task/file actions into the f
 
 **Source:** Published · Table 2 · 4 × 128 held-out tasks · equal-weight environment average
 
+**Experimental question:** Q1 · Does CAMP improve long-horizon task performance?
+
 All six original comparisons are visible. The same Qwen3.5-4B backbone reaches 54.4, compared with CompactionRL 48.0; paired 95% CI for the 6.4-point gap is 3.3 to 9.5. Shop is saturated and slightly favors CompactionRL; the largest improvements are Coding and AutoResearch. DeepResearch’s gap is not statistically significant. Displayed averages are from unrounded paper scores.
 
 ## 10. Learned file memory beats a 262K-context reference
@@ -79,6 +81,8 @@ All six original comparisons are visible. The same Qwen3.5-4B backbone reaches 5
 **Chapter:** Results & analysis · **Role:** Effectiveness · **Target:** 40 seconds
 
 **Source:** ADDITIONAL · November 2026 · Revised Appendix D.14 · author-reported
+
+**Experimental question:** Q1 · Does CAMP improve long-horizon task performance?
 
 Same base model, PPO, task rewards and 200-update budget. Context windows and compaction procedures differ. The long-context policy retains native task files but has no dedicated file-memory interface. This is a practical system comparison, not an isolated causal test of memory. The reference scores 49.2 average and CAMG-RL scores 54.4 with 30,720 active tokens, a 5.2-point advantage. Do not describe this as strict isolation of memory, because compaction and context settings differ. Do not claim a cost advantage without cost measurements.
 
@@ -88,6 +92,8 @@ Same base model, PPO, task rewards and 200-update budget. Context windows and co
 
 **Source:** Published · Figure 3a · frozen Qwen3.5-4B · rounded point estimates
 
+**Experimental question:** Q2 · Why does CAMP work?
+
 Lower negative log-likelihood means these valid action tokens are more likely under the frozen model. The strongest contrast here is retrieval. This is evidence of interface familiarity, not proof of which pre-training corpus caused it. No uncertainty bars have been reconstructed.
 
 ## 12. Memory actions need the learning signal
@@ -95,6 +101,8 @@ Lower negative log-likelihood means these valid action tokens are more likely un
 **Chapter:** Results & analysis · **Role:** Mechanism · **Target:** 50 seconds
 
 **Source:** Published · Figure 4 · average task success (%)
+
+**Experimental question:** Q2 · Why does CAMP work?
 
 The no-gradient condition retains rewards, critic targets and critic learning. The two continuation conditions intervene at different stages. The four rows are distinct interventions. Full training reaches 54.4, no memory-action actor gradients reaches 21.1, restricting to continuation during both training and evaluation gives 41.8, and restricting only at evaluation gives 28.1.
 
@@ -104,31 +112,39 @@ The no-gradient condition retains rewards, critic targets and critic learning. T
 
 **Source:** Published · Appendix D.3 · same-state continuations · eligible tasks only
 
+**Experimental question:** Q2 · Why does CAMP work?
+
 Forked continuations from the same post-reset state, within eligible tasks only. Shuffled donors are within-environment and length-matched. This is a local memory-content intervention, not a whole-distribution effect. Negative bars are percentage-point changes relative to intact files. The eligible counts are 128, 29, 60, and 23. Equal-environment mean losses are 14.1 for blank and 11.5 for shuffled memory. This is stronger local evidence than an uncontrolled correlation between writing and success, but not a population-wide treatment effect.
 
-## 14. The learned memory policy transfers across interfaces
-
-**Chapter:** Results & analysis · **Role:** Transfer · **Target:** 55 seconds
-
-**Source:** ADDITIONAL · November 2026 · Revised Appendix D.10 · author-reported
-
-Task-execution policy stays frozen Qwen3.5-4B; only the memory-writing/reading policy changes. No further training. Sample counts, intervals and significance are not supplied. The gains are 11.4 points with Claude Code file tools and 6.4 with AgeMem memory tools. Only the memory-writing and reading policy changes. This is not a claim about changing the entire task actor, and no uncertainty or sample size should be invented.
-
-## 15. Gains carry over to external benchmarks
-
-**Chapter:** Results & analysis · **Role:** Transfer · **Target:** 50 seconds
-
-**Source:** Published · Table 3 · benchmark success (%) · no compute-equivalence claim
-
-Benchmark success percentages. Larger frozen models are capability references, not compute-equivalent controls. These outcomes do not isolate a memory-only transfer effect. Focus on matched base-to-trained gains at each scale: SWE-bench Verified 7.6 to 15.8 for 4B and 14.8 to 27.6 for 9B; MLE-bench Lite 0.0 to 4.5 and 4.5 to 9.1. Larger frozen MoE models remain capability references in the paper; this slide shows only matched base-to-trained comparisons.
-
-## 16. Case study: carry a Scrapy fix across contexts
+## 14. Case study: carry a Scrapy fix across contexts
 
 **Chapter:** Results & analysis · **Role:** Case study · **Target:** 80 seconds
 
 **Source:** Figure 5 / Appendix A.4.3 · recorded training episode · shortened excerpts
 
-An illustrative training episode, not a held-out comparison or a counterfactual failure without memory. Introduce the case here, after the audience knows the problem and method. Task: fix response logging in Scrapy. At round 12 the agent edits scheduler.py; at round 18 it saves the diagnosis and next steps to CONTINUATION.md. After context replacement it reads the file at round 19, then performs subsequent checks and finishes at round 30 within a 40-round budget. The tests are later actions, not all at round 19. Hidden tests passed; terminal return is 1.00. The excerpts are shortened. No matched no-memory failure is claimed.
+**Experimental question:** Q2 · Why does CAMP work?
+
+An illustrative training episode, not a held-out comparison or a counterfactual failure without memory. Use this case to close Q2: show the memory behavior behind the preceding mechanism results, then turn to Q3 and generalization. Task: fix response logging in Scrapy. At round 12 the agent edits scheduler.py; at round 18 it saves the diagnosis and next steps to CONTINUATION.md. After context replacement it reads the file at round 19, then performs subsequent checks and finishes at round 30 within a 40-round budget. The tests are later actions, not all at round 19. Hidden tests passed; terminal return is 1.00. The excerpts are shortened. No matched no-memory failure is claimed.
+
+## 15. The learned memory policy transfers across interfaces
+
+**Chapter:** Results & analysis · **Role:** Transfer · **Target:** 55 seconds
+
+**Source:** ADDITIONAL · November 2026 · Revised Appendix D.10 · author-reported
+
+**Experimental question:** Q3 · Does the learned memory behavior generalize?
+
+Task-execution policy stays frozen Qwen3.5-4B; only the memory-writing/reading policy changes. No further training. Sample counts, intervals and significance are not supplied. The gains are 11.4 points with Claude Code file tools and 6.4 with AgeMem memory tools. Only the memory-writing and reading policy changes. This is not a claim about changing the entire task actor, and no uncertainty or sample size should be invented.
+
+## 16. Gains carry over to external benchmarks
+
+**Chapter:** Results & analysis · **Role:** Transfer · **Target:** 50 seconds
+
+**Source:** Published · Table 3 · benchmark success (%) · no compute-equivalence claim
+
+**Experimental question:** Q3 · Does the learned memory behavior generalize?
+
+Benchmark success percentages. Larger frozen models are capability references, not compute-equivalent controls. These outcomes do not isolate a memory-only transfer effect. Focus on matched base-to-trained gains at each scale: SWE-bench Verified 7.6 to 15.8 for 4B and 14.8 to 27.6 for 9B; MLE-bench Lite 0.0 to 4.5 and 4.5 to 9.1. Larger frozen MoE models remain capability references in the paper; this slide shows only matched base-to-trained comparisons.
 
 ## 17. Familiar operations. Learned memory.
 
