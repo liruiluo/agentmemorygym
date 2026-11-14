@@ -294,17 +294,6 @@ def build(out,root=ROOT):
     takeaway(s,'A larger window alone is not the only route to stronger execution.')
 
 
-    # Interface prior.
-    s=slide('The file interface is familiar before RL','Published · Figure 3a · frozen Qwen3.5-4B · rounded point estimates',
-       'Lower negative log-likelihood means these valid action tokens are more likely under the frozen model. The strongest contrast here is retrieval. This is evidence of interface familiarity, not proof of which pre-training corpus caused it. No uncertainty bars have been reconstructed.')
-    text(s,'NEGATIVE LOG-LIKELIHOOD\nNATS / ACTION TOKEN\nLOWER IS BETTER',7.25,1.36,2.25,.55,10,MID)
-    for j,(lab,col) in enumerate([('File operations',BLUE),('Dedicated tools',GRAY)]):
-        rect(s,.8+j*3.05,1.43,.13,.13,col,col,0);text(s,lab,1.02+j*3.05,1.39,2.8,.27,12,MID)
-    r=d['prior']['rows'];grouped(s,[x[0] for x in r],[('File operations',[x[1] for x in r],BLUE),('Dedicated tools',[x[2] for x in r],GRAY)],y=1.83,h=2.35,maximum=1.5,ticks=[0,.5,1,1.5],decimals=2,legend=False)
-    big(s,'0.08','Retrieval NLL with files\nvs. 0.47 with dedicated tools',y=2.05)
-    takeaway(s,'Build on an interface the model already knows.')
-
-
     # Learning signal: distinct memory-action and continuation ablations.
     s=slide('Memory actions need the learning signal',source_caption(d,'ablation',slide=True)+' · average task success (%)',
        d['ablation']['boundary']+' The four rows are distinct interventions. Full training reaches 54.4, no memory-action actor gradients reaches 21.1, restricting to continuation during both training and evaluation gives 41.8, and restricting only at evaluation gives 28.1.')
@@ -328,6 +317,17 @@ def build(out,root=ROOT):
             x=right+v/32*(right-left);rect(s,x,y+j*.23,right-x,.17,col,col,0);text(s,f'{v:.1f}',right+.13,y+j*.23-.03,.55,.23,11,col if col==BLUE else MID)
     big(s,f"−{k['BLANK_DROP']} pp",'Equal-environment mean\nwhen memory is blanked',x=7.35,y=2.05,w=2.1)
     takeaway(s,'Erase or shuffle the memory: success falls in every domain.')
+
+
+    # Interface prior.
+    s=slide('The file interface is familiar before RL','Published · Figure 3a · frozen Qwen3.5-4B · rounded point estimates',
+       'Lower negative log-likelihood means these valid action tokens are more likely under the frozen model. The strongest contrast here is retrieval. This is evidence of interface familiarity, not proof of which pre-training corpus caused it. No uncertainty bars have been reconstructed.')
+    text(s,'NEGATIVE LOG-LIKELIHOOD\nNATS / ACTION TOKEN\nLOWER IS BETTER',7.25,1.36,2.25,.55,10,MID)
+    for j,(lab,col) in enumerate([('File operations',BLUE),('Dedicated tools',GRAY)]):
+        rect(s,.8+j*3.05,1.43,.13,.13,col,col,0);text(s,lab,1.02+j*3.05,1.39,2.8,.27,12,MID)
+    r=d['prior']['rows'];grouped(s,[x[0] for x in r],[('File operations',[x[1] for x in r],BLUE),('Dedicated tools',[x[2] for x in r],GRAY)],y=1.83,h=2.35,maximum=1.5,ticks=[0,.5,1,1.5],decimals=2,legend=False)
+    big(s,'0.08','Retrieval NLL with files\nvs. 0.47 with dedicated tools',y=2.05)
+    takeaway(s,'Build on an interface the model already knows.')
 
 
     # Q2 closes with a complete case: save, recover, check, finish.
@@ -373,14 +373,14 @@ def build(out,root=ROOT):
         if entry['chapter']:chapter_trail(s,entry['chapter'],entry.get('phase'))
     assert_slide_story(prs)
     out.parent.mkdir(parents=True,exist_ok=True);prs.save(out)
-    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Text and charts are editable. The Figure 1 context crop, Figure 2 environment crop and full Figures 1, 2 and 5 are pictures in PPTX and original vectors in PDF. The case page displays the complete original Figure 5. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
+    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Q2.1 asks whether the gains come from better memory; Q2.2 asks whether pre-trained file-operation skills help. The case closes Q2 without a third subquestion. Text and charts are editable. The Figure 1 context crop, Figure 2 environment crop and full Figures 1, 2 and 5 are pictures in PPTX and original vectors in PDF. The case page displays the complete original Figure 5. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         notes+=f'## {n:02}. {t or d["project"]}\n\n**Chapter:** {entry["chapter"] or entry["role"]} · **Role:** {entry["role"]} · **Target:** {entry["seconds"]} seconds\n\n**Source:** {src}\n\n'
         if entry['phase']:notes+=f"**Experimental question:** {question_label(entry['phase'])}\n\n"
         notes+=body+'\n\n'
     notes+='## Additional Q&A material (not extra slides)\n\nThe Background uses the Figure 1 context-only row and a visual failure story to motivate the problem. The AgeMem arm’s zero designated memory-chain observation remains supporting material for questions, not an on-slide statistic. The shared data also retains the CAMG-RL acquisition trajectory (7.97% to 20.9%), the syntax-constrained frozen-model comparison (Bash 20.3% vs. AgeMem 16.0%), and five-run robustness (CAMG-RL 55.3 ± 2.9 vs. CompactionRL 47.1 ± 3.5, mean ± SD). These are omitted from the main talk to preserve the motivation → method → effectiveness → mechanism → transfer story. Refer to each experiment’s own protocol before using these numbers.\n'
     (out.parent/'speaker-notes.md').write_text(notes)
-    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → Q1 effectiveness → Q2 mechanism and complete case → Q3 transfer.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case closes Q2 with the complete original Figure 5. A lightweight four-chapter trail marks progress before Results; each result page carries its Q1, Q2 or Q3 question in the top navigation row, above a larger conclusion-led title. Chapter navigation is above the title throughout. Experimental plots carry one readable comparison/intervention line between the title and exhibit; the case page displays the complete original Figure 5 at full width, keeping all four panels and the context-replacement boundary. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Question | Role | Action title | Exhibit |\n|---|---|---|---|---|---|\n'
+    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → Q1 effectiveness → Q2.1 memory contribution → Q2.2 file-operation prior → complete Q2 case → Q3 transfer.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case closes Q2 with the complete original Figure 5. A lightweight four-chapter trail marks progress before Results; each result page carries a lightweight question in the top navigation row, above a larger conclusion-led title. Q2.1 groups the memory-learning ablations and same-state content intervention; Q2.2 covers the frozen-model file-operation prior. The case closes the whole Q2 with its parent question, What drives CAMP’s gains?, without a Q2.3 or divider page. Chapter navigation is above the title throughout. Experimental plots carry one readable comparison/intervention line between the title and exhibit; the case page displays the complete original Figure 5 at full width, keeping all four panels and the context-replacement boundary. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Question | Role | Action title | Exhibit |\n|---|---|---|---|---|---|\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         outline_md+=f'| {n} | {entry["chapter"] or entry["role"]} | {entry["phase"] or "—"} | {entry["role"]} | {t or d["project"]} | {entry["exhibit"]} |\n'
     outline_md+='\n## Speaking and source notes\n\nThe contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, the CAMG-RL acquisition trajectory and the syntax-only probe remain optional Q&A material, not additional talk pages. The background shows unused memory tools, a lost constraint and task failure; it carries no isolated zero statistic or defensive labels. Image-generation provenance is in the asset manifest.\n'

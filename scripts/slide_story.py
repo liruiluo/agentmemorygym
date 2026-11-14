@@ -4,13 +4,19 @@ from pptx.util import Inches
 
 QUESTIONS = {
     'Q1': 'Does CAMP improve long-horizon task performance?',
-    'Q2': 'Why does CAMP work?',
+    'Q2': 'What drives CAMP’s gains?',
     'Q3': 'Does the learned memory behavior generalize?',
 }
 
 
+SUBQUESTIONS = {
+    'Q2.1': 'Do the gains come from better memory?',
+    'Q2.2': 'Do pre-trained file-operation skills help?',
+}
+
+
 def question_label(phase):
-    return f'{phase} · {QUESTIONS[phase]}'
+    return f"{phase} · {(QUESTIONS | SUBQUESTIONS)[phase]}"
 
 
 # One audience-facing line identifies the comparison, not a protocol inventory.
@@ -39,9 +45,9 @@ STORY=[
     entry('Method','Learning mechanism','Original Figure 2 + shared policy/reward/PPO callouts','CAMG-RL · Figure 2 · fully asynchronous PPO'),
     entry('Results & analysis','Effectiveness','Six-method main comparison','Task success · Qwen3.5-4B · 128 held-out tasks per environment','Q1','main'),
     entry('Results & analysis','Effectiveness','262K-context practical reference','Same base, PPO, rewards and updates; context and compaction differ','Q1','long_context'),
-    entry('Results & analysis','Prior evidence','Frozen-model file vs. dedicated-tool likelihood','Interface familiarity · Figure 3a · frozen Qwen3.5-4B','Q2','prior'),
-    entry('Results & analysis','Mechanism','Memory-action gradient and continuation ablations','Ablations · Figure 4 · average task success','Q2','ablation'),
-    entry('Results & analysis','Mechanism','Blank/shuffled memory from the same state','Memory-content intervention · same-state continuations · eligible tasks','Q2','intervention'),
+    entry('Results & analysis','Mechanism','Memory-action gradient and continuation ablations','Ablations · Figure 4 · average task success','Q2.1','ablation'),
+    entry('Results & analysis','Mechanism','Blank/shuffled memory from the same state','Memory-content intervention · same-state continuations · eligible tasks','Q2.1','intervention'),
+    entry('Results & analysis','Prior evidence','Frozen-model file vs. dedicated-tool likelihood','Interface familiarity · Figure 3a · frozen Qwen3.5-4B','Q2.2','prior'),
     entry('Results & analysis','Case study','Complete original Figure 5: error, repair, memory write and readback, success','Scrapy case · Figure 5 · recorded training episode','Q2'),
     entry('Results & analysis','Transfer','New memory interfaces, fixed task executor','Frozen task executor · memory policy changed · no further training','Q3','transfer'),
     entry('Results & analysis','Transfer','Matched base vs. trained external results','SWE-bench Verified / MLE-bench Lite · matched model scales','Q3','external'),
@@ -49,7 +55,7 @@ STORY=[
 ]
 
 # Fourteen and a half minutes of speaking plus transitions.
-for row,seconds in zip(STORY,[35,20,45,80,25,50,60,75,60,40,50,50,55,80,55,50,40]):
+for row,seconds in zip(STORY,[35,20,45,80,25,50,60,75,60,40,50,55,50,80,55,50,40]):
     row['seconds']=seconds
 
 def visible_source(number):
@@ -97,7 +103,9 @@ def assert_slide_story(deck):
     pic=case_pictures[0]
     assert not any([pic.crop_left,pic.crop_top,pic.crop_right,pic.crop_bottom]),'Do not crop the case figure panels'
     assert pic.width>=Inches(9) and pic.top>=Inches(.99) and pic.top+pic.height<Inches(5.23),'Original case figure must fill the body without colliding with header/footer'
-    assert [e['phase'] for e in STORY if e['chapter']=='Results & analysis']==['Q1']*2+['Q2']*4+['Q3']*2,'Experimental questions must form three contiguous groups'
+    assert [e['phase'].split('.')[0] for e in STORY if e['chapter']=='Results & analysis']==['Q1']*2+['Q2']*4+['Q3']*2,'Experimental questions must form three contiguous groups'
+    assert [e['phase'] for e in STORY[10:14]]==['Q2.1','Q2.1','Q2.2','Q2'],'Memory evidence, prior evidence and whole-Q2 case must remain distinct'
+    assert [e['experiment'] for e in STORY[10:14]]==['ablation','intervention','prior',None],'Q2 subquestions must match the evidence they explain'
     for i,e in enumerate(STORY):
         design=[o for o in deck.slides[i].shapes if o.name.startswith('experiment-design:')]
         if e['experiment']:

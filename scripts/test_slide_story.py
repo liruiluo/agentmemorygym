@@ -4,7 +4,7 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.util import Inches
 from build_slides import build,ROOT
-from slide_story import STORY,QUESTIONS,EXPERIMENT_DESIGNS,question_label,assert_slide_story
+from slide_story import STORY,QUESTIONS,SUBQUESTIONS,EXPERIMENT_DESIGNS,question_label,assert_slide_story
 
 class SlideStoryTest(unittest.TestCase):
     @classmethod
@@ -70,7 +70,7 @@ class SlideStoryTest(unittest.TestCase):
                 self.assertIn(entry['phase'],'\n'.join(o.text for o in s.shapes if o.has_text_frame))
     def test_three_experimental_questions(self):
         self.assertEqual(list(QUESTIONS),['Q1','Q2','Q3'])
-        self.assertEqual([e['phase'] for e in STORY[8:16]],['Q1']*2+['Q2']*4+['Q3']*2)
+        self.assertEqual([e['phase'] for e in STORY[8:16]],['Q1']*2+['Q2.1','Q2.1','Q2.2','Q2']+['Q3']*2)
         self.assertEqual(STORY[13]['role'],'Case study')
         for i,entry in enumerate(STORY[8:16],8):
             q=next(o for o in self.deck.slides[i].shapes if o.name.startswith('result-question:'))
@@ -78,8 +78,25 @@ class SlideStoryTest(unittest.TestCase):
             self.assertNotEqual(self.deck.slides[i].shapes[0].text,q.text)
             self.assertLess(q.top.inches,1)
         notes=(self.path.parent/'speaker-notes.md').read_text()
-        for q,n in [('Q1',2),('Q2',4),('Q3',2)]:
+        for q,n in [('Q1',2),('Q2.1',2),('Q2.2',1),('Q2',1),('Q3',2)]:
             self.assertEqual(notes.count('**Experimental question:** '+question_label(q)),n)
+    def test_two_distinct_q2_subquestions(self):
+        self.assertEqual(list(SUBQUESTIONS),['Q2.1','Q2.2'])
+        self.assertEqual(QUESTIONS['Q2'],'What drives CAMP’s gains?')
+        self.assertEqual([e['experiment'] for e in STORY[10:14]],['ablation','intervention','prior',None])
+        self.assertEqual([self.deck.slides[i].shapes[0].text for i in [10,11,12]],['Memory actions need the learning signal','The saved content changes what happens next','The file interface is familiar before RL'])
+        self.assertEqual(STORY[13]['phase'],'Q2')
+        self.assertNotIn('Q2.3',assert_slide_story(self.deck))
+    def test_memory_slide_cannot_use_prior_subquestion(self):
+        d=Presentation(self.path)
+        q=next(o for o in d.slides[10].shapes if o.name.startswith('result-question:'))
+        q.text=question_label('Q2.2')
+        with self.assertRaisesRegex(AssertionError,'question text drift'):assert_slide_story(d)
+    def test_case_must_close_parent_q2(self):
+        d=Presentation(self.path)
+        q=next(o for o in d.slides[13].shapes if o.name.startswith('result-question:'))
+        q.name='result-question:Q2.3';q.text='Q2.3 · Case study'
+        with self.assertRaisesRegex(AssertionError,'wrong experimental question label'):assert_slide_story(d)
     def test_navigation_above_prominent_title(self):
         for slide,entry in zip(self.deck.slides,STORY):
             if not entry['chapter']:continue

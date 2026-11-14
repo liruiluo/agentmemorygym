@@ -71,8 +71,10 @@ question. Background uses the upper row of Figure 1 and a memory-underuse failur
 The environment page uses Figure 2’s right-hand panel, paired with what each task family must remember. CAMG environments then lead into Method, where original Figures 1 and 2 explain the
 file-memory idea and learning mechanism. The frozen-model interface-prior experiment
 appears within Q2 of Results. The experimental story is Q1: does CAMP improve
-long-horizon task performance; Q2: why does it work; Q3: does the learned memory
-behavior generalize. The complete original Figure 5 shows the Scrapy case and closes Q2 before the two transfer
+long-horizon task performance; Q2: what drives its gains; Q3: does the learned memory
+behavior generalize. Within Q2, Q2.1 groups the memory-learning ablations and same-state
+content intervention; Q2.2 follows with the frozen-model file-operation prior. These are
+small question labels, not divider pages or replacements for the conclusion titles. The complete original Figure 5 shows the Scrapy case and closes Q2 before the two transfer
 slides in Q3. Each result page keeps its conclusion-led title and chart, with a
 small question header; no divider pages are added. Chapter navigation and questions
 sit above the larger slide title. Each experimental plot now has one readable

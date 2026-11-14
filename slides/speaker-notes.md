@@ -1,6 +1,6 @@
 # CAMP · 17-slide research story
 
-Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Text and charts are editable. The Figure 1 context crop, Figure 2 environment crop and full Figures 1, 2 and 5 are pictures in PPTX and original vectors in PDF. The case page displays the complete original Figure 5. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
+Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Q2.1 asks whether the gains come from better memory; Q2.2 asks whether pre-trained file-operation skills help. The case closes Q2 without a third subquestion. Text and charts are editable. The Figure 1 context crop, Figure 2 environment crop and full Figures 1, 2 and 5 are pictures in PPTX and original vectors in PDF. The case page displays the complete original Figure 5. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
 
 ## 01. Coding Agent Memory Post-training
 
@@ -90,41 +90,41 @@ Comparison / intervention: Same base, PPO, task rewards and 200 updates; context
 
 Same base model, PPO, task rewards and 200-update budget. Context windows and compaction procedures differ. The long-context policy retains native task files but has no dedicated file-memory interface. This is a practical system comparison, not an isolated causal test of memory. The reference scores 49.2 average and CAMG-RL scores 54.4 with 30,720 active tokens, a 5.2-point advantage. Do not describe this as strict isolation of memory, because compaction and context settings differ. Do not claim a cost advantage without cost measurements.
 
-## 11. The file interface is familiar before RL
-
-**Chapter:** Results & analysis · **Role:** Prior evidence · **Target:** 50 seconds
-
-**Source:** Published · Figure 3a · frozen Qwen3.5-4B · rounded point estimates
-
-**Experimental question:** Q2 · Why does CAMP work?
-
-Comparison / intervention: Score file and dedicated-tool memory actions with frozen Qwen3.5-4B.
-
-Lower negative log-likelihood means these valid action tokens are more likely under the frozen model. The strongest contrast here is retrieval. This is evidence of interface familiarity, not proof of which pre-training corpus caused it. No uncertainty bars have been reconstructed.
-
-## 12. Memory actions need the learning signal
+## 11. Memory actions need the learning signal
 
 **Chapter:** Results & analysis · **Role:** Mechanism · **Target:** 50 seconds
 
 **Source:** Published · Figure 4 · average task success (%)
 
-**Experimental question:** Q2 · Why does CAMP work?
+**Experimental question:** Q2.1 · Do the gains come from better memory?
 
 Comparison / intervention: Remove memory-action actor gradients (keep rewards/critic), or use only CONTINUATION.md.
 
 The no-gradient condition retains rewards, critic targets and critic learning. The two continuation conditions intervene at different stages. The four rows are distinct interventions. Full training reaches 54.4, no memory-action actor gradients reaches 21.1, restricting to continuation during both training and evaluation gives 41.8, and restricting only at evaluation gives 28.1.
 
-## 13. The saved content changes what happens next
+## 12. The saved content changes what happens next
 
 **Chapter:** Results & analysis · **Role:** Mechanism · **Target:** 55 seconds
 
 **Source:** Published · Appendix D.3 · same-state continuations · eligible tasks only
 
-**Experimental question:** Q2 · Why does CAMP work?
+**Experimental question:** Q2.1 · Do the gains come from better memory?
 
 Comparison / intervention: Resume from the same post-reset state with intact, blank or shuffled memory.
 
 Forked continuations from the same post-reset state, within eligible tasks only. Shuffled donors are within-environment and length-matched. This is a local memory-content intervention, not a whole-distribution effect. Negative bars are percentage-point changes relative to intact files. The eligible counts are 128, 29, 60, and 23. Equal-environment mean losses are 14.1 for blank and 11.5 for shuffled memory. This is stronger local evidence than an uncontrolled correlation between writing and success, but not a population-wide treatment effect.
+
+## 13. The file interface is familiar before RL
+
+**Chapter:** Results & analysis · **Role:** Prior evidence · **Target:** 50 seconds
+
+**Source:** Published · Figure 3a · frozen Qwen3.5-4B · rounded point estimates
+
+**Experimental question:** Q2.2 · Do pre-trained file-operation skills help?
+
+Comparison / intervention: Score file and dedicated-tool memory actions with frozen Qwen3.5-4B.
+
+Lower negative log-likelihood means these valid action tokens are more likely under the frozen model. The strongest contrast here is retrieval. This is evidence of interface familiarity, not proof of which pre-training corpus caused it. No uncertainty bars have been reconstructed.
 
 ## 14. Case study: carry a Scrapy fix across contexts
 
@@ -132,7 +132,7 @@ Forked continuations from the same post-reset state, within eligible tasks only.
 
 **Source:** Figure 5 / Appendix A.4.3 · recorded training episode · complete original figure
 
-**Experimental question:** Q2 · Why does CAMP work?
+**Experimental question:** Q2 · What drives CAMP’s gains?
 
 An illustrative training episode, not a held-out comparison or a counterfactual failure without memory. Use this case to close Q2: show the memory behavior behind the preceding mechanism results, then turn to Q3 and generalization. Task: fix response logging in Scrapy. At round 12 the agent edits scheduler.py; at round 18 it saves the diagnosis and next steps to CONTINUATION.md. After context replacement it reads the file at round 19, then performs subsequent checks and finishes at round 30 within a 40-round budget. The tests are later actions, not all at round 19. Hidden tests passed; terminal return is 1.00. The complete original Figure 5 is displayed without cropping, rewriting or panel recomposition. Follow its four panels from initial error through repair, memory write, context replacement, readback and success. No matched no-memory failure is claimed.
 
