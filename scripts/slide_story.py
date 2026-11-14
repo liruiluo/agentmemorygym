@@ -11,7 +11,7 @@ STORY=[
     entry('Background','Memory need','Figure 1 upper row: context lost → repeated work → unfinished task','Figure 1 · context-only row'),
     entry('Background','Research problem','Unused memory tools → lost constraint → failure; prior-mismatch hypothesis → question','Memory use · the research problem'),
     entry(None,'Contributions','Environment suite / learning method / empirical study','CAMP · three contributions'),
-    entry('Environments','Task demands','Four task families and the state each must retain','CAMG · Shop / Coding / DeepResearch / AutoResearch'),
+    entry('Environments','Task demands','Figure 2 environment panel + what each task family must remember','CAMG · Figure 2 · environment panel'),
     entry('Method','Core idea','Original Figure 1, both contrast rows','Figure 1 · conceptual illustration'),
     entry('Method','Learning mechanism','Original Figure 2 + shared policy/reward/PPO callouts','CAMG-RL · Figure 2 · fully asynchronous PPO'),
     entry('Results & analysis','Effectiveness','Six-method main comparison','Task success · Qwen3.5-4B · 128 held-out tasks per environment','Effectiveness'),
@@ -61,8 +61,11 @@ def assert_slide_story(deck):
     for word in ['CAMG','CAMG-RL','Empirical study']:
         assert word in text_at(page_for('Contributions')),f'Missing contribution {word}'
     assert 'Fully asynchronous PPO' in text_at(page_for('Learning mechanism'))
-    for role,key in [('Memory need','fig1_context_only'),('Core idea','fig1_camg_teaser'),('Learning mechanism','fig2_camg_framework')]:
+    for role,key in [('Memory need','fig1_context_only'),('Task demands','fig2_environments'),('Core idea','fig1_camg_teaser'),('Learning mechanism','fig2_camg_framework')]:
         assert [o.name for o in deck.slides[page_for(role)-1].shapes if o.name.startswith('paper-figure:')]==['paper-figure:'+key]
+    environment=text_at(page_for('Task demands'))
+    for term in ['Shop','Coding','DeepResearch','AutoResearch','purchase history','test progress','intermediate findings','Hypotheses','Later decisions depend on information gathered earlier.']:
+        assert term in environment,f'Missing environment memory demand: {term}'
     case=page_for('Case study')
     assert case>max(i+1 for i,e in enumerate(STORY) if e['role']=='Transfer')
     assert [n for n in range(1,len(STORY)+1) if 'Scrapy' in text_at(n)]==[case],'The technical case must appear once, after the results'

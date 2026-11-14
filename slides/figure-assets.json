@@ -37,5 +37,22 @@
       1536,
       400
     ]
+  },
+  "fig2_environments": {
+    "reference": "Figure 2, environment panel",
+    "pdf": "assets/slides/figures/fig2_camg_framework.pdf",
+    "png": "assets/slides/figures/fig2_camg_framework.png",
+    "pdf_sha256": "f7c74d1b8ba71d213ca9b5be6a51fa6cc15885a4b0d2304bcf356e12a534e5cd",
+    "png_sha256": "234018fd2cbc97b1703ede52c68fc655b83921e0f5cc0bdda39ec47d15fd26b7",
+    "width_pt": 1152.0,
+    "height_pt": 768.0,
+    "raster_width_px": 2400,
+    "source_note": "Original Figure 2 right-hand environment ring, cropped without relabeling. The full Figure 2 remains on the Method page. PPTX crop and vector PDF use the same source rectangle.",
+    "clip_pt": [
+      802,
+      68,
+      1140,
+      480
+    ]
   }
 }

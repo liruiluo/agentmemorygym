@@ -67,7 +67,7 @@ def verify(root,pptx,pdf):
                 for pa in o.text_frame.paragraphs:
                     for run in pa.runs:
                         if run.font.size:min_font=min(min_font,run.font.size.pt)
-    doc=fitz.open(pdf);assert len(doc)==len(STORY);assert (paper_pictures,generated_pictures,pictures)==(3,1,4)
+    doc=fitz.open(pdf);assert len(doc)==len(STORY);assert (paper_pictures,generated_pictures,pictures)==(4,1,5)
     alltext='\n'.join(p.get_text() for p in doc)
     assert '54.4' in alltext and '+6.4 pp' in alltext and '+11.4 pp' in alltext
     assert '18.0 baseline' not in alltext and '\ufffd' not in alltext

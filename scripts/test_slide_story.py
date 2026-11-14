@@ -63,11 +63,23 @@ class SlideStoryTest(unittest.TestCase):
                     self.assertEqual(hashlib.sha256(o.image.blob).hexdigest(),a['png_sha256'])
                     for kind in ('png','pdf'):
                         self.assertEqual(hashlib.sha256((ROOT/a[kind]).read_bytes()).hexdigest(),a[kind+'_sha256'])
-        self.assertEqual(seen,['fig1_context_only','fig1_camg_teaser','fig2_camg_framework'])
+        self.assertEqual(seen,['fig1_context_only','fig2_environments','fig1_camg_teaser','fig2_camg_framework'])
         crop=assets['fig1_context_only'];self.assertEqual(crop['clip_pt'],[0,0,1536,400])
         self.assertEqual(crop['pdf_sha256'],assets['fig1_camg_teaser']['pdf_sha256'])
         picture=next(o for o in self.deck.slides[2].shapes if o.name=='paper-figure:fig1_context_only')
         self.assertAlmostEqual(picture.crop_bottom,5/9,places=5)
+    def test_environment_panel_is_exact_crop(self):
+        a=json.loads((ROOT/'slides/figure-assets.json').read_text())
+        self.assertEqual(a['fig2_environments']['clip_pt'],[802,68,1140,480])
+        self.assertEqual(a['fig2_environments']['pdf_sha256'],a['fig2_camg_framework']['pdf_sha256'])
+        p=next(o for o in self.deck.slides[5].shapes if o.name=='paper-figure:fig2_environments')
+        self.assertAlmostEqual(p.crop_left,802/1152,places=5)
+        self.assertAlmostEqual(p.crop_top,68/768,places=5)
+    def test_environment_text_remains_necessary(self):
+        d=Presentation(self.path)
+        for o in d.slides[5].shapes:
+            if o.has_text_frame:o.text=o.text.replace('purchase history','details')
+        with self.assertRaisesRegex(AssertionError,'Missing environment memory demand'):assert_slide_story(d)
     def test_defensive_motivation_labels_rejected(self):
         d=Presentation(self.path);d.slides[3].shapes[-1].text+=' (illustration)'
         with self.assertRaisesRegex(AssertionError,'defensive'):assert_slide_story(d)

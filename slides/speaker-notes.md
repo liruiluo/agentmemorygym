@@ -1,6 +1,6 @@
 # CAMP · 17-slide research story
 
-Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable. The Figure 1 upper-row crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
+Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
 
 ## 01. Coding Agent Memory Post-training
 
@@ -42,13 +42,13 @@ Walk through the budget example: the agent sees a $50 limit, proceeds without ca
 
 This is the actual three-part contribution structure of the paper. CAMG is the environment suite; CAMG-RL is the learning method; the empirical study establishes useful and reusable memory behavior. Fully asynchronous PPO is the implementation, not a claim to a new optimizer. This page is a twenty-to-thirty-second preview; the next pages explain each contribution.
 
-## 06. One shared policy, four kinds of work
+## 06. CAMG: four kinds of long-horizon work
 
 **Chapter:** Environments · **Role:** Task demands · **Target:** 50 seconds
 
-**Source:** CAMG environments · V1 suite · four domains
+**Source:** CAMG environments · Figure 2 right-hand panel
 
-CAMG is the environment suite, CAMG-RL is the learning method, and fully asynchronous PPO is its system implementation. Native task semantics and grading remain with the environments. The final policy is shared, not four separately deployed environment policies. Do not substitute CAMP-II’s General/Visual domains.
+Introduce the four task families with the environment panel from Figure 2. Shop requires remembering user preferences and purchase history across linked sessions. Coding requires carrying forward diagnosis, code changes and test progress. DeepResearch requires retaining sources and intermediate findings. AutoResearch requires tracking hypotheses, experimental trials and their results. The common demand is that later decisions depend on information gathered earlier. The suite supports learning and evaluating memory use across these different tasks. Keep the policy, rollout and PPO explanation for the full Figure 2 in Method.
 
 ## 07. Use files to carry working state beyond the context
 

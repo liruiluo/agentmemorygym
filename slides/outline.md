@@ -4,7 +4,7 @@ Updated 2026-11-14. English, approximately 15 minutes.
 
 Story: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → effectiveness → mechanism → transfer → complete case.
 
-The roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case appears once, after the results. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.
+The roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case appears once, after the results. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.
 
 | # | Chapter | Role | Action title | Exhibit |
 |---|---|---|---|---|
@@ -13,7 +13,7 @@ The roadmap follows the title. Background ends at the research question; the sep
 | 3 | Background | Memory need | Long tasks need memory beyond the active context | Figure 1 upper row: context lost → repeated work → unfinished task |
 | 4 | Background | Research problem | Having memory tools does not ensure their use | Unused memory tools → lost constraint → failure; prior-mismatch hypothesis → question |
 | 5 | Contributions | Contributions | Three contributions to learning reusable memory | Environment suite / learning method / empirical study |
-| 6 | Environments | Task demands | One shared policy, four kinds of work | Four task families and the state each must retain |
+| 6 | Environments | Task demands | CAMG: four kinds of long-horizon work | Figure 2 environment panel + what each task family must remember |
 | 7 | Method | Core idea | Use files to carry working state beyond the context | Original Figure 1, both contrast rows |
 | 8 | Method | Learning mechanism | Task reward trains both acting and remembering | Original Figure 2 + shared policy/reward/PPO callouts |
 | 9 | Results & analysis | Effectiveness | CAMG-RL reaches 54.4% average task success | Six-method main comparison |

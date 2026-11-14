@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build the 17-slide CAMP story from data/research.json.
 
-Text, charts and case diagrams are native PowerPoint objects. Three paper-figure
-placements (one upper-row crop and two full figures) use high-resolution pictures
+Text, charts and case diagrams are native PowerPoint objects. Four paper-figure
+placements (two focused crops and two full figures) use high-resolution pictures
 in PPTX and original vectors in PDF. One GPT-image-2 background visual is a raster
 asset. PDF export is a separate checked step; see render_slides_pdf.py.
 """
@@ -222,15 +222,20 @@ def build(out,root=ROOT):
     takeaway(s,'Environment suite → learning method → reusable behavior.')
 
 
-    # Environment identity.
-    s=slide('One shared policy, four kinds of work','CAMG environments · V1 suite · four domains',
-       'CAMG is the environment suite, CAMG-RL is the learning method, and fully asynchronous PPO is its system implementation. Native task semantics and grading remain with the environments. The final policy is shared, not four separately deployed environment policies. Do not substitute CAMP-II’s General/Visual domains.')
-    domains=[('Shop','WebShop','Six linked sessions:\nretain preferences\nand purchase history'),('Coding','SWE-smith','Repo repair:\nretain diagnosis,\npatches and test status'),('DeepResearch','LiteResearcher','Multi-step research:\nretain sources and\nintermediate findings'),('AutoResearch','OpenMLE packages','ML experiments:\nretain hypotheses,\ntrials and results')]
-    for i,(name,sub,mem) in enumerate(domains):
-        x=.5+i*2.28;line(s,x,1.35,x+2.05,1.35,INK,1.4);label(s,f'0{i+1}',x,1.51,2)
-        text(s,name,x,1.92,2.08,.4,19,bold=True);label(s,sub,x,2.39,2.08,BLUE);text(s,mem,x,2.91,2.08,.95,14,MID)
-    rect(s,1.55,4.02,6.9,.46,PALE,PALE,0);text(s,'Shared policy  +  episode-persistent workspace',1.7,4.1,6.6,.3,17,BLUE,bold=True,align=PP_ALIGN.CENTER)
-    takeaway(s,'Learn a memory behavior across heterogeneous tasks.')
+    # Reuse the paper's environment panel; explain each task's memory demand.
+    s=slide('CAMG: four kinds of long-horizon work','CAMG environments · Figure 2 right-hand panel',
+       'Introduce the four task families with the environment panel from Figure 2. Shop requires remembering user preferences and purchase history across linked sessions. Coding requires carrying forward diagnosis, code changes and test progress. DeepResearch requires retaining sources and intermediate findings. AutoResearch requires tracking hypotheses, experimental trials and their results. The common demand is that later decisions depend on information gathered earlier. The suite supports learning and evaluating memory use across these different tasks. Keep the policy, rollout and PPO explanation for the full Figure 2 in Method.')
+    paper_figure(s,'fig2_environments',.7,1.09,3.00,root)
+    label(s,'WHAT MUST THE AGENT REMEMBER?',4.3,1.16,5.15,BLUE)
+    demands=[('Shop','Preferences and purchase history.'),
+             ('Coding','Diagnosis, patches and test progress.'),
+             ('DeepResearch','Sources and intermediate findings.'),
+             ('AutoResearch','Hypotheses, trials and results.')]
+    for i,(domain,demand) in enumerate(demands):
+        y=1.61+i*.76
+        text(s,domain,4.3,y,5.15,.32,18,INK,bold=True)
+        text(s,demand,4.3,y+.36,5.15,.31,15.5,MID)
+    text(s,'Later decisions depend on information gathered earlier.',.55,4.86,8.9,.31,17,BLUE,bold=True)
 
 
     # Paper Figure 1 keeps both rows of the conceptual comparison.
@@ -360,19 +365,19 @@ def build(out,root=ROOT):
         if entry['chapter']:chapter_trail(s,entry['chapter'],entry.get('phase'))
     assert_slide_story(prs)
     out.parent.mkdir(parents=True,exist_ok=True);prs.save(out)
-    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable. The Figure 1 upper-row crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
+    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         notes+=f'## {n:02}. {t or d["project"]}\n\n**Chapter:** {entry["chapter"] or entry["role"]} · **Role:** {entry["role"]} · **Target:** {entry["seconds"]} seconds\n\n**Source:** {src}\n\n{body}\n\n'
     notes+='## Additional Q&A material (not extra slides)\n\nThe Background uses the Figure 1 context-only row and a visual failure story to motivate the problem. The AgeMem arm’s zero designated memory-chain observation remains supporting material for questions, not an on-slide statistic. The shared data also retains the CAMG-RL acquisition trajectory (7.97% to 20.9%), the syntax-constrained frozen-model comparison (Bash 20.3% vs. AgeMem 16.0%), and five-run robustness (CAMG-RL 55.3 ± 2.9 vs. CompactionRL 47.1 ± 3.5, mean ± SD). These are omitted from the main talk to preserve the motivation → method → effectiveness → mechanism → transfer story. Refer to each experiment’s own protocol before using these numbers.\n'
     (out.parent/'speaker-notes.md').write_text(notes)
-    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → effectiveness → mechanism → transfer → complete case.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case appears once, after the results. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Role | Action title | Exhibit |\n|---|---|---|---|---|\n'
+    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → effectiveness → mechanism → transfer → complete case.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case appears once, after the results. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Role | Action title | Exhibit |\n|---|---|---|---|---|\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         outline_md+=f'| {n} | {entry["chapter"] or entry["role"]} | {entry["role"]} | {t or d["project"]} | {entry["exhibit"]} |\n'
     outline_md+='\n## Speaking and source notes\n\nThe contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, the CAMG-RL acquisition trajectory and the syntax-only probe remain optional Q&A material, not additional talk pages. The background shows unused memory tools, a lost constraint and task failure; it carries no isolated zero statistic or defensive labels. Image-generation provenance is in the asset manifest.\n'
     (out.parent/'outline.md').write_text(outline_md)
-    manifest={'slides':len(prs.slides),'data_sha256':sha,'paper_figure_pictures':3,'generated_illustrations':1,'pdf_figures':'original vectors','updated':d['updated'],'slides_outline':[dict(number=n,title=t or d['project'],provenance=src,**entry) for (n,t,src,_),entry in zip(outline,STORY)]}
+    manifest={'slides':len(prs.slides),'data_sha256':sha,'paper_figure_pictures':4,'generated_illustrations':1,'pdf_figures':'original vectors','updated':d['updated'],'slides_outline':[dict(number=n,title=t or d['project'],provenance=src,**entry) for (n,t,src,_),entry in zip(outline,STORY)]}
     (out.parent/'deck-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-    print(json.dumps({'pptx':str(out),'slides':len(prs.slides),'paper_figure_pictures':3,'generated_illustrations':1,'data_sha256':sha}))
+    print(json.dumps({'pptx':str(out),'slides':len(prs.slides),'paper_figure_pictures':4,'generated_illustrations':1,'data_sha256':sha}))
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--site-root',type=Path,default=ROOT);a=p.parse_args();build(a.out,a.site_root)
