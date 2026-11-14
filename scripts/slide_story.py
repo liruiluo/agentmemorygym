@@ -125,5 +125,6 @@ def assert_slide_story(deck):
             assert title.top+title.height<=Inches(.99),'Header must not displace the slide body'
         else:
             assert not navigation,'Do not add navigation to non-chapter pages'
+    assert STORY[-1]['role']=='Conclusion' and deck.slides[-1].shapes[0].text=='Takeaways','Final slide must be titled Takeaways'
     assert 'What should survive a context boundary?' not in visible
     return visible

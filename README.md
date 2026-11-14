@@ -79,7 +79,8 @@ sit above the larger slide title. Each experimental plot now has one readable
 comparison/intervention line below its title: what is compared, what changes and
 which factors are held fixed. The chart remains dominant and the takeaway states
 the finding. The recorded case keeps its task/action sequence instead of a
-protocol line. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
+protocol line. The final slide is titled **Takeaways** and retains the three
+summary points and project link. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
 
 The shared result file retains the source references for each experiment. Website
 selection does not change the data used by the 17-slide talk. The paper link leads

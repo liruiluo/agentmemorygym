@@ -14,6 +14,14 @@ class SlideStoryTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):cls.tmp.cleanup()
     def test_positive_story(self):self.assertTrue(assert_slide_story(self.deck))
+    def test_final_slide_is_explicit_takeaways(self):
+        self.assertEqual(self.deck.slides[-1].shapes[0].text,'Takeaways')
+        content='\n'.join(o.text for o in self.deck.slides[-1].shapes if o.has_text_frame)
+        for phrase in ['Start from a familiar interface.','Train memory through the task.','Learn a behavior that can be reused.','liruiluo.github.io/agentmemorygym']:
+            self.assertIn(phrase,content)
+    def test_slogan_cannot_replace_takeaways_heading(self):
+        d=Presentation(self.path);d.slides[-1].shapes[0].text='Familiar operations. Learned memory.'
+        with self.assertRaisesRegex(AssertionError,'Final slide must be titled Takeaways'):assert_slide_story(d)
     def test_report_labels_rejected(self):
         d=Presentation(self.path);d.slides[0].shapes[0].text='ADDITIONAL November additions'
         with self.assertRaises(AssertionError):assert_slide_story(d)

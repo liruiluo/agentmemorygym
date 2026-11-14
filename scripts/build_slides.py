@@ -371,7 +371,7 @@ def build(out,root=ROOT):
 
 
     # End on the scientific takeaways, not an unasked appendix.
-    s=slide('Familiar operations. Learned memory.','CAMP V1 · published paper + labelled November additions · data/research.json',
+    s=slide('Takeaways','CAMP V1 · published paper + labelled November additions · data/research.json',
        'Close with three scoped statements. Familiarity is measured before training. Task reward teaches useful memory behaviors, supported by acquisition, ablation and local content intervention. The benefits extend to external benchmarks and, in November additions, new memory interfaces. Do not claim universal causality or compute savings. The project page links the paper, code and slides. Detailed protocol and source-version boundaries stay in these speaker notes and shared data, not the audience-facing story.')
     for i,(a,b) in enumerate([('Start from a familiar interface.','Use ordinary file operations instead of inventing a new memory language.'),('Train memory through the task.','Preserve and reuse useful state with downstream reward.'),('Learn a behavior that can be reused.','Stronger execution across environments, interfaces and external tasks.')]):
         y=1.23+i*1.05;text(s,f'0{i+1}',.55,y,.55,.38,19,BLUE);text(s,a,1.35,y,8.0,.42,23,bold=True);text(s,b,1.35,y+.52,8.0,.4,14,MID)

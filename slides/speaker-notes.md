@@ -160,7 +160,7 @@ Comparison / intervention: Compare frozen base and trained policies at the same 
 
 Benchmark success percentages. Larger frozen models are capability references, not compute-equivalent controls. These outcomes do not isolate a memory-only transfer effect. Focus on matched base-to-trained gains at each scale: SWE-bench Verified 7.6 to 15.8 for 4B and 14.8 to 27.6 for 9B; MLE-bench Lite 0.0 to 4.5 and 4.5 to 9.1. Larger frozen MoE models remain capability references in the paper; this slide shows only matched base-to-trained comparisons.
 
-## 17. Familiar operations. Learned memory.
+## 17. Takeaways
 
 **Chapter:** Conclusion · **Role:** Conclusion · **Target:** 40 seconds
 

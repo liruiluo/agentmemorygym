@@ -24,7 +24,7 @@ The roadmap follows the title. Background ends at the research question; the sep
 | 14 | Results & analysis | Q2 | Case study | Case study: carry a Scrapy fix across contexts | Scrapy saved note + read/check actions + successful finish |
 | 15 | Results & analysis | Q3 | Transfer | The learned memory policy transfers across interfaces | New memory interfaces, fixed task executor |
 | 16 | Results & analysis | Q3 | Transfer | Gains carry over to external benchmarks | Matched base vs. trained external results |
-| 17 | Conclusion | — | Conclusion | Familiar operations. Learned memory. | Three takeaways and project link |
+| 17 | Conclusion | — | Conclusion | Takeaways | Three takeaways and project link |
 
 ## Speaking and source notes
 
