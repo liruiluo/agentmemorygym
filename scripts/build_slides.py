@@ -128,15 +128,17 @@ def paper_figure(s,key,x,y,w,root=ROOT):
 
 def chapter_trail(s,chapter,phase=None):
     if phase:
-        text(s,'04  Results & analysis',.5,.79,2.2,.18,8.5,BLUE,bold=True)
-        line(s,.5,.98,2.62,.98,BLUE,1.3)
-        q=text(s,question_label(phase),2.8,.77,6.7,.23,11,BLUE,bold=True,align=PP_ALIGN.RIGHT)
+        nav=text(s,'04  Results & analysis',.5,.18,2.2,.18,8.5,BLUE,bold=True)
+        nav.name='chapter-navigation:Results & analysis'
+        line(s,.5,.39,2.62,.39,BLUE,1.3)
+        q=text(s,question_label(phase),2.8,.16,6.7,.23,11,BLUE,bold=True,align=PP_ALIGN.RIGHT)
         q.name='result-question:'+phase
         return
     for i,(name,x,w) in enumerate([('Background',.5,1.35),('Environments',2.1,1.65),('Method',4.04,1.12),('Results & analysis',5.46,2.2)]):
         active=name==chapter
-        text(s,f'{i+1:02}  {name}',x,.79,w,.18,8.5,BLUE if active else LIGHT,bold=active)
-        if active:line(s,x,.98,x+w-.08,.98,BLUE,1.3)
+        nav=text(s,f'{i+1:02}  {name}',x,.18,w,.18,8.5,BLUE if active else LIGHT,bold=active)
+        nav.name='chapter-navigation:'+name
+        if active:line(s,x,.39,x+w-.08,.39,BLUE,1.3)
 
 
 def build(out,root=ROOT):
@@ -149,8 +151,9 @@ def build(out,root=ROOT):
     outline=[]
     def slide(heading,source,notes):
         s=prs.slides.add_slide(prs.slide_layouts[6]);num=len(prs.slides)
-        text(s,heading,.42,.18,8.65,.57,23,INK,bold=False)
-        text(s,'JD.com',8.96,.23,.68,.25,11,RED,bold=True,align=PP_ALIGN.RIGHT)
+        has_navigation=bool(STORY[num-1]['chapter'])
+        text(s,heading,.42,.48 if has_navigation else .18,8.65,.43 if has_navigation else .57,23,INK,bold=False)
+        text(s,'JD.com',8.96,.53 if has_navigation else .23,.68,.25,11,RED,bold=True,align=PP_ALIGN.RIGHT)
         footer(s,visible_source(num),num)
         s.notes_slide.notes_text_frame.text=notes+'\n\nSource: '+source+'\nData SHA256: '+sha
         outline.append((num,heading,source,notes))
@@ -370,14 +373,14 @@ def build(out,root=ROOT):
         if entry['chapter']:chapter_trail(s,entry['chapter'],entry.get('phase'))
     assert_slide_story(prs)
     out.parent.mkdir(parents=True,exist_ok=True);prs.save(out)
-    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
+    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; the exhibit follows directly below. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         notes+=f'## {n:02}. {t or d["project"]}\n\n**Chapter:** {entry["chapter"] or entry["role"]} · **Role:** {entry["role"]} · **Target:** {entry["seconds"]} seconds\n\n**Source:** {src}\n\n'
         if entry['phase']:notes+=f"**Experimental question:** {question_label(entry['phase'])}\n\n"
         notes+=body+'\n\n'
     notes+='## Additional Q&A material (not extra slides)\n\nThe Background uses the Figure 1 context-only row and a visual failure story to motivate the problem. The AgeMem arm’s zero designated memory-chain observation remains supporting material for questions, not an on-slide statistic. The shared data also retains the CAMG-RL acquisition trajectory (7.97% to 20.9%), the syntax-constrained frozen-model comparison (Bash 20.3% vs. AgeMem 16.0%), and five-run robustness (CAMG-RL 55.3 ± 2.9 vs. CompactionRL 47.1 ± 3.5, mean ± SD). These are omitted from the main talk to preserve the motivation → method → effectiveness → mechanism → transfer story. Refer to each experiment’s own protocol before using these numbers.\n'
     (out.parent/'speaker-notes.md').write_text(notes)
-    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → Q1 effectiveness → Q2 mechanism and complete case → Q3 transfer.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case closes Q2. A lightweight four-chapter trail marks progress before Results; each result page carries its Q1, Q2 or Q3 question above the exhibit while keeping a conclusion-led main title. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Question | Role | Action title | Exhibit |\n|---|---|---|---|---|---|\n'
+    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → Q1 effectiveness → Q2 mechanism and complete case → Q3 transfer.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The environment page uses Figure 2’s right-hand panel with one memory demand per task family. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case closes Q2. A lightweight four-chapter trail marks progress before Results; each result page carries its Q1, Q2 or Q3 question in the top navigation row, above a larger conclusion-led title. Chapter navigation is above the title throughout, with the exhibit directly below the title. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Question | Role | Action title | Exhibit |\n|---|---|---|---|---|---|\n'
     for (n,t,src,body),entry in zip(outline,STORY):
         outline_md+=f'| {n} | {entry["chapter"] or entry["role"]} | {entry["phase"] or "—"} | {entry["role"]} | {t or d["project"]} | {entry["exhibit"]} |\n'
     outline_md+='\n## Speaking and source notes\n\nThe contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, the CAMG-RL acquisition trajectory and the syntax-only probe remain optional Q&A material, not additional talk pages. The background shows unused memory tools, a lost constraint and task failure; it carries no isolated zero statistic or defensive labels. Image-generation provenance is in the asset manifest.\n'

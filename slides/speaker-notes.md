@@ -1,6 +1,6 @@
 # CAMP · 17-slide research story
 
-Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
+Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; the exhibit follows directly below. Text, charts and case diagrams are editable. The Figure 1 context crop, Figure 2 environment crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
 
 ## 01. Coding Agent Memory Post-training
 

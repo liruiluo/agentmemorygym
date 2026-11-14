@@ -74,7 +74,9 @@ appears within Q2 of Results. The experimental story is Q1: does CAMP improve
 long-horizon task performance; Q2: why does it work; Q3: does the learned memory
 behavior generalize. A complete Scrapy case closes Q2 before the two transfer
 slides in Q3. Each result page keeps its conclusion-led title and chart, with a
-small question header; no divider pages are added. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
+small question header; no divider pages are added. Chapter navigation and questions
+sit above the larger slide title, leaving the title directly connected to its
+exhibit. Navigation is visually subordinate and the body layout is unchanged. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
 
 The shared result file retains the source references for each experiment. Website
 selection does not change the data used by the 17-slide talk. The paper link leads

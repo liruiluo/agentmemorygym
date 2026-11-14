@@ -1,5 +1,6 @@
 """Audience-facing talk structure; scientific provenance stays in research.json/notes."""
 import re
+from pptx.util import Inches
 
 QUESTIONS = {
     'Q1': 'Does CAMP improve long-horizon task performance?',
@@ -79,6 +80,8 @@ def assert_slide_story(deck):
     case=page_for('Case study')
     assert max(i+1 for i,e in enumerate(STORY) if e['role']=='Mechanism')<case<min(i+1 for i,e in enumerate(STORY) if e['role']=='Transfer'),'Case study closes Q2 before transfer'
     assert [n for n in range(1,len(STORY)+1) if 'Scrapy' in text_at(n)]==[case],'The technical case must appear once, at the end of Q2'
+    for word in ['CONTINUATION.md','objective: fix response logging','Hidden tests passed','1.00','pytest']:
+        assert word in text_at(case),f'Merged case is incomplete: {word}'
     assert [e['phase'] for e in STORY if e['chapter']=='Results & analysis']==['Q1']*2+['Q2']*4+['Q3']*2,'Experimental questions must form three contiguous groups'
     for i,e in enumerate(STORY):
         labels=[o for o in deck.slides[i].shapes if o.name.startswith('result-question:')]
@@ -87,7 +90,17 @@ def assert_slide_story(deck):
             assert labels[0].text==question_label(e['phase']),'Experimental question text drift'
         else:
             assert not labels,'Question labels belong to experimental slides only'
+        navigation=[o for o in deck.slides[i].shapes if o.name.startswith('chapter-navigation:')]
+        if e['chapter']:
+            title=deck.slides[i].shapes[0]
+            assert len(navigation)==(1 if e['phase'] else 4),'Missing chapter navigation'
+            for marker in navigation+labels:
+                assert marker.top+marker.height<title.top,'Navigation must precede the slide title'
+                marker_size=marker.text_frame.paragraphs[0].runs[0].font.size
+                title_size=title.text_frame.paragraphs[0].runs[0].font.size
+                assert marker_size is not None and title_size is not None and marker_size<title_size,'Title must dominate navigation'
+            assert title.top+title.height<=Inches(.99),'Header must not displace the slide body'
+        else:
+            assert not navigation,'Do not add navigation to non-chapter pages'
     assert 'What should survive a context boundary?' not in visible
-    for word in ['CONTINUATION.md','objective: fix response logging','Hidden tests passed','1.00','pytest']:
-        assert word in text_at(case),f'Merged case is incomplete: {word}'
     return visible

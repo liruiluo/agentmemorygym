@@ -2,6 +2,7 @@
 import hashlib,json,tempfile,unittest
 from pathlib import Path
 from pptx import Presentation
+from pptx.util import Inches
 from build_slides import build,ROOT
 from slide_story import STORY,QUESTIONS,question_label,assert_slide_story
 
@@ -49,7 +50,7 @@ class SlideStoryTest(unittest.TestCase):
         case_index=next(i for i,e in enumerate(STORY) if e['role']=='Case study')
         for o in d.slides[case_index].shapes:
             if o.has_text_frame:o.text=o.text.replace('CONTINUATION.md','state-file')
-        with self.assertRaises(AssertionError):assert_slide_story(d)
+        with self.assertRaisesRegex(AssertionError,'Merged case is incomplete'):assert_slide_story(d)
     def test_chapters_match_story(self):
         for s,entry in zip(self.deck.slides,STORY):
             if entry['phase']:
@@ -66,6 +67,25 @@ class SlideStoryTest(unittest.TestCase):
         notes=(self.path.parent/'speaker-notes.md').read_text()
         for q,n in [('Q1',2),('Q2',4),('Q3',2)]:
             self.assertEqual(notes.count('**Experimental question:** '+question_label(q)),n)
+    def test_navigation_above_prominent_title(self):
+        for slide,entry in zip(self.deck.slides,STORY):
+            if not entry['chapter']:continue
+            title=slide.shapes[0]
+            for marker in slide.shapes:
+                if marker.name.startswith(('chapter-navigation:','result-question:')):
+                    self.assertLess(marker.top+marker.height,title.top)
+                    self.assertLess(marker.text_frame.paragraphs[0].runs[0].font.size,title.text_frame.paragraphs[0].runs[0].font.size)
+            self.assertLessEqual(title.top+title.height,Inches(.99))
+    def test_navigation_below_title_rejected(self):
+        d=Presentation(self.path)
+        nav=next(o for o in d.slides[5].shapes if o.name.startswith('chapter-navigation:'))
+        nav.top=Inches(.79)
+        with self.assertRaisesRegex(AssertionError,'Navigation must precede'):assert_slide_story(d)
+    def test_question_below_title_rejected(self):
+        d=Presentation(self.path)
+        q=next(o for o in d.slides[8].shapes if o.name.startswith('result-question:'))
+        q.top=Inches(.77)
+        with self.assertRaisesRegex(AssertionError,'Navigation must precede'):assert_slide_story(d)
     def test_wrong_question_rejected(self):
         d=Presentation(self.path)
         q=next(o for o in d.slides[10].shapes if o.name.startswith('result-question:'))

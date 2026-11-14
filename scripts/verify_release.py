@@ -69,9 +69,16 @@ def verify(root,pptx,pdf):
                         if run.font.size:min_font=min(min_font,run.font.size.pt)
     doc=fitz.open(pdf);assert len(doc)==len(STORY);assert (paper_pictures,generated_pictures,pictures)==(4,1,5)
     alltext='\n'.join(p.get_text() for p in doc)
-    for page,entry in zip(doc,STORY):
+    for page,slide,entry in zip(doc,deck.slides,STORY):
         if entry['phase']:
             assert question_label(entry['phase']) in page.get_text(),'Missing experimental question in PDF'
+        if entry['chapter']:
+            title_rects=page.search_for(slide.shapes[0].text)
+            assert title_rects,'Missing slide title in PDF'
+            for marker in slide.shapes:
+                if marker.name.startswith(('chapter-navigation:','result-question:')):
+                    rects=page.search_for(marker.text)
+                    assert rects and max(x.y1 for x in rects)<min(x.y0 for x in title_rects),'PDF navigation must precede title'
     assert '54.4' in alltext and '+6.4 pp' in alltext and '+11.4 pp' in alltext
     assert '18.0 baseline' not in alltext and '\ufffd' not in alltext
     raster_counts=[len(p.get_images()) for p in doc]
