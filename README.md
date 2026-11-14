@@ -12,7 +12,7 @@ The public **CAMP V1 / CAMG-RL** research page and editable 17-slide talk.
 Use Python 3.9+ with the packages in `requirements-presentation.txt`. The default
 headless PDF exporter uses the macOS Arial and Menlo font files and the two
 hash-bound vector figure PDFs in `assets/slides/figures/`. It checks that the
-PPTX pictures match those originals before placing the vectors. On another OS,
+PPTX pictures and crop rectangles match those originals before placing the vectors. The memory-underuse background image is a separately hash-bound raster asset. On another OS,
 export the generated PPTX with PowerPoint/LibreOffice or adapt the renderer's font
 registration to licensed local equivalents, then repeat the visual and font checks.
 No frontend dependencies, external fonts or CDN scripts are needed at runtime.
@@ -48,7 +48,8 @@ from rounded environment values.
 
 - `scripts/site.template.html` + `build_website.py`: semantic, responsive static page.
 - `scripts/build_slides.py` + `slide_story.py`: the story order, chapter trail, native editable charts and text, plus speaker notes.
-- `slides/figure-assets.json`: exact hashes of the two original paper figures. PPTX uses high-resolution pictures; PDF retains their original vectors. The rest of the deck is editable native content.
+- `slides/figure-assets.json`: exact hashes of the two original paper figures and the upper-row crop rectangle used in Background. Three placements use pictures in PPTX and original vectors in PDF.
+- `slides/illustration-assets.json`: the GPT-image-2 memory-underuse image, prompt and generation metadata. This one asset remains raster in both formats; other text, charts and case diagrams are editable native content.
 - `scripts/render_slides_pdf.py`: deterministic vector/text PDF export, fail on text overflow.
 - `scripts/build_social_card.py`: source-generated social preview, no research data fabrication.
 - `slides/outline.md`, `slides/speaker-notes.md`: the current talk, not an older release's outline.
@@ -66,7 +67,7 @@ than the rendered page. Project editing rules are in `AGENTS.md`.
 
 The talk opens with title → roadmap → background: why memory is needed, why available
 memory tools may remain underused, the prior-mismatch hypothesis and the research
-question. Background stops at the problem. A separate contribution overview follows.
+question. Background uses the upper row of Figure 1 and a memory-underuse failure graphic rather than a zero statistic; it stops at the problem. A separate contribution overview follows.
 CAMG environments then lead into Method, where original Figures 1 and 2 explain the
 file-memory idea and learning mechanism. The frozen-model interface-prior experiment
 appears in Results, alongside effectiveness, mechanism and transfer. A complete

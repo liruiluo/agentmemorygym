@@ -13,6 +13,8 @@ def main():
     paths+=['scripts/slide_story.py','scripts/test_slide_story.py','scripts/write_release_manifest.py','slides/figure-assets.json','README.md','requirements-presentation.txt']
     figures=json.loads((ROOT/'slides/figure-assets.json').read_text())
     paths += [a[k] for a in figures.values() for k in ('pdf','png')]
+    illustrations=json.loads((ROOT/'slides/illustration-assets.json').read_text())
+    paths+=['slides/illustration-assets.json']+[a[k] for a in illustrations.values() for k in ('image','prompt')]
     manifest={'schema_version':1,'updated':load()['updated'],'slides':len(deck.slides),'data_sha256':data_sha,'files':{x:sha(ROOT/x) for x in paths}}
     (folder/'build-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');print('Release manifest written.')
 if __name__=='__main__':main()

@@ -1,6 +1,6 @@
 # CAMP · 17-slide research story
 
-Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable; Figures 1 and 2 are faithful paper-figure pictures in PPTX and vector originals in PDF. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
+Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable. The Figure 1 upper-row crop and the two full paper figures are pictures in PPTX and original vectors in PDF. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
 
 ## 01. Coding Agent Memory Post-training
 
@@ -22,9 +22,9 @@ Keep this to about twenty seconds. Background explains memory need, tool underus
 
 **Chapter:** Background · **Role:** Memory need · **Target:** 45 seconds
 
-**Source:** Introduction · long-horizon memory need
+**Source:** Figure 1 · upper context-only row
 
-Begin with the need, before naming a memory interface or solution. Long-horizon tasks accumulate constraints, evidence and decisions that later actions still depend on. Some of that information no longer fits in the active prompt. Without effective memory the agent can repeat work, forget a constraint or lose track of progress. This is a conceptual information-flow diagram, not a recorded experiment. Do not introduce filesystem operations or the CAMP mechanism on this page.
+Long-horizon tasks accumulate constraints, evidence and decisions that later actions still depend on. Follow the top row of Figure 1: the agent makes progress, earlier working state leaves the active context, work is repeated and the task remains unfinished. The upper row is cropped directly from the original figure. The complete figure, including the file-memory solution, appears in Method.
 
 ## 04. Having memory tools does not ensure their use
 
@@ -32,7 +32,7 @@ Begin with the need, before naming a memory interface or solution. Long-horizon 
 
 **Source:** AgeMem (ACL 2026) · CAMP Figure 3b and interface-prior analysis
 
-AgeMem exposes ADD, UPDATE, DELETE, RETRIEVE, SUMMARY and FILTER as memory tools (Yu et al., ACL 2026, https://aclanthology.org/2026.acl-long.981/). Distinguish that original method from our comparison: in the CAMP AgeMem-tool training arm, only 53 of 261,941 policy responses attempt the dedicated tools and complete designated store–retrieve–use chains are zero in both the first and last training quarters. This observation is about this baseline and its designated interface, not every AgeMem setup, all native workspace use, or all prior methods. Coding agents can still use task files. The hypothesis is that new post-training memory actions are poorly aligned with the pre-trained behavioral prior. The research question is how post-training can teach effective memory use. Stop at this problem; explain the filesystem solution in Method and examine frozen-model interface familiarity in Results.
+Walk through the budget example: the agent sees a $50 limit, proceeds without calling the available memory tools, loses the constraint as context moves on, and places an $80 order. The image was generated with GPT-image-2; generation provenance is in slides/illustration-assets.json. AgeMem exposes ADD, UPDATE, DELETE, RETRIEVE, SUMMARY and FILTER (Yu et al., ACL 2026, https://aclanthology.org/2026.acl-long.981/). In the CAMP AgeMem-tool arm, 53 of 261,941 policy responses attempt the dedicated tools and complete designated store–retrieve–use chains are zero in the first and last quarters. These observations concern the compared dedicated interface; native workspace use is separate. Our hypothesis is that post-training memory actions are poorly aligned with the pre-trained behavioral prior. End at the research question; the mechanism and supporting experiment follow later.
 
 ## 05. Three contributions to learning reusable memory
 
@@ -140,4 +140,4 @@ Close with three scoped statements. Familiarity is measured before training. Tas
 
 ## Additional Q&A material (not extra slides)
 
-The Background uses the AgeMem arm’s zero designated memory-chain observation to motivate the problem. The shared data also retains the CAMG-RL acquisition trajectory (7.97% to 20.9%), the syntax-constrained frozen-model comparison (Bash 20.3% vs. AgeMem 16.0%), and five-run robustness (CAMG-RL 55.3 ± 2.9 vs. CompactionRL 47.1 ± 3.5, mean ± SD). These are omitted from the main talk to preserve the motivation → method → effectiveness → mechanism → transfer story. Refer to each experiment’s own protocol before using these numbers.
+The Background uses the Figure 1 context-only row and a visual failure story to motivate the problem. The AgeMem arm’s zero designated memory-chain observation remains supporting material for questions, not an on-slide statistic. The shared data also retains the CAMG-RL acquisition trajectory (7.97% to 20.9%), the syntax-constrained frozen-model comparison (Bash 20.3% vs. AgeMem 16.0%), and five-run robustness (CAMG-RL 55.3 ± 2.9 vs. CompactionRL 47.1 ± 3.5, mean ± SD). These are omitted from the main talk to preserve the motivation → method → effectiveness → mechanism → transfer story. Refer to each experiment’s own protocol before using these numbers.

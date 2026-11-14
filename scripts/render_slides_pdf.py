@@ -66,7 +66,11 @@ def main():
                     key=shape.name.split(':',1)[1];a=assets[key];source=root/a['pdf']
                     assert hashlib.sha256(source.read_bytes()).hexdigest()==a['pdf_sha256'],f'Figure drift: {key}'
                     assert hashlib.sha256(shape.image.blob).hexdigest()==a['png_sha256'],f'Picture drift: {key}'
-                    vector_figures.append((index-1,fitz.Rect(x,y,x+w,y+h),source))
+                    x0,y0,x1,y1=a.get('clip_pt',[0,0,a['width_pt'],a['height_pt']])
+                    expected=[x0/a['width_pt'],y0/a['height_pt'],1-x1/a['width_pt'],1-y1/a['height_pt']]
+                    actual=[shape.crop_left,shape.crop_top,shape.crop_right,shape.crop_bottom]
+                    assert all(abs(v-e)<1e-5 for v,e in zip(actual,expected)),f'Crop drift: {key}'
+                    vector_figures.append((index-1,fitz.Rect(x,y,x+w,y+h),source,fitz.Rect(x0,y0,x1,y1)))
                     continue
                 pdf.drawImage(ImageReader(io.BytesIO(shape.image.blob)), x, sh-y-h, w, h, mask="auto")
                 continue
@@ -166,9 +170,9 @@ def main():
         pdf.showPage()
     pdf.save()
     doc=fitz.open(stream=buffer.getvalue(),filetype='pdf')
-    for page,box,source in vector_figures:
+    for page,box,source,clip in vector_figures:
         with fitz.open(source) as original:
-            doc[page].show_pdf_page(box,original,0,keep_proportion=True)
+            doc[page].show_pdf_page(box,original,0,keep_proportion=True,clip=clip)
     doc.save(args.pdf,garbage=4,deflate=True,no_new_id=True)
     print(json.dumps({"pages":len(prs.slides),"pdf":str(args.pdf),"overflow":overflow}, ensure_ascii=False))
     if overflow:

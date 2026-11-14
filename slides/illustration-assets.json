@@ -1,0 +1,23 @@
+{
+  "memory_tools_unused": {
+    "requested_model": "gpt-image-2",
+    "started_at": "2026-11-14T18:43:19.595668+08:00",
+    "prompt_sha256": "9fd32c71f546f264d5e30de2f2709ae2a0186e91401c9f89e2da14f11c23ae32",
+    "http_status": 200,
+    "transport_error": null,
+    "finished_at": "2026-11-14T18:45:16.953179+08:00",
+    "response_sha256": "2da2d35d1724932d3341684c39f8d6502a3f2e282cd6572a24f5113cae39e169",
+    "response_top_level_model": null,
+    "response_image_models": [
+      null
+    ],
+    "image_sha256": "c9541778dc66a8d2fc6d9d777b1360da02f0a6d4e276f777929123215046c6cb",
+    "status": "saved",
+    "image": "assets/slides/illustrations/memory-tools-unused.jpg",
+    "prompt": "assets/slides/illustrations/memory-tools-unused.prompt.txt",
+    "usage": "Slide 4: available but unused memory tools, forgotten budget, task failure.",
+    "provenance": "Generated through the documented gpt-image-2 route. Model fields were absent from the returned response.",
+    "width_px": 1536,
+    "height_px": 1024
+  }
+}

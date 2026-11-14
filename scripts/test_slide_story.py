@@ -34,7 +34,9 @@ class SlideStoryTest(unittest.TestCase):
     def test_hypothesis_and_underuse_are_scoped(self):
         index=next(i for i,e in enumerate(STORY) if e['role']=='Research problem')
         visible='\n'.join(o.text for o in self.deck.slides[index].shapes if o.has_text_frame)
-        self.assertIn('OBSERVED IN OUR AGEMEM-TOOL BASELINE',visible)
+        self.assertNotIn('0%',visible)
+        self.assertNotIn('illustration',visible.lower())
+        self.assertNotIn('AGEMEM-TOOL BASELINE',visible)
         self.assertIn('OUR HYPOTHESIS',visible)
         self.assertEqual(sum(e['seconds'] for e in STORY),870)
     def test_background_before_technical_case(self):
@@ -61,7 +63,23 @@ class SlideStoryTest(unittest.TestCase):
                     self.assertEqual(hashlib.sha256(o.image.blob).hexdigest(),a['png_sha256'])
                     for kind in ('png','pdf'):
                         self.assertEqual(hashlib.sha256((ROOT/a[kind]).read_bytes()).hexdigest(),a[kind+'_sha256'])
-        self.assertEqual(seen,['fig1_camg_teaser','fig2_camg_framework'])
+        self.assertEqual(seen,['fig1_context_only','fig1_camg_teaser','fig2_camg_framework'])
+        crop=assets['fig1_context_only'];self.assertEqual(crop['clip_pt'],[0,0,1536,400])
+        self.assertEqual(crop['pdf_sha256'],assets['fig1_camg_teaser']['pdf_sha256'])
+        picture=next(o for o in self.deck.slides[2].shapes if o.name=='paper-figure:fig1_context_only')
+        self.assertAlmostEqual(picture.crop_bottom,5/9,places=5)
+    def test_defensive_motivation_labels_rejected(self):
+        d=Presentation(self.path);d.slides[3].shapes[-1].text+=' (illustration)'
+        with self.assertRaisesRegex(AssertionError,'defensive'):assert_slide_story(d)
+    def test_zero_motivation_statistic_rejected(self):
+        d=Presentation(self.path);d.slides[3].shapes[-1].text+=' 0%'
+        with self.assertRaisesRegex(AssertionError,'zero statistic'):assert_slide_story(d)
+    def test_generated_asset_binding(self):
+        a=json.loads((ROOT/'slides/illustration-assets.json').read_text())['memory_tools_unused']
+        o=next(o for o in self.deck.slides[3].shapes if o.name.startswith('generated-illustration:'))
+        self.assertEqual(hashlib.sha256(o.image.blob).hexdigest(),a['image_sha256'])
+        self.assertEqual(hashlib.sha256((ROOT/a['prompt']).read_bytes()).hexdigest(),a['prompt_sha256'])
+        self.assertEqual(a['requested_model'],'gpt-image-2')
     def test_secondary_results_stay_off_stage(self):
         visible=assert_slide_story(self.deck)
         self.assertNotIn('55.3',visible);self.assertNotIn('20.9',visible)

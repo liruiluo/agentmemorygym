@@ -20,5 +20,22 @@
     "height_pt": 768.0,
     "raster_width_px": 2400,
     "source_note": "Unmodified original CAMP paper figure. PPTX uses a high-resolution picture; PDF exporter places the original vector PDF."
+  },
+  "fig1_context_only": {
+    "reference": "Figure 1, upper row",
+    "pdf": "assets/slides/figures/fig1_camg_teaser.pdf",
+    "png": "assets/slides/figures/fig1_camg_teaser.png",
+    "pdf_sha256": "3645eb1d1a31a6f6961e52d68d8f7fe9702c90e843477294483c98916673804d",
+    "png_sha256": "c664d20233b407cea5d2932ab214f09cc316d5058ce2204377a1d80f81a91c60",
+    "width_pt": 1536.0,
+    "height_pt": 900.0,
+    "raster_width_px": 2400,
+    "source_note": "Upper context-only row of original Figure 1. The source PDF/PNG are unchanged; native PPTX crop and vector PDF clipping use this same rectangle.",
+    "clip_pt": [
+      0,
+      0,
+      1536,
+      400
+    ]
   }
 }

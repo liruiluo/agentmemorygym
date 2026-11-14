@@ -4,14 +4,14 @@ Updated 2026-11-14. English, approximately 15 minutes.
 
 Story: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → effectiveness → mechanism → transfer → complete case.
 
-The roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. The file-memory solution and original Figure 1 begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case appears once, after the results. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.
+The roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. Background shows only the context-only upper row of Figure 1. The complete Figure 1 and its file-memory solution begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case appears once, after the results. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.
 
 | # | Chapter | Role | Action title | Exhibit |
 |---|---|---|---|---|
 | 1 | Identity | Identity | Coding Agent Memory Post-training | Full title, authors, affiliation and links |
 | 2 | Roadmap | Roadmap | The story in four questions | Four chapters and the questions they answer |
-| 3 | Background | Memory need | Long tasks need memory beyond the active context | Earlier findings leave the active prompt but remain relevant |
-| 4 | Background | Research problem | Having memory tools does not ensure their use | Available tools → observed underuse → prior-mismatch hypothesis → question |
+| 3 | Background | Memory need | Long tasks need memory beyond the active context | Figure 1 upper row: context lost → repeated work → unfinished task |
+| 4 | Background | Research problem | Having memory tools does not ensure their use | Unused memory tools → lost constraint → failure; prior-mismatch hypothesis → question |
 | 5 | Contributions | Contributions | Three contributions to learning reusable memory | Environment suite / learning method / empirical study |
 | 6 | Environments | Task demands | One shared policy, four kinds of work | Four task families and the state each must retain |
 | 7 | Method | Core idea | Use files to carry working state beyond the context | Original Figure 1, both contrast rows |
@@ -28,4 +28,4 @@ The roadmap follows the title. Background ends at the research question; the sep
 
 ## Speaking and source notes
 
-The contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, the CAMG-RL acquisition trajectory and the syntax-only probe remain optional Q&A material, not additional talk pages. The background’s zero-chain observation refers only to the compared AgeMem-tool arm and its designated memory interface.
+The contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, the CAMG-RL acquisition trajectory and the syntax-only probe remain optional Q&A material, not additional talk pages. The background shows unused memory tools, a lost constraint and task failure; it carries no isolated zero statistic or defensive labels. Image-generation provenance is in the asset manifest.

@@ -36,28 +36,43 @@ def verify(root,pptx,pdf):
     assert not any(x in html for x in ['/Users/','/dev/shm','teacher.key','18.0%'])
     deck=Presentation(pptx);assert len(deck.slides)==len(STORY);assert_slide_story(deck)
     assert sha(root/'data/research.json') in deck.core_properties.comments
-    shapes=0;min_font=100;pictures=0
+    shapes=0;min_font=100;pictures=0;paper_pictures=0;generated_pictures=0
     figure_assets=json.loads((root/'slides/figure-assets.json').read_text())
+    illustration_assets=json.loads((root/'slides/illustration-assets.json').read_text())
     for i,s in enumerate(deck.slides,1):
         assert s.notes_slide.notes_text_frame.text.strip(),f'Missing notes {i}'
         assert not any(x in s.notes_slide.notes_text_frame.text for x in ['/Users/','/dev/shm','18.0 baseline'])
         for o in s.shapes:
             shapes+=1
             if o.shape_type==MSO_SHAPE_TYPE.PICTURE:
-                pictures+=1;assert o.name.startswith('paper-figure:'),'Unexpected picture'
-                asset=figure_assets[o.name.split(':',1)[1]]
-                assert hashlib.sha256(o.image.blob).hexdigest()==asset['png_sha256']
-                for kind in ('pdf','png'):assert sha(root/asset[kind])==asset[kind+'_sha256']
+                pictures+=1
+                if o.name.startswith('paper-figure:'):
+                    paper_pictures+=1;asset=figure_assets[o.name.split(':',1)[1]]
+                    assert hashlib.sha256(o.image.blob).hexdigest()==asset['png_sha256']
+                    for kind in ('pdf','png'):assert sha(root/asset[kind])==asset[kind+'_sha256']
+                    x0,y0,x1,y1=asset.get('clip_pt',[0,0,asset['width_pt'],asset['height_pt']])
+                    expected=[x0/asset['width_pt'],y0/asset['height_pt'],1-x1/asset['width_pt'],1-y1/asset['height_pt']]
+                    assert all(abs(a-b)<1e-5 for a,b in zip([o.crop_left,o.crop_top,o.crop_right,o.crop_bottom],expected)),'Figure crop drift'
+                elif o.name=='generated-illustration:memory_tools_unused':
+                    assert i==4,'Illustration belongs on the memory-use background page'
+                    generated_pictures+=1;asset=illustration_assets['memory_tools_unused']
+                    assert hashlib.sha256(o.image.blob).hexdigest()==asset['image_sha256']
+                    assert sha(root/asset['image'])==asset['image_sha256']
+                    assert sha(root/asset['prompt'])==asset['prompt_sha256']
+                    assert asset['requested_model']=='gpt-image-2'
+                    assert not any([o.crop_left,o.crop_top,o.crop_right,o.crop_bottom]),'Unexpected raster crop'
+                else:raise AssertionError('Unexpected picture: '+o.name)
             assert min(o.left,o.top)>=0 and o.left+o.width<=deck.slide_width+5 and o.top+o.height<=deck.slide_height+5,(i,o.name)
             if o.has_text_frame:
                 for pa in o.text_frame.paragraphs:
                     for run in pa.runs:
                         if run.font.size:min_font=min(min_font,run.font.size.pt)
-    doc=fitz.open(pdf);assert len(doc)==len(STORY);assert pictures==2
+    doc=fitz.open(pdf);assert len(doc)==len(STORY);assert (paper_pictures,generated_pictures,pictures)==(3,1,4)
     alltext='\n'.join(p.get_text() for p in doc)
     assert '54.4' in alltext and '+6.4 pp' in alltext and '+11.4 pp' in alltext
     assert '18.0 baseline' not in alltext and '\ufffd' not in alltext
-    assert all(not p.get_images() for p in doc),'Raster PDF charts'
+    raster_counts=[len(p.get_images()) for p in doc]
+    assert raster_counts==[1 if i==3 else 0 for i in range(len(doc))],('Unexpected PDF raster image',raster_counts)
     font_report=subprocess.check_output(['pdffonts',str(pdf)],text=True)
     assert 'Type 3' not in font_report
     for row in font_report.splitlines()[2:]:
@@ -72,7 +87,7 @@ def verify(root,pptx,pdf):
     from research_data import stats as get_stats
     other=deepcopy(d);other['main']['rows'][-1][-1]+=1
     assert float(get_stats(other)['MAIN_AVG'])==float(k['MAIN_AVG'])+1
-    return {'passed':True,'slides':len(STORY),'native_shapes':shapes-pictures,'paper_figure_pictures':pictures,'pdf_raster_images':0,'minimum_font_pt':min_font,'data_sha256':sha(root/'data/research.json'),'pptx_sha256':sha(pptx),'pdf_sha256':sha(pdf),'html_sha256':sha(root/'index.html'),'local_links':len(p.links),'fonts':font_report}
+    return {'passed':True,'slides':len(STORY),'native_shapes':shapes-pictures,'paper_figure_pictures':paper_pictures,'generated_illustrations':generated_pictures,'pdf_raster_images':sum(raster_counts),'minimum_font_pt':min_font,'data_sha256':sha(root/'data/research.json'),'pptx_sha256':sha(pptx),'pdf_sha256':sha(pdf),'html_sha256':sha(root/'index.html'),'local_links':len(p.links),'fonts':font_report}
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('--pptx',type=Path,required=True);ap.add_argument('--pdf',type=Path,required=True);ap.add_argument('--out',type=Path);a=ap.parse_args()

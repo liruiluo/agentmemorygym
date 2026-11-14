@@ -8,8 +8,8 @@ def entry(chapter,role,exhibit,source,phase=None):
 STORY=[
     entry(None,'Identity','Full title, authors, affiliation and links','CAMP · arXiv:2609.34422'),
     entry(None,'Roadmap','Four chapters and the questions they answer','CAMP · talk roadmap'),
-    entry('Background','Memory need','Earlier findings leave the active prompt but remain relevant','Motivation · long-horizon tasks'),
-    entry('Background','Research problem','Available tools → observed underuse → prior-mismatch hypothesis → question','CAMP comparison · AgeMem tools · Figure 3b'),
+    entry('Background','Memory need','Figure 1 upper row: context lost → repeated work → unfinished task','Figure 1 · context-only row'),
+    entry('Background','Research problem','Unused memory tools → lost constraint → failure; prior-mismatch hypothesis → question','Memory use · the research problem'),
     entry(None,'Contributions','Environment suite / learning method / empirical study','CAMP · three contributions'),
     entry('Environments','Task demands','Four task families and the state each must retain','CAMG · Shop / Coding / DeepResearch / AutoResearch'),
     entry('Method','Core idea','Original Figure 1, both contrast rows','Figure 1 · conceptual illustration'),
@@ -44,8 +44,13 @@ def assert_slide_story(deck):
         assert word in text_at(page_for('Roadmap')),f'Missing roadmap chapter {word}'
     for word in ['Earlier findings','leave the prompt','Without memory']:
         assert word in text_at(page_for('Memory need')),f'Missing memory need {word}'
-    for word in ['AGEMEM','0%','Memory calls remain rare','OUR HYPOTHESIS','pre-trained behavioral priors','How can post-training teach effective memory use?']:
+    for word in ['OUR HYPOTHESIS','pre-trained behavioral priors','How can post-training teach effective memory use?']:
         assert word in text_at(page_for('Research problem')),f'Missing causal motivation {word}'
+    problem=text_at(page_for('Research problem'))
+    assert '0%' not in problem,'Do not foreground a zero statistic in the motivation'
+    for phrase in ['illustration','illustrative','not a real','not a recorded','not a measured']:
+        assert phrase not in problem.lower(),'No defensive labels on the visual motivation'
+    assert [o.name for o in deck.slides[page_for('Research problem')-1].shapes if o.name.startswith('generated-illustration:')]==['generated-illustration:memory_tools_unused']
     background='\n'.join(text_at(i+1) for i,e in enumerate(STORY) if e['chapter']=='Background')
     for term in ['CONTINUATION.md','filesystem','file operations','task reward','PPO','A narrow training setting']:
         assert term.lower() not in background.lower(),f'Background must stop at the problem, not the solution: {term}'
@@ -56,7 +61,7 @@ def assert_slide_story(deck):
     for word in ['CAMG','CAMG-RL','Empirical study']:
         assert word in text_at(page_for('Contributions')),f'Missing contribution {word}'
     assert 'Fully asynchronous PPO' in text_at(page_for('Learning mechanism'))
-    for role,key in [('Core idea','fig1_camg_teaser'),('Learning mechanism','fig2_camg_framework')]:
+    for role,key in [('Memory need','fig1_context_only'),('Core idea','fig1_camg_teaser'),('Learning mechanism','fig2_camg_framework')]:
         assert [o.name for o in deck.slides[page_for(role)-1].shapes if o.name.startswith('paper-figure:')]==['paper-figure:'+key]
     case=page_for('Case study')
     assert case>max(i+1 for i,e in enumerate(STORY) if e['role']=='Transfer')
