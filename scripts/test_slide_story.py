@@ -14,13 +14,29 @@ class SlideStoryTest(unittest.TestCase):
     def tearDownClass(cls):cls.tmp.cleanup()
     def test_positive_story(self):self.assertTrue(assert_slide_story(self.deck))
     def test_report_labels_rejected(self):
-        d=Presentation(self.path);d.slides[5].shapes[0].text='ADDITIONAL November additions'
+        d=Presentation(self.path);d.slides[0].shapes[0].text='ADDITIONAL November additions'
         with self.assertRaises(AssertionError):assert_slide_story(d)
     def test_missing_contribution_rejected(self):
         d=Presentation(self.path)
-        for o in d.slides[5].shapes:
+        index=next(i for i,e in enumerate(STORY) if e['role']=='Contributions')
+        for o in d.slides[index].shapes:
             if o.has_text_frame:o.text=o.text.replace('Empirical study','Study')
         with self.assertRaises(AssertionError):assert_slide_story(d)
+    def test_background_does_not_explain_solution(self):
+        d=Presentation(self.path);d.slides[2].shapes[0].text='Use file operations with task reward'
+        with self.assertRaisesRegex(AssertionError,'Background must stop'):assert_slide_story(d)
+    def test_background_must_end_at_research_question(self):
+        d=Presentation(self.path)
+        index=next(i for i,e in enumerate(STORY) if e['role']=='Research problem')
+        for o in d.slides[index].shapes:
+            if o.has_text_frame:o.text=o.text.replace('How can post-training teach effective memory use?','Our solution follows now')
+        with self.assertRaisesRegex(AssertionError,'Missing causal motivation'):assert_slide_story(d)
+    def test_hypothesis_and_underuse_are_scoped(self):
+        index=next(i for i,e in enumerate(STORY) if e['role']=='Research problem')
+        visible='\n'.join(o.text for o in self.deck.slides[index].shapes if o.has_text_frame)
+        self.assertIn('OBSERVED IN OUR AGEMEM-TOOL BASELINE',visible)
+        self.assertIn('OUR HYPOTHESIS',visible)
+        self.assertEqual(sum(e['seconds'] for e in STORY),870)
     def test_background_before_technical_case(self):
         d=Presentation(self.path)
         self.assertEqual(d.slides[1].shapes[0].text,'The story in four questions')

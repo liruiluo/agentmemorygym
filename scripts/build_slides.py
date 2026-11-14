@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the 16-slide CAMP story from data/research.json.
+"""Build the 17-slide CAMP story from data/research.json.
 
 Text, charts and case diagrams are native PowerPoint objects. Two original paper
 figures are high-resolution pictures in PPTX and original vectors in PDF. No
@@ -134,7 +134,7 @@ def build(out,root=ROOT):
     raw=(root/'data/research.json').read_bytes();d=load(root);k=stats(d);sha=hashlib.sha256(raw).hexdigest()
     prs=Presentation();prs.slide_width=Inches(10);prs.slide_height=Inches(5.625)
     prs.core_properties.title=d['project']+': '+d['subtitle'];prs.core_properties.author=', '.join(d['authors'])
-    prs.core_properties.subject='CAMP · motivation, contributions, environments, method and results'
+    prs.core_properties.subject='CAMP · memory problem, contributions, environments, method and results'
     prs.core_properties.keywords='CAMG, CAMG-RL, reinforcement learning, file memory'
     prs.core_properties.comments='Shared research data SHA256: '+sha
     outline=[]
@@ -165,8 +165,8 @@ def build(out,root=ROOT):
 
     # Roadmap: four chapters, phrased as questions the talk will answer.
     s=slide('The story in four questions','Talk roadmap',
-       'Keep this to about twenty seconds. Background explains why this work is needed, not just why memory matters. Environments explain what makes the task suite demand memory. Method explains how ordinary file operations learn from task reward. Results answer effectiveness, mechanism and transfer. After the results, show a complete Scrapy case before closing.')
-    rows=[('01','Background','Why CAMP?','Need → gap → familiar file operations'),
+       'Keep this to about twenty seconds. Background explains memory need, tool underuse and the prior-mismatch hypothesis, then ends at the research question. It does not explain the proposed solution. Environments explain what makes the task suite demand memory. Method explains how ordinary file operations learn from task reward. Results answer effectiveness, mechanism and transfer. After the results, show a complete Scrapy case before closing.')
+    rows=[('01','Background','What memory problem remains?','Need → underused tools → prior mismatch → question'),
           ('02','Environments','What must the agent remember?','Four domains, one persistent workspace'),
           ('03','Method','How does memory become a learned skill?','Task reward + fully asynchronous PPO'),
           ('04','Results & analysis','Does it help, why, and does it transfer?','Effectiveness → mechanism → transfer')]
@@ -180,40 +180,37 @@ def build(out,root=ROOT):
     takeaway(s,'Why memory matters → how it is learned → what it enables.')
 
 
-    # Motivation: explain the specific research gap, not only context length.
-    s=slide('Why learn memory through familiar file operations?','Introduction · motivation and research question',
-       'Long tasks lose useful working state at context boundaries. The paper identifies two gaps in prior learned-memory work: it often introduces specialized memory tools and trains in domain-specific, relatively short-horizon settings. This is not a claim that all prior work has those limitations. CAMP asks whether task-reward RL can build on familiar file operations to learn memory across diverse long-horizon tasks. Coding agent describes the form of memory operations, not a restriction to programming tasks.')
-    text(s,'Long tasks outgrow the active context; earlier findings still matter.',.55,1.14,8.9,.4,17,INK)
-    label(s,'STARTING POINT IN PRIOR LEARNED-MEMORY WORK',.55,1.65,8.8)
-    for i,(title,detail) in enumerate([
-        ('A new memory-tool interface','The agent must learn how to store, retrieve and revise through dedicated tools.'),
-        ('A narrow training setting','Memory learned in one domain or short horizon may not carry over to longer tasks.')]):
-        x=.55+i*4.65
-        line(s,x,1.98,x+4.2,1.98,INK,1.4)
-        text(s,title,x,2.17,4.2,.44,21,bold=True)
-        text(s,detail,x,2.72,4.2,.79,17,MID)
-    label(s,'CAMP’S QUESTION',.55,3.68,8.8,BLUE)
-    text(s,'Can task reward turn familiar file operations\ninto a reusable long-horizon memory skill?',.55,4.06,8.9,.87,25,BLUE,bold=True)
+    # Background stops at the research problem; no proposed mechanism yet.
+    s=slide('Long tasks need memory beyond the active context','Introduction · long-horizon memory need',
+       'Begin with the need, before naming a memory interface or solution. Long-horizon tasks accumulate constraints, evidence and decisions that later actions still depend on. Some of that information no longer fits in the active prompt. Without effective memory the agent can repeat work, forget a constraint or lose track of progress. This is a conceptual information-flow diagram, not a recorded experiment. Do not introduce filesystem operations or the CAMP mechanism on this page.')
+    text(s,'Earlier findings still matter after they leave the prompt.',.55,1.18,8.9,.42,20)
+    for title,x,w in [('Earlier steps',.55,2.35),('Active context',3.57,2.85),('Later decision',7.18,2.3)]:
+        label(s,title.upper(),x,1.94,w,BLUE)
+    text(s,'Constraints\nEvidence\nDecisions',.55,2.42,2.35,1.12,20,MID)
+    rect(s,3.57,2.37,2.85,1.24,'F6F8FA',LINE)
+    text(s,'Recent actions\nand observations',3.8,2.66,2.39,.66,18,INK,align=PP_ALIGN.CENTER)
+    text(s,'Needs earlier\nfindings',7.18,2.65,2.3,.78,20,INK)
+    line(s,2.72,2.98,3.35,2.98,LINE,1.5,True)
+    line(s,6.52,2.98,7.0,2.98,LINE,1.5,True)
+    text(s,'Earlier details\nno longer fit',3.76,3.8,2.46,.57,14,RED,align=PP_ALIGN.CENTER)
+    text(s,'Without memory: repeat work, forget constraints, lose progress.',.55,4.41,8.9,.39,17,BLUE,bold=True)
 
 
-    # Interface prior.
-    s=slide('The file interface is familiar before RL','Published · Figure 3a · frozen Qwen3.5-4B · rounded point estimates',
-       'Lower negative log-likelihood means these valid action tokens are more likely under the frozen model. The strongest contrast here is retrieval. This is evidence of interface familiarity, not proof of which pre-training corpus caused it. No uncertainty bars have been reconstructed.')
-    label(s,'NEGATIVE LOG-LIKELIHOOD · NATS PER ACTION TOKEN · LOWER IS BETTER',.55,.99)
-    r=d['prior']['rows'];grouped(s,[x[0] for x in r],[('File operations',[x[1] for x in r],BLUE),('Dedicated tools',[x[2] for x in r],GRAY)],y=1.83,h=2.35,maximum=1.5,ticks=[0,.5,1,1.5],decimals=2)
-    big(s,'0.08','Retrieval NLL with files\nvs. 0.47 with dedicated tools',y=2.05)
-    takeaway(s,'Build on an interface the model already knows.')
-
-
-    # Paper Figure 1 keeps both rows of the conceptual comparison.
-    s=slide('Use files to carry working state beyond the context','Figure 1 · conceptual illustration',
-       'Read the original paper figure from top to bottom. The top row illustrates how relying on active context can lead to repeated work. The bottom row shows ordinary file writes and reads preserving working state. This figure is a conceptual explanation, not a measured matched failure/success pair. It retains both rows and every original label. Files are available throughout the episode, not only at reset.')
-    paper_figure(s,'fig1_camg_teaser',.5,1.08,6.05,root)
-    for i,(verb,detail) in enumerate([('Write','Plans, evidence,\nintermediate results'),('Keep','Files survive\ncontext replacement'),('Read','Recover state and\ncontinue the task')]):
-        y=1.28+i*1.08
-        text(s,verb,6.95,y,2.5,.4,22,BLUE,bold=True)
-        text(s,detail,6.95,y+.45,2.5,.65,15,MID)
-    takeaway(s,'A familiar interface gives RL somewhere useful to start.')
+    # Observed tool underuse motivates a prior-mismatch hypothesis and question.
+    s=slide('Having memory tools does not ensure their use','AgeMem (ACL 2026) · CAMP Figure 3b and interface-prior analysis',
+       'AgeMem exposes ADD, UPDATE, DELETE, RETRIEVE, SUMMARY and FILTER as memory tools (Yu et al., ACL 2026, https://aclanthology.org/2026.acl-long.981/). Distinguish that original method from our comparison: in the CAMP AgeMem-tool training arm, only 53 of 261,941 policy responses attempt the dedicated tools and complete designated store–retrieve–use chains are zero in both the first and last training quarters. This observation is about this baseline and its designated interface, not every AgeMem setup, all native workspace use, or all prior methods. Coding agents can still use task files. The hypothesis is that new post-training memory actions are poorly aligned with the pre-trained behavioral prior. The research question is how post-training can teach effective memory use. Stop at this problem; explain the filesystem solution in Method and examine frozen-model interface familiarity in Results.')
+    label(s,'AVAILABLE: AGEMEM’S SIX MEMORY TOOLS',.55,1.22,4.15,BLUE)
+    label(s,'OBSERVED IN OUR AGEMEM-TOOL BASELINE',5.05,1.22,4.45,BLUE)
+    text(s,'ADD · UPDATE · DELETE\nRETRIEVE · SUMMARY · FILTER',.55,1.73,4.15,.72,14,INK,font=CODE)
+    zero=d['acquisition']['agemem'];assert zero==[0,0]
+    text(s,f'{zero[0]:g}%',5.05,1.67,1.3,.77,38,BLUE,bold=True)
+    text(s,'complete store–retrieve–use chains\nearly and late in training',6.55,1.78,2.95,.72,13,MID)
+    text(s,'Tools are provided; use is a policy choice.',.55,2.61,4.2,.43,14,MID)
+    text(s,'Memory calls remain rare.',5.05,2.61,4.45,.43,17,INK)
+    line(s,.55,3.18,9.5,3.18,INK,1.2)
+    label(s,'OUR HYPOTHESIS',.55,3.4,8.95,BLUE)
+    text(s,'Post-training memory actions can be poorly aligned\nwith the model’s pre-trained behavioral priors.',.55,3.79,8.95,.68,19,INK)
+    text(s,'How can post-training teach effective memory use?',.55,4.66,8.95,.38,20,BLUE,bold=True)
 
 
     # Explicit contribution summary, separate from the talk directory.
@@ -241,6 +238,17 @@ def build(out,root=ROOT):
         text(s,name,x,1.92,2.08,.4,19,bold=True);label(s,sub,x,2.39,2.08,BLUE);text(s,mem,x,2.91,2.08,.95,14,MID)
     rect(s,1.55,4.02,6.9,.46,PALE,PALE,0);text(s,'Shared policy  +  episode-persistent workspace',1.7,4.1,6.6,.3,17,BLUE,bold=True,align=PP_ALIGN.CENTER)
     takeaway(s,'Learn a memory behavior across heterogeneous tasks.')
+
+
+    # Paper Figure 1 keeps both rows of the conceptual comparison.
+    s=slide('Use files to carry working state beyond the context','Figure 1 · conceptual illustration',
+       'Read the original paper figure from top to bottom. This is now the first method page, after the environment suite. The top row illustrates how relying on active context can lead to repeated work. The bottom row shows ordinary file writes and reads preserving working state. This figure is a conceptual explanation, not a measured matched failure/success pair. It retains both rows and every original label. Files are available throughout the episode, not only at reset.')
+    paper_figure(s,'fig1_camg_teaser',.5,1.08,6.05,root)
+    for i,(verb,detail) in enumerate([('Write','Plans, evidence,\nintermediate results'),('Keep','Files survive\ncontext replacement'),('Read','Recover state and\ncontinue the task')]):
+        y=1.28+i*1.08
+        text(s,verb,6.95,y,2.5,.4,22,BLUE,bold=True)
+        text(s,detail,6.95,y+.45,2.5,.65,15,MID)
+    takeaway(s,'A familiar interface gives RL somewhere useful to start.')
 
 
     # Paper Figure 2: the actual system picture, not generic workflow boxes.
@@ -273,6 +281,15 @@ def build(out,root=ROOT):
     big(s,f"+{k['CONTEXT_GAIN']} pp",'Average task success\nwith 30,720 active tokens',y=1.85)
     text(s,'The context budget and compaction procedure both differ.',.55,4.23,8.8,.24,11,MID)
     takeaway(s,'A larger window alone is not the only route to stronger execution.')
+
+
+    # Interface prior.
+    s=slide('The file interface is familiar before RL','Published · Figure 3a · frozen Qwen3.5-4B · rounded point estimates',
+       'Lower negative log-likelihood means these valid action tokens are more likely under the frozen model. The strongest contrast here is retrieval. This is evidence of interface familiarity, not proof of which pre-training corpus caused it. No uncertainty bars have been reconstructed.')
+    label(s,'NEGATIVE LOG-LIKELIHOOD · NATS PER ACTION TOKEN · LOWER IS BETTER',.55,.99)
+    r=d['prior']['rows'];grouped(s,[x[0] for x in r],[('File operations',[x[1] for x in r],BLUE),('Dedicated tools',[x[2] for x in r],GRAY)],y=1.83,h=2.35,maximum=1.5,ticks=[0,.5,1,1.5],decimals=2)
+    big(s,'0.08','Retrieval NLL with files\nvs. 0.47 with dedicated tools',y=2.05)
+    takeaway(s,'Build on an interface the model already knows.')
 
 
     # Learning signal: distinct memory-action and continuation ablations.
@@ -350,15 +367,15 @@ def build(out,root=ROOT):
         if entry['chapter']:chapter_trail(s,entry['chapter'],entry.get('phase'))
     assert_slide_story(prs)
     out.parent.mkdir(parents=True,exist_ok=True);prs.save(out)
-    notes='# CAMP · 16-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable; Figures 1 and 2 are faithful paper-figure pictures in PPTX and vector originals in PDF. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
+    notes='# CAMP · 17-slide research story\n\nUpdated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Text, charts and case diagrams are editable; Figures 1 and 2 are faithful paper-figure pictures in PPTX and vector originals in PDF. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.\n\n'
     for (n,t,src,body),entry in zip(outline,STORY):
-        notes+=f'## {n:02}. {t or d["project"]}\n\n**Chapter:** {entry["chapter"] or "Opening / roadmap"} · **Role:** {entry["role"]} · **Target:** {entry["seconds"]} seconds\n\n**Source:** {src}\n\n{body}\n\n'
-    notes+='## Additional Q&A material (not extra slides)\n\nThe shared data also retains the designated-interface acquisition metric (7.97% to 20.9%), the syntax-constrained frozen-model comparison (Bash 20.3% vs. AgeMem 16.0%), and five-run robustness (CAMG-RL 55.3 ± 2.9 vs. CompactionRL 47.1 ± 3.5, mean ± SD). These are omitted from the main talk to preserve the motivation → method → effectiveness → mechanism → transfer story. Refer to each experiment’s own protocol before using these numbers.\n'
+        notes+=f'## {n:02}. {t or d["project"]}\n\n**Chapter:** {entry["chapter"] or entry["role"]} · **Role:** {entry["role"]} · **Target:** {entry["seconds"]} seconds\n\n**Source:** {src}\n\n{body}\n\n'
+    notes+='## Additional Q&A material (not extra slides)\n\nThe Background uses the AgeMem arm’s zero designated memory-chain observation to motivate the problem. The shared data also retains the CAMG-RL acquisition trajectory (7.97% to 20.9%), the syntax-constrained frozen-model comparison (Bash 20.3% vs. AgeMem 16.0%), and five-run robustness (CAMG-RL 55.3 ± 2.9 vs. CompactionRL 47.1 ± 3.5, mean ± SD). These are omitted from the main talk to preserve the motivation → method → effectiveness → mechanism → transfer story. Refer to each experiment’s own protocol before using these numbers.\n'
     (out.parent/'speaker-notes.md').write_text(notes)
-    outline_md='# CAMP · 16-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: why memory → why CAMP → contributions → task environments → learning method → effectiveness → mechanism → transfer → the case carried to completion.\n\nThe roadmap follows the title and leads directly into background. The technical Scrapy case appears once, after the results. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Role | Action title | Exhibit |\n|---|---|---|---|---|\n'
+    outline_md='# CAMP · 17-slide public research talk\n\nUpdated 2026-11-14. English, approximately 15 minutes.\n\nStory: memory need → tool underuse → prior-mismatch hypothesis → research question → contributions → task environments → CAMP method → effectiveness → mechanism → transfer → complete case.\n\nThe roadmap follows the title. Background ends at the research question; the separate contribution overview comes next. The file-memory solution and original Figure 1 begin Method, while the frozen-model prior experiment belongs to the mechanism results. The technical Scrapy case appears once, after the results. A lightweight four-chapter trail marks progress; result pages also name the question they answer. There are no full-page chapter dividers, references or appendix tail.\n\n| # | Chapter | Role | Action title | Exhibit |\n|---|---|---|---|---|\n'
     for (n,t,src,body),entry in zip(outline,STORY):
-        outline_md+=f'| {n} | {entry["chapter"] or "Opening / roadmap"} | {entry["role"]} | {t or d["project"]} | {entry["exhibit"]} |\n'
-    outline_md+='\n## Speaking and source notes\n\nThe contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, chain counts and the syntax-only probe are optional Q&A material, not additional talk pages.\n'
+        outline_md+=f'| {n} | {entry["chapter"] or entry["role"]} | {entry["role"]} | {t or d["project"]} | {entry["exhibit"]} |\n'
+    outline_md+='\n## Speaking and source notes\n\nThe contribution overview follows the paper’s actual suite / method / empirical-study structure. Figures 1 and 2 retain their original content; the conceptual comparison is not presented as a measured counterfactual. Results use unchanged source values and essential on-slide comparison conditions. Full provenance and scientific qualifications are in [speaker notes](speaker-notes.md) and [shared data](../data/research.json). Multi-run robustness, the CAMG-RL acquisition trajectory and the syntax-only probe remain optional Q&A material, not additional talk pages. The background’s zero-chain observation refers only to the compared AgeMem-tool arm and its designated memory interface.\n'
     (out.parent/'outline.md').write_text(outline_md)
     manifest={'slides':len(prs.slides),'data_sha256':sha,'paper_figure_pictures':2,'pdf_figures':'original vectors','updated':d['updated'],'slides_outline':[dict(number=n,title=t or d['project'],provenance=src,**entry) for (n,t,src,_),entry in zip(outline,STORY)]}
     (out.parent/'deck-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')

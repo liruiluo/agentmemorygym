@@ -8,14 +8,15 @@ def entry(chapter,role,exhibit,source,phase=None):
 STORY=[
     entry(None,'Identity','Full title, authors, affiliation and links','CAMP · arXiv:2609.34422'),
     entry(None,'Roadmap','Four chapters and the questions they answer','CAMP · talk roadmap'),
-    entry('Background','Why CAMP','Interface and training-setting gaps → research question','Motivation · Introduction'),
-    entry('Background','Why files','Frozen-model file vs. dedicated-tool likelihood','Interface familiarity · Figure 3a · frozen Qwen3.5-4B'),
-    entry('Background','Core idea','Original Figure 1, both contrast rows','Figure 1 · conceptual illustration'),
-    entry('Background','Contributions','Environment suite / learning method / empirical study','CAMP · three contributions'),
+    entry('Background','Memory need','Earlier findings leave the active prompt but remain relevant','Motivation · long-horizon tasks'),
+    entry('Background','Research problem','Available tools → observed underuse → prior-mismatch hypothesis → question','CAMP comparison · AgeMem tools · Figure 3b'),
+    entry(None,'Contributions','Environment suite / learning method / empirical study','CAMP · three contributions'),
     entry('Environments','Task demands','Four task families and the state each must retain','CAMG · Shop / Coding / DeepResearch / AutoResearch'),
+    entry('Method','Core idea','Original Figure 1, both contrast rows','Figure 1 · conceptual illustration'),
     entry('Method','Learning mechanism','Original Figure 2 + shared policy/reward/PPO callouts','CAMG-RL · Figure 2 · fully asynchronous PPO'),
     entry('Results & analysis','Effectiveness','Six-method main comparison','Task success · Qwen3.5-4B · 128 held-out tasks per environment','Effectiveness'),
     entry('Results & analysis','Effectiveness','262K-context practical reference','Same base, PPO, rewards and updates; context and compaction differ','Effectiveness'),
+    entry('Results & analysis','Prior evidence','Frozen-model file vs. dedicated-tool likelihood','Interface familiarity · Figure 3a · frozen Qwen3.5-4B','Mechanism'),
     entry('Results & analysis','Mechanism','Memory-action gradient and continuation ablations','Ablations · Figure 4 · average task success','Mechanism'),
     entry('Results & analysis','Mechanism','Blank/shuffled memory from the same state','Memory-content intervention · same-state continuations · eligible tasks','Mechanism'),
     entry('Results & analysis','Transfer','New memory interfaces, fixed task executor','Frozen task executor · memory policy changed · no further training','Transfer'),
@@ -25,7 +26,7 @@ STORY=[
 ]
 
 # Fourteen and a half minutes of speaking plus transitions.
-for row,seconds in zip(STORY,[45,20,80,50,55,25,55,85,60,45,55,60,60,50,85,40]):
+for row,seconds in zip(STORY,[35,20,45,80,25,50,60,75,60,40,50,50,55,55,50,80,40]):
     row['seconds']=seconds
 
 def visible_source(number):
@@ -38,11 +39,20 @@ def assert_slide_story(deck):
         assert not re.search(pattern,visible,re.I),f'Report-style audience text: {pattern}'
     text_at=lambda n:'\n'.join(o.text for o in deck.slides[n-1].shapes if o.has_text_frame)
     page_for=lambda role:next(i+1 for i,e in enumerate(STORY) if e['role']==role)
-    assert STORY[1]['role']=='Roadmap' and STORY[2]['role']=='Why CAMP'
+    assert STORY[1]['role']=='Roadmap' and STORY[2]['role']=='Memory need'
     for word in ['Background','Environments','Method','Results & analysis']:
         assert word in text_at(page_for('Roadmap')),f'Missing roadmap chapter {word}'
-    for word in ['Long tasks outgrow','memory-tool interface','training setting','CAMP’S QUESTION']:
-        assert word in text_at(page_for('Why CAMP')),f'Missing work-specific motivation {word}'
+    for word in ['Earlier findings','leave the prompt','Without memory']:
+        assert word in text_at(page_for('Memory need')),f'Missing memory need {word}'
+    for word in ['AGEMEM','0%','Memory calls remain rare','OUR HYPOTHESIS','pre-trained behavioral priors','How can post-training teach effective memory use?']:
+        assert word in text_at(page_for('Research problem')),f'Missing causal motivation {word}'
+    background='\n'.join(text_at(i+1) for i,e in enumerate(STORY) if e['chapter']=='Background')
+    for term in ['CONTINUATION.md','filesystem','file operations','task reward','PPO','A narrow training setting']:
+        assert term.lower() not in background.lower(),f'Background must stop at the problem, not the solution: {term}'
+    assert STORY[page_for('Core idea')-1]['chapter']=='Method'
+    assert STORY[page_for('Learning mechanism')-1]['chapter']=='Method'
+    assert STORY[page_for('Prior evidence')-1]['chapter']=='Results & analysis'
+    assert page_for('Research problem')<page_for('Contributions')<page_for('Core idea')
     for word in ['CAMG','CAMG-RL','Empirical study']:
         assert word in text_at(page_for('Contributions')),f'Missing contribution {word}'
     assert 'Fully asynchronous PPO' in text_at(page_for('Learning mechanism'))
