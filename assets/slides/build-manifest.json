@@ -6,7 +6,7 @@
   "files": {
     "data/research.json": "da9b1aef6a0a8efd74ce91314cc5c98c87dca68e5a2389927b7d843607f0638d",
     "index.html": "064c93ff9d0023365f38b157e68744274c774b066a13de49a9bbf6df00605c2a",
-    "styles.css": "999dad987cbcd902baae51e25159ecd6236121779712120f47828bbe217e9a68",
+    "styles.css": "3846813f1a6cf96af4a1acf67905bde2d0401ddd65dd169da06e5c8f2d74cd75",
     "script.js": "74623ebaf372b33f9b0d19d4189d0d16622631ba27867d9df6677bdb7385b989",
     "scripts/build_slides.py": "de45e0fa25549cd2fbb01c2017f668cc3139ef4152ea82cd7f546c4a4c7d2beb",
     "scripts/render_slides_pdf.py": "14767289af767359bea8cd5b7f7347d8c23df42e045da5c0f9298eb168337da8",
