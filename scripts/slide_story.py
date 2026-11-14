@@ -31,6 +31,14 @@ EXPERIMENT_DESIGNS = {
 }
 
 
+# Keep scientific provenance in source/notes; do not repeat the comparison below the plot.
+RESULT_REFERENCES = {
+    'main': '', 'long_context': '', 'ablation': 'Figure 4',
+    'intervention': '', 'prior': 'Figure 3a', 'case': 'Figure 5',
+    'transfer': '', 'external': '',
+}
+
+
 def entry(chapter,role,exhibit,source,phase=None,experiment=None):
     return dict(chapter=chapter,role=role,exhibit=exhibit,source=source,phase=phase,experiment=experiment)
 
@@ -59,7 +67,10 @@ for row,seconds in zip(STORY,[35,20,45,80,25,50,60,75,60,40,50,55,50,80,55,50,40
     row['seconds']=seconds
 
 def visible_source(number):
-    return STORY[number-1]['source']
+    entry=STORY[number-1]
+    if entry['chapter']=='Results & analysis':
+        return RESULT_REFERENCES[entry['experiment'] or 'case']
+    return entry['source']
 
 def assert_slide_story(deck):
     assert len(deck.slides)==len(STORY),'Talk length and outline drift'
@@ -118,6 +129,10 @@ def assert_slide_story(deck):
             assert runs and all(r.font.size is not None and r.font.size.pt>=14 for r in runs),'Experiment design must be readable'
         else:
             assert not design,'Do not impose experimental design on a case or non-experimental page'
+        if e['chapter']=='Results & analysis':
+            footer_text=[o.text for o in deck.slides[i].shapes if o.has_text_frame and o.top>=Inches(5.3) and o.left<Inches(9)]
+            expected=visible_source(i+1)
+            assert footer_text==([expected] if expected else []),'Result footers must contain only necessary source references'
         labels=[o for o in deck.slides[i].shapes if o.name.startswith('result-question:')]
         if e['phase']:
             assert len(labels)==1 and labels[0].name=='result-question:'+e['phase'],'Missing or wrong experimental question label'

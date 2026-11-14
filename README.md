@@ -80,7 +80,8 @@ small question header; no divider pages are added. Chapter navigation and questi
 sit above the larger slide title. Each experimental plot now has one readable
 comparison/intervention line below its title: what is compared, what changes and
 which factors are held fixed. The chart remains dominant and the takeaway states
-the finding. The recorded case uses the complete original Figure 5 at full width, with all four
+the finding. Result footers keep only necessary figure references and page numbers;
+experimental conditions are not repeated below the plot. The recorded case uses the complete original Figure 5 at full width, with all four
 panels and the context-replacement boundary intact. It has no added protocol line. The final slide is titled **Takeaways** and retains the three
 summary points and project link. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
 

@@ -4,7 +4,7 @@ from pathlib import Path
 from pptx import Presentation
 from pptx.util import Inches
 from build_slides import build,ROOT
-from slide_story import STORY,QUESTIONS,SUBQUESTIONS,EXPERIMENT_DESIGNS,question_label,assert_slide_story
+from slide_story import STORY,QUESTIONS,SUBQUESTIONS,EXPERIMENT_DESIGNS,RESULT_REFERENCES,visible_source,question_label,assert_slide_story
 
 class SlideStoryTest(unittest.TestCase):
     @classmethod
@@ -97,6 +97,25 @@ class SlideStoryTest(unittest.TestCase):
         q=next(o for o in d.slides[13].shapes if o.name.startswith('result-question:'))
         q.name='result-question:Q2.3';q.text='Q2.3 · Case study'
         with self.assertRaisesRegex(AssertionError,'wrong experimental question label'):assert_slide_story(d)
+    def test_result_footers_are_references_only(self):
+        self.assertEqual([visible_source(n) for n in range(9,17)],['','','Figure 4','','Figure 3a','Figure 5','',''])
+        for i in range(8,16):
+            footers=[o.text for o in self.deck.slides[i].shapes if o.has_text_frame and o.top>=Inches(5.3) and o.left<Inches(9)]
+            ref=visible_source(i+1)
+            self.assertEqual(footers,[ref] if ref else [])
+            number=next(o for o in self.deck.slides[i].shapes if o.name=='page-number')
+            self.assertEqual(number.text,f'{i+1:02}')
+        self.assertIn('Task-execution policy stays frozen',(self.path.parent/'speaker-notes.md').read_text())
+    def test_duplicate_protocol_footer_rejected(self):
+        d=Presentation(self.path)
+        box=d.slides[14].shapes.add_textbox(Inches(.45),Inches(5.34),Inches(8.65),Inches(.19))
+        box.text='Frozen task executor · memory policy changed · no further training'
+        with self.assertRaisesRegex(AssertionError,'Result footers must contain only'):assert_slide_story(d)
+    def test_conditions_cannot_be_added_to_reference_footer(self):
+        d=Presentation(self.path)
+        footer=next(o for o in d.slides[12].shapes if o.name=='source-footer')
+        footer.text+=' · frozen Qwen3.5-4B'
+        with self.assertRaisesRegex(AssertionError,'Result footers must contain only'):assert_slide_story(d)
     def test_navigation_above_prominent_title(self):
         for slide,entry in zip(self.deck.slides,STORY):
             if not entry['chapter']:continue
