@@ -9,6 +9,7 @@ from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 from research_data import load,stats,ROOT
 from build_website import build
+from presentation_policy import assert_public_story
 
 class Page(HTMLParser):
     def __init__(self):super().__init__();self.ids=[];self.links=[]
@@ -28,7 +29,8 @@ def verify(root,pptx,pdf):
         elif not re.match(r'\w+://',href):assert (root/href.split('#')[0]).is_file(),href
     for anchor in ['top','idea','gym','method','evidence','paper']:assert anchor in p.ids
     assert 'unpkg.com' not in html and 'AgeMem completes no chain' not in html
-    assert 'independently re-verified' in html and 'November' in html
+    assert_public_story(html)
+    assert d['sources']['additional']['independently_run_verified'] is False
     assert 'no separate reasoning' not in html.lower()
     assert not any(x in html for x in ['/Users/','/dev/shm','teacher.key','18.0%'])
     deck=Presentation(pptx);assert len(deck.slides)==16

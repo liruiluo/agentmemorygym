@@ -53,23 +53,18 @@ from rounded environment values.
 - `scripts/check_browser.py`: responsive widths, no-JS content, keyboard, clipboard and reduced motion.
 - `scripts/verify_release.py`: data/build freshness, anchors, local links, geometry, notes and fonts.
 
-## Evidence versions
+## Public presentation
 
-**Published** figures and main results refer to [arXiv v2, 30 September 2026](https://arxiv.org/abs/2609.34422v2).
-The main result table is **Table 2** in that release; it is Table 1 in the revised
-manuscript. The archived `assets/paper.pdf` remains the original **v1** for compatibility;
-the primary Paper link goes to arXiv, not this historical copy.
+The website follows a story: familiar file operations → learning useful memory →
+stronger task execution → a skill that travels → one real task carried to completion.
+Use a small set of figures with clear takeaways. Keep provenance/version checks,
+seed accounting and acceptance notes in the data and internal verification rather
+than the rendered page. Project editing rules are in `AGENTS.md`.
 
-**November 2026 additions** are author-reported revised-manuscript results: constrained
-decoding, fixed-executor memory-interface transfer, the long-context reference, model-family replication, and the Coding workspace-chain
-clarification. Five-run robustness was already published in Appendix D.8.
-They are explicitly labelled as additions, not as already part of the September arXiv
-release. Raw run receipts were not independently re-verified for this presentation update.
-Protocol boundaries are included in the data file, page captions and speaker notes.
-Only the interface-transfer portion of the additional memory-quality study is included.
-
-This is the **four-environment RL** project. CAMP-II and its five-environment dataset are
-linked only as a separate related release; their methods, data and results are not merged here.
+The shared result file retains the source references for each experiment. Website
+selection does not change the data used by the 16-slide talk. The paper link leads
+to arXiv; `assets/paper.pdf` remains available for existing links. CAMP-II is linked
+as related work and keeps its own methods and five-environment suite.
 
 ## Release procedure
 
