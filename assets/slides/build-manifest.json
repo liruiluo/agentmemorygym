@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-14",
+  "slides": 16,
+  "data_sha256": "da9b1aef6a0a8efd74ce91314cc5c98c87dca68e5a2389927b7d843607f0638d",
+  "files": {
+    "data/research.json": "da9b1aef6a0a8efd74ce91314cc5c98c87dca68e5a2389927b7d843607f0638d",
+    "index.html": "064c93ff9d0023365f38b157e68744274c774b066a13de49a9bbf6df00605c2a",
+    "styles.css": "999dad987cbcd902baae51e25159ecd6236121779712120f47828bbe217e9a68",
+    "script.js": "74623ebaf372b33f9b0d19d4189d0d16622631ba27867d9df6677bdb7385b989",
+    "scripts/build_slides.py": "de45e0fa25549cd2fbb01c2017f668cc3139ef4152ea82cd7f546c4a4c7d2beb",
+    "scripts/render_slides_pdf.py": "14767289af767359bea8cd5b7f7347d8c23df42e045da5c0f9298eb168337da8",
+    "scripts/build_website.py": "467595003e4f0eed7b3c0e1a323255e099b872503235469855cb5ea5b7e220f3",
+    "scripts/site.template.html": "e92e385eb463d566667f3776062e88783bbed43d736726fa04eb2fdf195b1da0",
+    "scripts/research_data.py": "1d0d57d6b4f253ffdca06761df81c37b6abc7c294375b2bec40455eb0f90ec23",
+    "slides/outline.md": "329edee52c4e5963622123b7a58bd0d1da5c5d6c8f568864fc61e59eedb54e12",
+    "slides/speaker-notes.md": "eec1243dec1987b01732b9ffcdd28301d7387f31abd82bd84d3606da120f9827",
+    "assets/social-card.png": "186bc308f0aaa925b26ad47ad53ffdbf141701ade99603dc76b7d46ba5f2313e",
+    "assets/slides/coding-agent-memory-post-training-slides.pptx": "b130e5d12bbe15336a1182a38623671a37514e3cdc3439aad381c33eb40b0382",
+    "assets/slides/coding-agent-memory-post-training-slides.pdf": "965fded1316aa6eed5a0d66b408b3e4bed83712dc71caa23c0299a0e5d13019f"
+  }
+}

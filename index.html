@@ -1,214 +1,113 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f5f4ef" />
-    <meta name="description" content="Coding Agent Memory Post-training: unlocking the memory potential of pre-trained file operations for long-horizon tasks via reinforcement learning." />
-    <meta property="og:title" content="Coding Agent Memory Post-training | CAMG-RL" />
-    <meta property="og:description" content="Learning to use ordinary files as memory for long-horizon tasks through reinforcement learning." />
-    <meta property="og:type" content="website" />
-    <link rel="canonical" href="https://liruiluo.github.io/agentmemorygym/" />
-    <title>Coding Agent Memory Post-training | CAMG-RL</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="site-shell">
-      <header class="topbar">
-        <a class="brand" href="#top" aria-label="CAMG home">
-          <span class="brand-mark" aria-hidden="true">/</span>
-          <span>CAMG<span class="brand-dot">.</span>RL</span>
-        </a>
-        <nav class="nav-links" aria-label="Primary navigation">
-          <a href="#idea">Idea</a>
-          <a href="#gym">The Gym</a>
-          <a href="#method">Method</a>
-          <a href="#evidence">Evidence</a>
-          <a href="#paper">Paper</a>
-        </nav>
-        <a class="topbar-cta" href="https://arxiv.org/abs/2609.34422" target="_blank" rel="noreferrer">
-          <span>arXiv:2609.34422</span>
-          <i data-lucide="arrow-up-right" aria-hidden="true"></i>
-        </a>
-      </header>
-
-      <main id="top">
-        <section class="hero section-pad">
-          <div class="hero-copy reveal">
-            <p class="eyebrow"><span class="eyebrow-line"></span> Research project / arXiv:2609.34422</p>
-            <h1>Coding Agent<br /><em>Memory <span class="title-word">Post-training</span></em></h1>
-            <p class="hero-paper-title">Unlocking the memory potential of pre-trained file operations for long-horizon tasks via reinforcement learning.</p>
-            <p class="authors"><span>Lirui Luo</span><span>Kelong Mao</span><span>Heming Xia</span><span>Rongqing Li</span><span>Xinwei Yang</span><span>Luyu Chen</span><span>Kieran Wong</span><span>Yudong Guo</span><span>Xinrui Wang</span><span>Jiayin Zhu</span><span>Simiu Gu</span><span>Sulong Xu</span><span>Cong Fang</span></p>
-            <p class="affiliation">JD.com</p>
-            <p class="hero-thesis"><span>Research thesis</span> Files are not just artifacts. They are memory.</p>
-            <p class="hero-lede">
-              CAMG-RL trains a task-acting policy to create, revise, search, and reuse ordinary workspace files
-              across context boundaries - using the same file operations that code-pretrained agents already know.
-            </p>
-            <div class="hero-actions">
-              <a class="button button-primary" href="https://arxiv.org/abs/2609.34422" target="_blank" rel="noreferrer">Read the paper <i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
-              <a class="button button-quiet" href="https://github.com/jd-opensource/CodingAgentMemoryGym" target="_blank" rel="noopener noreferrer">Code <i data-lucide="code-2" aria-hidden="true"></i></a>
-              <a class="button button-quiet" href="https://huggingface.co/datasets/LiruiLuo/CAMG-II" target="_blank" rel="noopener noreferrer">CAMG-II Data <i data-lucide="database" aria-hidden="true"></i></a>
-              <a class="button button-quiet" href="assets/slides/coding-agent-memory-post-training-slides.pdf" target="_blank" rel="noopener noreferrer">Slides <i data-lucide="presentation" aria-hidden="true"></i></a>
-              <a class="button button-quiet" href="#evidence">Explore results <i data-lucide="arrow-down" aria-hidden="true"></i></a>
-            </div>
-            <div class="hero-facts" aria-label="Project facts">
-              <div><strong>4</strong><span>task environments</span></div>
-              <div><strong>2</strong><span>model scales</span></div>
-              <div><strong>54.4%</strong><span>average success</span></div>
-            </div>
-          </div>
-
-          <div class="hero-visual reveal reveal-delay-1">
-            <div class="visual-label"><span class="status-dot"></span> memory loop / active</div>
-            <figure class="teaser-frame">
-              <img src="assets/teaser.png" alt="CAMG-RL compares context-only work with file-backed memory across a context boundary." />
-              <figcaption><span>FIG. 01</span> A continuation file keeps the work alive when context does not.</figcaption>
-            </figure>
-            <div class="visual-note"><span class="note-index">01</span><span>ordinary shell actions</span><span class="note-arrow">+</span><span>persistent workspace</span></div>
-          </div>
-        </section>
-
-        <section class="marquee-band" aria-label="Project metadata">
-          <div class="marquee-track">
-            <span>CAMG</span><b>/</b><span>CAMG-RL</span><b>/</b><span>ARXIV:2609.34422</span><b>/</b><span>JD.COM</span><b>/</b><span>2026</span>
-          </div>
-        </section>
-
-        <section id="idea" class="section section-pad idea-section">
-          <div class="section-kicker reveal">01 / The idea</div>
-          <div class="split-heading reveal reveal-delay-1">
-            <h2>When the prompt<br /><span>runs out of room.</span></h2>
-            <div>
-              <p class="section-intro">A long task does not fail only because the model forgets. It fails because the useful state has nowhere durable to live.</p>
-              <p class="muted-copy">CAMG gives the policy a persistent workspace and lets reinforcement learning discover when to write a plan, preserve evidence, or read a decision back. The interface is familiar before training begins.</p>
-            </div>
-          </div>
-          <div class="idea-grid">
-            <article class="idea-card idea-card-large reveal">
-              <div class="card-topline"><span class="card-number">01</span><span class="card-tag">context boundary</span></div>
-              <div class="context-diagram" aria-hidden="true">
-                <div class="context-row"><span class="context-block">task</span><span class="context-arrow">-></span><span class="context-block">work</span><span class="context-arrow">-></span><span class="context-block">context full</span></div>
-                <div class="boundary-line"><span>active context ends here</span></div>
-                <div class="context-row context-row-after"><span class="context-file">.agent_memory/CONTINUATION.md</span><span class="context-arrow">-></span><span class="context-block context-block-live">read + continue</span></div>
-              </div>
-              <h3>Make the state explicit.</h3>
-              <p>Before replacement, the policy writes a bounded continuation file. After replacement, it receives the path - not a hidden summary - and reads the state back through a normal file action.</p>
-            </article>
-            <article class="idea-card reveal reveal-delay-1">
-              <div class="card-topline"><span class="card-number">02</span><span class="card-tag">pre-training prior</span></div>
-              <div class="quote-mark">“</div>
-              <h3>Use what the model already knows.</h3>
-              <p>Shell commands, text files, search, and revision are native coding-agent behavior. CAMG-RL turns that prior into deliberate long-horizon memory with task reward.</p>
-              <div class="mini-code"><span>$</span> cat .agent_memory/CONTINUATION.md</div>
-            </article>
-            <article class="idea-card idea-card-accent reveal reveal-delay-2">
-              <div class="card-topline"><span class="card-number">03</span><span class="card-tag">learning signal</span></div>
-              <h3>Memory earns its keep.</h3>
-              <p>There is no separate memory reward. The only question is whether the saved state helps the downstream task succeed.</p>
-              <div class="signal-line"><span class="signal-dot"></span><span>task reward</span><i data-lucide="arrow-right" aria-hidden="true"></i><span>policy update</span></div>
-            </article>
-          </div>
-        </section>
-
-        <section id="gym" class="section section-pad gym-section">
-          <div class="section-kicker reveal">02 / The gym</div>
-          <div class="split-heading reveal reveal-delay-1">
-            <h2>One interface.<br /><span>Four kinds of work.</span></h2>
-            <p class="section-intro">Each environment keeps its native task semantics while sharing executable shell access and an episode-persistent workspace.</p>
-          </div>
-
-          <div class="environment-layout reveal">
-            <div class="env-tabs" role="tablist" aria-label="CAMG environments">
-              <button class="env-tab is-active" id="tab-shop" role="tab" aria-selected="true" data-env="shop"><span class="env-index">01</span><span class="env-name">Shop</span><span class="env-short">WebShop</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
-              <button class="env-tab" id="tab-coding" role="tab" aria-selected="false" data-env="coding"><span class="env-index">02</span><span class="env-name">Coding</span><span class="env-short">SWE-smith</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
-              <button class="env-tab" id="tab-research" role="tab" aria-selected="false" data-env="research"><span class="env-index">03</span><span class="env-name">DeepResearch</span><span class="env-short">LiteResearcher</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
-              <button class="env-tab" id="tab-auto" role="tab" aria-selected="false" data-env="auto"><span class="env-index">04</span><span class="env-name">AutoResearch</span><span class="env-short">OpenMLE</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
-            </div>
-            <div class="env-detail" role="tabpanel" aria-live="polite">
-              <div class="env-detail-header"><span class="detail-label" id="env-type">native task + file memory</span><span class="detail-counter" id="env-counter">01 / 04</span></div>
-              <h3 id="env-title">Shop</h3>
-              <p id="env-description">Search, compare, and purchase under a budget while keeping product evidence and constraints available over a long interaction.</p>
-              <div class="env-meta-grid">
-                <div><span>Native task</span><strong id="env-native">browse + buy</strong></div>
-                <div><span>Memory role</span><strong id="env-memory">preferences, evidence</strong></div>
-                <div><span>Shared action</span><strong>shell_command</strong></div>
-              </div>
-              <div class="env-prompt"><span class="prompt-label">episode workspace</span><code id="env-file">.agent_memory/preferences.md</code><span class="prompt-cursor"></span></div>
-              <div class="env-footer"><span id="env-footer-copy">A task-native world, one shared memory substrate.</span><button class="icon-button" type="button" id="env-next" aria-label="Next environment"><i data-lucide="arrow-right" aria-hidden="true"></i></button></div>
-            </div>
-          </div>
-          <figure class="framework-wide reveal reveal-delay-1">
-            <img src="assets/framework.png" alt="CAMG-RL architecture: rollout GPUs, task environments, memory files, an episode queue, and PPO learner GPUs." />
-            <figcaption><span>FIG. 02</span> A single policy samples native task actions and filesystem actions into one asynchronous PPO loop.</figcaption>
-          </figure>
-        </section>
-
-        <section id="method" class="section section-pad method-section">
-          <div class="section-kicker reveal">03 / The method</div>
-          <div class="method-header reveal reveal-delay-1">
-            <h2>Memory as<br /><span>reasoning.</span></h2>
-            <p class="section-intro">The policy does not emit a separate hidden reasoning channel. It writes the reasoning state it needs into files that can be inspected, revised, and reused.</p>
-          </div>
-          <div class="method-flow">
-            <div class="flow-step reveal"><span class="flow-index">A</span><div><span class="flow-label">act</span><h3>Work on the task</h3><p>Use the native tool and ordinary shell actions in the same response space.</p></div></div>
-            <div class="flow-connector" aria-hidden="true"><i data-lucide="arrow-down" aria-hidden="true"></i></div>
-            <div class="flow-step reveal reveal-delay-1"><span class="flow-index">B</span><div><span class="flow-label">write</span><h3>Save what matters</h3><p>Record the objective, evidence, open questions, and next step in editable files.</p></div></div>
-            <div class="flow-connector" aria-hidden="true"><i data-lucide="arrow-down" aria-hidden="true"></i></div>
-            <div class="flow-step reveal reveal-delay-2"><span class="flow-index">C</span><div><span class="flow-label">return</span><h3>Read it back</h3><p>After context replacement, retrieve the state with a normal file read and keep going.</p></div></div>
-          </div>
-          <div class="terminal-card reveal reveal-delay-1">
-            <div class="terminal-head"><span class="terminal-title">.agent_memory/CONTINUATION.md</span><span class="terminal-status"><span class="status-dot status-dot-green"></span> persisted</span></div>
-            <div class="terminal-body"><span class="terminal-comment"># checkpoint before context replacement</span><span><b>objective:</b> fix response logging after recent changes</span><span><b>evidence:</b> added _mqpush in scrapy/core/scheduler.py</span><span><b>tested:</b> no _mqpush error</span><span><b>next:</b> run tests, confirm logging, submit</span><span class="terminal-prompt">$ cat .agent_memory/CONTINUATION.md <i class="cursor"></i></span></div>
-          </div>
-        </section>
-
-        <section id="evidence" class="section section-pad evidence-section">
-          <div class="section-kicker reveal">04 / The evidence</div>
-          <div class="split-heading reveal reveal-delay-1">
-            <h2>Small moves.<br /><span>Longer memory.</span></h2>
-            <p class="section-intro">The trained 4B policy moves a little, but its behavior changes where it counts: toward complete memory chains and better long-horizon task outcomes.</p>
-          </div>
-          <div class="metrics-strip reveal">
-            <div class="metric metric-primary"><span>Average CAMG success</span><strong>54.4<span>%</span></strong><small>+6.4 pts vs. CompactionRL</small></div>
-            <div class="metric"><span>Complete memory chains</span><strong>20.9<span>%</span></strong><small>last training quarter</small></div>
-            <div class="metric"><span>External transfer</span><strong>15.8<span>%</span></strong><small>SWE-bench Verified</small></div>
-            <div class="metric"><span>Model size</span><strong>4<span>B</span></strong><small>Qwen3.5 base</small></div>
-          </div>
-
-          <div class="chart-panel reveal reveal-delay-1">
-            <div class="chart-header"><div><span class="chart-kicker">native held-out panel</span><h3>Files beat dedicated memory tools.</h3></div><div class="legend" aria-label="Chart legend"><button class="legend-button is-active" data-series="camg"><span class="legend-swatch swatch-camg"></span>CAMG-RL</button><button class="legend-button" data-series="compact"><span class="legend-swatch swatch-compact"></span>CompactionRL</button><button class="legend-button" data-series="base"><span class="legend-swatch swatch-base"></span>Frozen 4B</button></div></div>
-            <div class="bar-chart" role="img" aria-label="Success rate comparison across four CAMG environments">
-              <div class="chart-row" data-route="shop"><div class="chart-label"><span>Shop</span><small>WebShop</small></div><div class="bar-track"><span class="bar bar-camg" style="--value: 97.1%"></span><span class="bar bar-compact is-hidden" style="--value: 97.5%"></span><span class="bar bar-base is-hidden" style="--value: 11.6%"></span></div><strong class="bar-value">97.1%</strong></div>
-              <div class="chart-row" data-route="coding"><div class="chart-label"><span>Coding</span><small>SWE-smith</small></div><div class="bar-track"><span class="bar bar-camg" style="--value: 26.6%"></span><span class="bar bar-compact is-hidden" style="--value: 19.5%"></span><span class="bar bar-base is-hidden" style="--value: 10.9%"></span></div><strong class="bar-value">26.6%</strong></div>
-              <div class="chart-row" data-route="research"><div class="chart-label"><span>DeepResearch</span><small>LiteResearcher</small></div><div class="bar-track"><span class="bar bar-camg" style="--value: 55.5%"></span><span class="bar bar-compact is-hidden" style="--value: 50.8%"></span><span class="bar bar-base is-hidden" style="--value: 36.7%"></span></div><strong class="bar-value">55.5%</strong></div>
-              <div class="chart-row" data-route="auto"><div class="chart-label"><span>AutoResearch</span><small>OpenMLE</small></div><div class="bar-track"><span class="bar bar-camg" style="--value: 38.3%"></span><span class="bar bar-compact is-hidden" style="--value: 24.2%"></span><span class="bar bar-base is-hidden" style="--value: 10.2%"></span></div><strong class="bar-value">38.3%</strong></div>
-            </div>
-            <p class="chart-footnote">Greedy decoding on the frozen 128-task panel per environment. Success rates are the paper's reader-facing values.</p>
-          </div>
-
-          <div class="evidence-grid">
-            <figure class="evidence-figure evidence-figure-wide reveal"><img src="assets/coding-case.png" alt="Four-stage coding episode showing a reproducer, patch, continuation file, and verification." /><figcaption><span>CASE STUDY</span> A coding episode carries the task state through a context replacement.</figcaption></figure>
-            <figure class="evidence-figure reveal reveal-delay-1"><img src="assets/interface-prior.png" alt="Analysis of filesystem memory actions versus dedicated memory tools." /><figcaption><span>INTERFACE PRIOR</span> The base policy already finds file operations familiar.</figcaption></figure>
-            <figure class="evidence-figure reveal reveal-delay-2"><img src="assets/ablation.png" alt="CAMG-RL ablation results across environments." /><figcaption><span>ABLATION</span> Memory-action gradients and general files both matter.</figcaption></figure>
-          </div>
-        </section>
-
-        <section class="section section-pad transfer-section">
-          <div class="transfer-copy reveal"><div class="section-kicker">05 / Beyond the gym</div><h2>Train on memory.<br /><span>Transfer the behavior.</span></h2><p class="section-intro">The final CAMG-RL checkpoint is evaluated beyond its training distribution on software engineering and machine-learning engineering tasks.</p><a class="text-link" href="#paper">See the evaluation protocol <i data-lucide="arrow-up-right" aria-hidden="true"></i></a></div>
-          <div class="transfer-table-wrap reveal reveal-delay-1"><table><thead><tr><th>Model / policy</th><th>SWE-bench<br />Verified</th><th>MLE-bench<br />Lite</th><th>Average</th></tr></thead><tbody><tr><td>Qwen3.5-4B</td><td>7.6%</td><td>0.0%</td><td>3.8%</td></tr><tr><td>Qwen3.5-35B-A3B</td><td>15.6%</td><td>4.5%</td><td>10.1%</td></tr><tr class="table-highlight"><td><strong>CAMG-RL-4B</strong></td><td><strong>15.8%</strong></td><td><strong>4.5%</strong></td><td><strong>10.2%</strong></td></tr><tr><td>Qwen3.5-122B-A10B</td><td>22.0%</td><td>9.1%</td><td>15.6%</td></tr><tr class="table-highlight"><td><strong>CAMG-RL-9B</strong></td><td><strong>27.6%</strong></td><td><strong>9.1%</strong></td><td><strong>18.4%</strong></td></tr><tr><td>Qwen3.5-397B-A17B</td><td>34.4%</td><td>13.6%</td><td>24.0%</td></tr></tbody></table><p class="table-note">Matched task assignments, decoding budgets, environments, and graders.</p></div>
-        </section>
-
-        <section id="paper" class="section section-pad paper-section">
-          <div class="paper-card reveal">
-            <div class="paper-card-main"><p class="eyebrow"><span class="eyebrow-line"></span> Project release</p><h2>Coding Agent Memory Post-training</h2><p class="paper-long-title">Unlocking the memory potential of pre-trained file operations for long-horizon tasks via reinforcement learning.</p><div class="paper-meta"><span>CAMG / CAMG-RL</span><span>Qwen3.5-4B / 9B</span><span>Agentic RL</span></div></div>
-            <div class="paper-card-actions"><a class="button button-primary" href="assets/paper.pdf" target="_blank" rel="noreferrer">Read PDF <i data-lucide="arrow-up-right" aria-hidden="true"></i></a><a class="button button-outline" href="assets/slides/coding-agent-memory-post-training-slides.pdf" target="_blank" rel="noopener noreferrer">Slides <i data-lucide="presentation" aria-hidden="true"></i></a><button class="button button-outline" id="copy-citation" type="button"><i data-lucide="copy" aria-hidden="true"></i><span>Copy citation</span></button><a class="button button-outline" href="https://github.com/jd-opensource/CodingAgentMemoryGym" target="_blank" rel="noopener noreferrer">Code <i data-lucide="code-2" aria-hidden="true"></i></a><a class="button button-outline" href="https://huggingface.co/datasets/LiruiLuo/CAMG-II" target="_blank" rel="noopener noreferrer">CAMG-II Data <i data-lucide="database" aria-hidden="true"></i></a></div>
-          </div>
-          <div class="footer-line"><span>CAMG-RL / 2026</span><span>File memory for long-horizon agents</span><a href="#top">Back to top <i data-lucide="arrow-up" aria-hidden="true"></i></a></div>
-        </section>
-      </main>
-    </div>
-    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.js"></script>
-    <script src="script.js"></script>
-  </body>
-</html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="CAMG-RL turns familiar file operations into learned long-horizon memory. Explore the method, real trajectories, published results, and November 2026 experiments.">
+<meta property="og:title" content="Coding Agent Memory Post-training · CAMG-RL">
+<meta property="og:description" content="Familiar file operations. Learned memory. More capable long-horizon agents.">
+<meta property="og:type" content="website"><meta property="og:url" content="https://liruiluo.github.io/agentmemorygym/">
+<meta property="og:image" content="https://liruiluo.github.io/agentmemorygym/assets/social-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="research-data-sha256" content="da9b1aef6a0a8efd74ce91314cc5c98c87dca68e5a2389927b7d843607f0638d">
+<link rel="canonical" href="https://liruiluo.github.io/agentmemorygym/">
+<title>Coding Agent Memory Post-training · CAMG-RL</title>
+<link rel="stylesheet" href="styles.css"><script src="script.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar"><div class="nav-inner">
+<a class="brand" href="#top" aria-label="CAMG-RL home"><span class="brand-glyph" aria-hidden="true">[m]</span> CAMG<span class="brand-rl">-RL</span></a>
+<nav aria-label="Main navigation"><a href="#evidence">Results</a><a href="#idea">Why files?</a><a href="#transfer">Transfer</a><a href="#paper">Paper &amp; slides</a></nav>
+<a class="nav-paper" href="https://arxiv.org/abs/2609.34422">arXiv ↗</a>
+</div></header>
+<main id="main">
+<section class="hero wrap" id="top">
+<div class="hero-text"><p class="eyebrow">Coding Agent Memory Post-training <span>/ 2026</span></p>
+<h1>Teaching agents<br>to remember<br><em>with files.</em></h1>
+<p class="hero-lede">Language models already know how to work with files. <strong>CAMG-RL teaches them what is worth remembering</strong>—and how to use it when the context is gone.</p>
+<div class="actions"><a class="button primary" href="https://arxiv.org/abs/2609.34422">Read the paper <span aria-hidden="true">↗</span></a><a class="button" href="assets/slides/coding-agent-memory-post-training-slides.pdf">Slides <span aria-hidden="true">↗</span></a><a class="text-link" href="https://github.com/jd-opensource/CodingAgentMemoryGym">Code ↗</a></div>
+<div class="hero-result"><div><strong>54.4<span>%</span></strong><span>Average task success</span></div><div><strong>+6.4<span>pp</span></strong><span>vs. CompactionRL</span></div><p>Published result · 4 environments <br>512 held-out tasks · <a href="#evidence">See comparison ↓</a></p></div>
+</div>
+<div class="hero-story">
+<div class="story-topline"><span>One real task, across a context boundary</span><span class="story-index">01 → 02</span></div>
+<div class="task-heading"><span class="tiny-label">CODING / SCRAPY</span><h2>Keep the fix. <br>Resume the work.</h2></div>
+<div class="file-paper"><div class="file-title"><span aria-hidden="true">≡</span> .agent_memory/CONTINUATION.md</div><pre>objective: fix response logging
+evidence: added _mqpush
+  in scrapy/core/scheduler.py
+tested: no _mqpush error
+next: run tests, confirm
+  logging, then submit</pre><span class="file-tag">Written at round 18</span></div>
+<div class="context-cut"><span>active context replaced</span><span aria-hidden="true">↓</span></div>
+<div class="resume-line"><span class="round-label">19</span><div><strong>Read the file. Continue testing.</strong><p>The path returns; the policy reads the contents.</p></div></div>
+<p class="story-caption">Recorded training trajectory · shortened excerpts.<br><a href="#case">Follow the write → read → test sequence ↓</a></p>
+</div>
+</section>
+<div class="author-strip wrap"><p>Lirui Luo · Kelong Mao · Heming Xia · Rongqing Li · Xinwei Yang · Luyu Chen · Kieran Wong · Yudong Guo · Xinrui Wang · Jiayin Zhu · Simiu Gu · Sulong Xu · Cong Fang</p><span>JD.com</span></div>
+<section id="evidence" class="section wrap">
+<div class="section-heading"><p class="eyebrow">01 / The result</p><h2>Better long-horizon execution.<br>One shared policy.</h2><p class="section-lede">Ordinary task actions and file-memory actions learn from the same downstream task reward.</p></div>
+<div class="result-layout"><div class="result-story"><p class="source-tag">Published · Table 2</p><div class="large-stat">54.4<span>%</span></div><p class="stat-caption">Average success across<br>Shop, Coding, DeepResearch<br>and AutoResearch.</p><div class="comparison-callout"><strong>+6.4 percentage points</strong><p>over CompactionRL<br>Paired 95% CI: [3.3, 9.5] pp</p></div><p class="small-copy">The largest gains over CompactionRL are in Coding (+7.1 pp) and AutoResearch (+14.1 pp). Shop is near saturation for both methods.</p></div>
+<figure class="main-chart"><figcaption>Average task success (%) <span>higher is better</span></figcaption><div class="bar-chart" role="list"><div class="bar-row gray" role="listitem"><span class="bar-name">Qwen3.5-4B</span><div class="bar-track" aria-hidden="true"><span style="width:29.0000%"></span></div><strong>17.4%</strong></div><div class="bar-row gray" role="listitem"><span class="bar-name">Mem0</span><div class="bar-track" aria-hidden="true"><span style="width:32.8333%"></span></div><strong>19.7%</strong></div><div class="bar-row gray" role="listitem"><span class="bar-name">Letta Code</span><div class="bar-track" aria-hidden="true"><span style="width:29.6667%"></span></div><strong>17.8%</strong></div><div class="bar-row gray" role="listitem"><span class="bar-name">CompactionRL</span><div class="bar-track" aria-hidden="true"><span style="width:80.0000%"></span></div><strong>48.0%</strong></div><div class="bar-row gray" role="listitem"><span class="bar-name">AgeMem</span><div class="bar-track" aria-hidden="true"><span style="width:42.1667%"></span></div><strong>25.3%</strong></div><div class="bar-row blue" role="listitem"><span class="bar-name">CAMG-RL</span><div class="bar-track" aria-hidden="true"><span style="width:90.6667%"></span></div><strong>54.4%</strong></div></div><div class="axis-row"><span>0</span><span>20</span><span>40</span><span>60</span></div><p class="chart-note">All comparisons visible at once. Same Qwen3.5-4B backbone.</p></figure></div>
+<details><summary>Full results across the four environments</summary><p class="table-hint">Swipe or scroll horizontally to see all columns →</p><div class="table-scroll" tabindex="0" role="region" aria-label="Published main results · task success (%)"><table><caption>Published main results · task success (%)</caption><thead><tr><th scope="col">Method</th><th scope="col">Shop</th><th scope="col">Coding</th><th scope="col">DeepResearch</th><th scope="col">AutoResearch</th><th scope="col">Average</th></tr></thead><tbody><tr><th scope="row">Qwen3.5-4B</th><td>11.6</td><td>10.9</td><td>36.7</td><td>10.2</td><td>17.4</td></tr><tr><th scope="row">Mem0</th><td>15.6</td><td>14.8</td><td>37.5</td><td>10.9</td><td>19.7</td></tr><tr><th scope="row">Letta Code</th><td>12.6</td><td>14.8</td><td>32.0</td><td>11.7</td><td>17.8</td></tr><tr><th scope="row">CompactionRL</th><td>97.5</td><td>19.5</td><td>50.8</td><td>24.2</td><td>48.0</td></tr><tr><th scope="row">AgeMem</th><td>16.7</td><td>26.6</td><td>28.1</td><td>29.7</td><td>25.3</td></tr><tr class="trained"><th scope="row">CAMG-RL</th><td>97.1</td><td>26.6</td><td>55.5</td><td>38.3</td><td>54.4</td></tr></tbody></table></div><p class="small-copy">128 held-out tasks per environment. The average weights environments equally. Displayed paper values are retained; averages use unrounded scores. DeepResearch’s gap over CompactionRL is not statistically significant.</p></details>
+</section>
+<section id="idea" class="section tint"><div class="wrap">
+<div class="section-heading"><p class="eyebrow">02 / A familiar starting point</p><h2>The interface matters.<br>Syntax is only part of the story.</h2></div>
+<div class="two-up"><article class="evidence-panel"><p class="source-tag">Published · Figure 3a</p><h3>File operations are already familiar</h3><p>Before RL, the base model assigns lower negative log-likelihood to ordinary file actions than to dedicated memory tools.</p><div class="pair-chart"><div class="pair-group"><h4>Store</h4><div class="pair-row blue"><span class="pair-name">File operations</span><div class="bar-track" aria-hidden="true"><span style="width:79.3333%"></span></div><strong>1.19</strong></div><div class="pair-row gray"><span class="pair-name">Dedicated tools</span><div class="bar-track" aria-hidden="true"><span style="width:93.3333%"></span></div><strong>1.40</strong></div></div><div class="pair-group"><h4>Retrieve</h4><div class="pair-row blue"><span class="pair-name">File operations</span><div class="bar-track" aria-hidden="true"><span style="width:5.3333%"></span></div><strong>0.08</strong></div><div class="pair-row gray"><span class="pair-name">Dedicated tools</span><div class="bar-track" aria-hidden="true"><span style="width:31.3333%"></span></div><strong>0.47</strong></div></div><div class="pair-group"><h4>Revise</h4><div class="pair-row blue"><span class="pair-name">File operations</span><div class="bar-track" aria-hidden="true"><span style="width:16.6667%"></span></div><strong>0.25</strong></div><div class="pair-row gray"><span class="pair-name">Dedicated tools</span><div class="bar-track" aria-hidden="true"><span style="width:18.0000%"></span></div><strong>0.27</strong></div></div><div class="pair-group"><h4>Remove</h4><div class="pair-row blue"><span class="pair-name">File operations</span><div class="bar-track" aria-hidden="true"><span style="width:18.0000%"></span></div><strong>0.27</strong></div><div class="pair-row gray"><span class="pair-name">Dedicated tools</span><div class="bar-track" aria-hidden="true"><span style="width:22.0000%"></span></div><strong>0.33</strong></div></div></div><p class="axis-label">Nats per action token · lower is better · bars span 0–1.5</p><p class="chart-note">Frozen Qwen3.5-4B. Rounded point estimates; no reconstructed error bars. This tests interface familiarity, not the origin of the pre-training data.</p></article>
+<article class="evidence-panel"><p class="source-tag new">Additional experiments · Nov 2026</p><h3>Fixing syntax narrows, but does not close, the gap</h3><p>Generation-time grammar and argument-schema masks improve both interfaces. Bash still leads by <strong>4.3 pp</strong>.</p><div class="pair-chart"><div class="pair-group"><h4>Unconstrained</h4><div class="pair-row blue"><span class="pair-name">Bash</span><div class="bar-track" aria-hidden="true"><span style="width:69.6000%"></span></div><strong>17.4</strong></div><div class="pair-row gray"><span class="pair-name">AgeMem</span><div class="bar-track" aria-hidden="true"><span style="width:37.6000%"></span></div><strong>9.4</strong></div></div><div class="pair-group"><h4>Constrained decoding</h4><div class="pair-row blue"><span class="pair-name">Bash</span><div class="bar-track" aria-hidden="true"><span style="width:81.2000%"></span></div><strong>20.3</strong></div><div class="pair-row gray"><span class="pair-name">AgeMem</span><div class="bar-track" aria-hidden="true"><span style="width:64.0000%"></span></div><strong>16.0</strong></div></div></div><p class="axis-label">Average task success (%) · bars span 0–25</p><p class="chart-note">Frozen base, no RL, 512 tasks. Both interfaces receive constrained decoding; no post-hoc repair. This does not isolate every difference between trained systems.</p></article></div>
+<details><summary>Constrained-decoding results and version</summary><p class="table-hint">Swipe or scroll horizontally to see all columns →</p><div class="table-scroll" tabindex="0" role="region" aria-label="Frozen-base interface comparison · task success (%)"><table><caption>Frozen-base interface comparison · task success (%)</caption><thead><tr><th scope="col">Interface</th><th scope="col">Shop</th><th scope="col">Coding</th><th scope="col">DeepResearch</th><th scope="col">AutoResearch</th><th scope="col">Average</th></tr></thead><tbody><tr><th scope="row">Bash</th><td>11.6</td><td>10.9</td><td>36.7</td><td>10.2</td><td>17.4</td></tr><tr><th scope="row">Bash + CD</th><td>15.6</td><td>14.1</td><td>39.1</td><td>12.5</td><td>20.3</td></tr><tr><th scope="row">AgeMem</th><td>6.3</td><td>7.0</td><td>18.8</td><td>5.5</td><td>9.4</td></tr><tr><th scope="row">AgeMem + CD</th><td>10.0</td><td>9.4</td><td>35.2</td><td>9.4</td><td>16.0</td></tr></tbody></table></div><p class="small-copy">Revised Appendix D.16; author-reported November additions. <a href="#versions">Source and version notes</a>.</p></details>
+</div></section>
+<section id="memory" class="section wrap">
+<div class="section-heading"><p class="eyebrow">03 / Learning useful memory</p><h2>The content earns its place.</h2><p class="section-lede">Writing a file is not enough. We test whether its contents help, and whether learning memory actions matters.</p></div>
+<div class="two-up"><article class="evidence-panel"><p class="source-tag">Published · Appendix D.3</p><h3>Change the memory. Change the outcome.</h3><p>Continue from the <strong>same post-reset state</strong>, but erase or shuffle the saved content. Success falls in every environment.</p><div class="delta-chart"><div class="legend"><span><i class="blue-dot"></i>Blank</span><span><i class="gray-dot"></i>Shuffled</span></div><div class="delta-group"><h4>Shop<small>n = 128</small></h4><div class="delta-row blue"><div class="delta-track" aria-hidden="true"><span style="width:91.875%"></span></div><strong>-29.4</strong></div><div class="delta-row gray"><div class="delta-track" aria-hidden="true"><span style="width:45.000%"></span></div><strong>-14.4</strong></div></div><div class="delta-group"><h4>Coding<small>n = 29</small></h4><div class="delta-row blue"><div class="delta-track" aria-hidden="true"><span style="width:43.125%"></span></div><strong>-13.8</strong></div><div class="delta-row gray"><div class="delta-track" aria-hidden="true"><span style="width:20.312%"></span></div><strong>-6.5</strong></div></div><div class="delta-group"><h4>DeepResearch<small>n = 60</small></h4><div class="delta-row blue"><div class="delta-track" aria-hidden="true"><span style="width:15.000%"></span></div><strong>-4.8</strong></div><div class="delta-row gray"><div class="delta-track" aria-hidden="true"><span style="width:52.188%"></span></div><strong>-16.7</strong></div></div><div class="delta-group"><h4>AutoResearch<small>n = 23</small></h4><div class="delta-row blue"><div class="delta-track" aria-hidden="true"><span style="width:25.938%"></span></div><strong>-8.3</strong></div><div class="delta-row gray"><div class="delta-track" aria-hidden="true"><span style="width:25.938%"></span></div><strong>-8.3</strong></div></div><p class="axis-label">← Lower success &nbsp; · &nbsp; change from intact memory (pp); right edge = 0</p></div><p class="chart-note">Eligible tasks only (counts shown). Shuffled files come from the same environment with matched length. The result identifies a local content effect, not an effect over every task.</p></article>
+<article class="evidence-panel"><p class="source-tag">Published · Figure 4</p><h3>Train the memory actions, too</h3><p>Removing their actor gradients or restricting the policy to a continuation file reduces average success.</p><div class="bar-chart" role="list"><div class="bar-row blue" role="listitem"><span class="bar-name">CAMG-RL</span><div class="bar-track" aria-hidden="true"><span style="width:90.6667%"></span></div><strong>54.4%</strong></div><div class="bar-row gray" role="listitem"><span class="bar-name">No memory-action actor gradients</span><div class="bar-track" aria-hidden="true"><span style="width:35.1667%"></span></div><strong>21.1%</strong></div><div class="bar-row gray" role="listitem"><span class="bar-name">Continuation only: train + evaluate</span><div class="bar-track" aria-hidden="true"><span style="width:69.6667%"></span></div><strong>41.8%</strong></div><div class="bar-row gray" role="listitem"><span class="bar-name">Continuation only: evaluate</span><div class="bar-track" aria-hidden="true"><span style="width:46.8333%"></span></div><strong>28.1%</strong></div></div><p class="axis-label">Average task success (%) · zero-based bars, maximum 60</p><p class="chart-note">No memory-action actor gradients still retains rewards, critic targets and critic learning. “Train + evaluate” and “evaluate” intervene at different stages.</p></article></div>
+<div class="acquisition-band"><div><p class="tiny-label">DESIGNATED MEMORY CHAINS · PUBLISHED FIGURE 3b</p><strong>8.0% <span aria-hidden="true">→</span> 20.9%</strong><p>First → last training quarter of CAMG-RL.</p></div><p>A complete chain stores or revises information, retrieves it later, and uses it in the task. The metric excludes mandatory continuation writes. AgeMem has no complete <em>designated-interface</em> chains here; this does not mean it never uses the native workspace.</p></div>
+<details><summary>Intervention values and the scope of the chain metric</summary><p class="table-hint">Swipe or scroll horizontally to see all columns →</p><div class="table-scroll" tabindex="0" role="region" aria-label="Same-state memory interventions · change in success (pp)"><table><caption>Same-state memory interventions · change in success (pp)</caption><thead><tr><th scope="col">Environment</th><th scope="col">Blank</th><th scope="col">Shuffled</th><th scope="col">Eligible tasks</th></tr></thead><tbody><tr><th scope="row">Shop</th><td>-29.4</td><td>-14.4</td><td>128.0</td></tr><tr><th scope="row">Coding</th><td>-13.8</td><td>-6.5</td><td>29.0</td></tr><tr><th scope="row">DeepResearch</th><td>-4.8</td><td>-16.7</td><td>60.0</td></tr><tr><th scope="row">AutoResearch</th><td>-8.3</td><td>-8.3</td><td>23.0</td></tr></tbody></table></div><p class="small-copy">The equal-environment mean drop is 14.1 pp for blank and 11.5 pp for shuffled content. First/last training quarters are updates 1–50 / 151–200. A separate November Coding analysis reports workspace-chain rates of 20.3% for CAMG-RL and 80.5% for AgeMem; these are Coding-only and are not the pooled training-quarter metric. See revised Appendix D.15.</p></details>
+</section>
+<section id="transfer" class="section tint"><div class="wrap">
+<div class="section-heading"><p class="eyebrow">04 / Beyond the original setting</p><h2>A learned behavior.<br>Not just one tool vocabulary.</h2><p class="section-lede">Further tests probe interface transfer, practical context alternatives, and robustness.</p></div>
+<div class="wide-experiment"><div><p class="source-tag new">Additional experiments · Nov 2026</p><h3>Change the interface.<br>Keep the memory policy.</h3><p>The task executor stays frozen. Replacing only the memory-writing and reading policy improves results through both Claude Code file tools and AgeMem memory tools.</p><p class="key-line">No further training.</p><p class="chart-note">Frozen Qwen3.5-4B executor. No sample counts or uncertainty estimates were supplied for this comparison.</p></div><figure><div class="pair-chart"><div class="pair-group"><h4>Claude Code file tools</h4><div class="pair-row gray"><span class="pair-name">Frozen memory policy</span><div class="bar-track" aria-hidden="true"><span style="width:53.0000%"></span></div><strong>15.9</strong></div><div class="pair-row blue"><span class="pair-name">Trained memory policy</span><div class="bar-track" aria-hidden="true"><span style="width:91.0000%"></span></div><strong>27.3</strong></div></div><div class="pair-group"><h4>AgeMem memory tools</h4><div class="pair-row gray"><span class="pair-name">Frozen memory policy</span><div class="bar-track" aria-hidden="true"><span style="width:47.6667%"></span></div><strong>14.3</strong></div><div class="pair-row blue"><span class="pair-name">Trained memory policy</span><div class="bar-track" aria-hidden="true"><span style="width:69.0000%"></span></div><strong>20.7</strong></div></div></div><figcaption>Average task success (%) · zero-based bars, maximum 30</figcaption></figure></div>
+<details><summary>All cross-interface results</summary><p class="table-hint">Swipe or scroll horizontally to see all columns →</p><div class="table-scroll" tabindex="0" role="region" aria-label="Fixed-executor interface transfer · task success (%)"><table><caption>Fixed-executor interface transfer · task success (%)</caption><thead><tr><th scope="col">Interface</th><th scope="col">Memory policy</th><th scope="col">Shop</th><th scope="col">Coding</th><th scope="col">DeepResearch</th><th scope="col">AutoResearch</th><th scope="col">Average</th></tr></thead><tbody><tr><th scope="row">Claude Code</th><td>Frozen Qwen3.5-4B</td><td>9.4</td><td>9.4</td><td>35.2</td><td>9.4</td><td>15.9</td></tr><tr class="trained"><th scope="row">Claude Code</th><td>CAMG-RL-4B</td><td>36.3</td><td>14.1</td><td>39.8</td><td>18.8</td><td>27.3</td></tr><tr><th scope="row">AgeMem</th><td>Frozen Qwen3.5-4B</td><td>8.6</td><td>7.8</td><td>32.0</td><td>8.6</td><td>14.3</td></tr><tr class="trained"><th scope="row">AgeMem</th><td>CAMG-RL-4B</td><td>22.7</td><td>11.7</td><td>34.4</td><td>14.1</td><td>20.7</td></tr></tbody></table></div><p class="small-copy">Revised Appendix D.10, interface-transfer experiment. The separately reported content-quality experiment is not included here.</p></details>
+<div class="wide-experiment context-experiment"><div><p class="source-tag new">Additional experiments · Nov 2026</p><h3>A larger window helps.<br>Learned file memory still adds value.</h3><p>CAMG-RL with a <strong>30,720-token active context</strong> scores above a 262K-token RL reference with automatic compaction.</p><p class="chart-note">Same base, PPO, task rewards and 200-update budget. The window and compaction procedures differ; native task files remain available to the reference. This is a practical comparison, not a single-factor causal test.</p></div><figure><div class="bar-chart" role="list"><div class="bar-row gray" role="listitem"><span class="bar-name">262K + automatic compaction</span><div class="bar-track" aria-hidden="true"><span style="width:82.0000%"></span></div><strong>49.2%</strong></div><div class="bar-row blue" role="listitem"><span class="bar-name">CAMG-RL (30,720 active tokens)</span><div class="bar-track" aria-hidden="true"><span style="width:90.6667%"></span></div><strong>54.4%</strong></div></div><div class="gain-note"><strong>+5.2 pp</strong><span>average task success</span></div><figcaption>Average task success (%) · zero-based bars, maximum 60</figcaption></figure></div>
+<details><summary>Long-context results</summary><p class="table-hint">Swipe or scroll horizontally to see all columns →</p><div class="table-scroll" tabindex="0" role="region" aria-label="Long-context reference · task success (%)"><table><caption>Long-context reference · task success (%)</caption><thead><tr><th scope="col">Method</th><th scope="col">Shop</th><th scope="col">Coding</th><th scope="col">DeepResearch</th><th scope="col">AutoResearch</th><th scope="col">Average</th></tr></thead><tbody><tr><th scope="row">262K + automatic compaction</th><td>90.6</td><td>21.9</td><td>49.2</td><td>35.2</td><td>49.2</td></tr><tr class="trained"><th scope="row">CAMG-RL (30,720 active tokens)</th><td>97.1</td><td>26.6</td><td>55.5</td><td>38.3</td><td>54.4</td></tr></tbody></table></div></details>
+<div class="two-up robustness"><article class="evidence-panel"><p class="source-tag">Published · Appendix D.8</p><h3>Across five training runs</h3><svg class="stability-plot" viewBox="0 0 640 190" role="img" aria-labelledby="stability-title stability-desc"><title id="stability-title">Average success across five training runs</title><desc id="stability-desc">CompactionRL 47.1 plus or minus 3.5 standard deviation. CAMG-RL 55.3 plus or minus 2.9. Scale zero to sixty percent.</desc><line x1="154.0" x2="154.0" y1="30" y2="135" stroke="#e2e5e9"/><text x="154.0" y="169" text-anchor="middle" fill="#56616c" font-size="15">0</text><line x1="299.0" x2="299.0" y1="30" y2="135" stroke="#e2e5e9"/><text x="299.0" y="169" text-anchor="middle" fill="#56616c" font-size="15">20</text><line x1="444.0" x2="444.0" y1="30" y2="135" stroke="#e2e5e9"/><text x="444.0" y="169" text-anchor="middle" fill="#56616c" font-size="15">40</text><line x1="589.0" x2="589.0" y1="30" y2="135" stroke="#e2e5e9"/><text x="589.0" y="169" text-anchor="middle" fill="#56616c" font-size="15">60</text><text x="0" y="57" font-size="17" fill="#202931">CompactionRL</text><line x1="470.1" x2="520.85" y1="52" y2="52" stroke="#6b7681" stroke-width="3"/><line x1="470.1" x2="470.1" y1="45" y2="59" stroke="#6b7681"/><line x1="520.85" x2="520.85" y1="45" y2="59" stroke="#6b7681"/><circle cx="495.475" cy="52" r="6" fill="#6b7681"/><text x="495.475" y="36" text-anchor="middle" font-size="17" fill="#6b7681">47.1 ± 3.5</text><text x="0" y="123" font-size="17" fill="#202931">CAMG-RL</text><line x1="533.9" x2="575.9499999999999" y1="118" y2="118" stroke="#2066a4" stroke-width="3"/><line x1="533.9" x2="533.9" y1="111" y2="125" stroke="#2066a4"/><line x1="575.9499999999999" x2="575.9499999999999" y1="111" y2="125" stroke="#2066a4"/><circle cx="554.925" cy="118" r="6" fill="#2066a4"/><text x="554.925" y="102" text-anchor="middle" font-size="17" fill="#2066a4">55.3 ± 2.9</text></svg><dl class="compact-stats"><div><dt>CompactionRL</dt><dd>47.1 ± 3.5</dd></div><div><dt>CAMG-RL</dt><dd>55.3 ± 2.9</dd></div></dl><p class="chart-note">Mean ± standard deviation, not a confidence interval. Five runs per method; individual run values are not reconstructed. Revised Appendix D.8.</p></article><article class="evidence-panel"><p class="source-tag new">Additional experiments · Nov 2026</p><h3>On another model family</h3><p>A separately trained Gemma 3 4B policy also improves.</p><div class="bar-chart" role="list"><div class="bar-row gray" role="listitem"><span class="bar-name">Frozen</span><div class="bar-track" aria-hidden="true"><span style="width:25.0000%"></span></div><strong>15.0%</strong></div><div class="bar-row blue" role="listitem"><span class="bar-name">CAMG-RL trained</span><div class="bar-track" aria-hidden="true"><span style="width:79.5000%"></span></div><strong>47.7%</strong></div></div><p class="axis-label">Average task success (%) · maximum 60</p><p class="chart-note">15.0 → 47.7 on Gemma 3 4B. This is training replication, not zero-shot transfer of Qwen weights. Revised Appendix D.13.</p></article></div>
+<details><summary>Model-family results</summary><p class="table-hint">Swipe or scroll horizontally to see all columns →</p><div class="table-scroll" tabindex="0" role="region" aria-label="Model-family replication · task success (%)"><table><caption>Model-family replication · task success (%)</caption><thead><tr><th scope="col">Gemma 3 4B policy</th><th scope="col">Shop</th><th scope="col">Coding</th><th scope="col">DeepResearch</th><th scope="col">AutoResearch</th><th scope="col">Average</th></tr></thead><tbody><tr><th scope="row">Frozen</th><td>10.9</td><td>8.6</td><td>32.8</td><td>7.8</td><td>15.0</td></tr><tr class="trained"><th scope="row">CAMG-RL trained</th><td>91.4</td><td>18.8</td><td>49.2</td><td>31.3</td><td>47.7</td></tr></tbody></table></div></details>
+</div></section>
+<section id="external" class="section wrap">
+<div class="section-heading"><p class="eyebrow">05 / Outside CAMG</p><h2>Gains extend to external benchmarks.</h2><p class="section-lede">The trained 4B and 9B policies improve over their own frozen bases on software engineering and machine-learning engineering tasks.</p></div>
+<p class="source-tag">Published · Table 3</p><p class="table-hint">Swipe or scroll horizontally to see all columns →</p><div class="table-scroll" tabindex="0" role="region" aria-label="External benchmark transfer · success (%)"><table><caption>External benchmark transfer · success (%)</caption><thead><tr><th scope="col">Model</th><th scope="col">SWE-bench Verified</th><th scope="col">MLE-bench Lite</th></tr></thead><tbody><tr><th scope="row">Qwen3.5-4B</th><td>7.6</td><td>0.0</td></tr><tr class="trained"><th scope="row">CAMG-RL-4B</th><td>15.8</td><td>4.5</td></tr><tr><th scope="row">Qwen3.5-35B-A3B</th><td>15.6</td><td>4.5</td></tr><tr><th scope="row">Qwen3.5-9B</th><td>14.8</td><td>4.5</td></tr><tr class="trained"><th scope="row">CAMG-RL-9B</th><td>27.6</td><td>9.1</td></tr><tr><th scope="row">Qwen3.5-122B-A10B</th><td>22.0</td><td>9.1</td></tr></tbody></table></div>
+<p class="chart-note">Larger frozen models are capability references, not compute-equivalent controls. These benchmark outcomes do not isolate a memory-only transfer effect.</p>
+</section>
+<section id="gym" class="section tint"><div class="wrap">
+<div class="section-heading"><p class="eyebrow">06 / The learning setup</p><h2>Four worlds. One file-memory interface.</h2><p class="section-lede">CAMG supplies long-horizon environments. CAMG-RL learns to act and remember from their native task rewards.</p></div>
+<div class="environments"><article><span>01</span><h3>Shop</h3><p>WebShop</p><p>Retain preferences, budget constraints and product evidence.</p></article><article><span>02</span><h3>Coding</h3><p>SWE-smith</p><p>Keep the diagnosis, code changes and test status across context boundaries.</p></article><article><span>03</span><h3>DeepResearch</h3><p>LiteResearcher</p><p>Preserve sources, findings and the next question to investigate.</p></article><article><span>04</span><h3>AutoResearch</h3><p>OpenMLE task packages</p><p>Track hypotheses, experiments and intermediate results.</p></article></div>
+<div id="method" class="method"><div class="method-step"><span class="tiny-label">ONE POLICY</span><strong>Task actions + file operations</strong><p>Read, write, revise, search.</p></div><span class="method-arrow" aria-hidden="true">→</span><div class="method-step"><span class="tiny-label">ONE TRAJECTORY</span><strong>Episode-persistent workspace</strong><p>Useful state survives context replacement.</p></div><span class="method-arrow" aria-hidden="true">→</span><div class="method-step"><span class="tiny-label">ONE TASK OBJECTIVE</span><strong>Downstream reward → PPO</strong><p>No extra memory-writing reward.</p></div></div>
+<p class="chart-note">A single shared policy is trained with fully asynchronous PPO. At a context boundary, the policy writes a bounded continuation file. The environment replaces the context and supplies its path; the policy must read the contents with an ordinary file action. The reset itself is not a policy action.</p>
+</div></section>
+<section id="case" class="section wrap">
+<div class="section-heading"><p class="eyebrow">07 / Back to the task</p><h2>Save the evidence.<br>Pick up where the work left off.</h2><p class="section-lede">In a recorded Scrapy training episode, a fix survives context replacement and becomes the starting point for testing.</p></div>
+<div class="case-nav" role="group" aria-label="Focus a step in the recorded trajectory"><button type="button" data-case="case-write" aria-pressed="true">18 / Write</button><button type="button" data-case="case-read" aria-pressed="false">19 / Read</button><button type="button" data-case="case-test" aria-pressed="false">30 / Finish</button></div>
+<div class="case-panels"><article id="case-write" class="case-panel selected"><p class="tiny-label">ROUND 18 · BEFORE REPLACEMENT</p><h3>Record the fix and next checks</h3><pre>objective: fix response logging
+evidence: added _mqpush
+  in scrapy/core/scheduler.py
+tested: no _mqpush error
+next: run tests, confirm
+  logging, then submit</pre><p>The implementation change was made at round 12. The file preserves what changed and what still needs testing.</p></article><article id="case-read" class="case-panel"><p class="tiny-label">ROUND 19 · NEW ACTIVE CONTEXT</p><h3>Read, then resume testing</h3><pre>cat .agent_memory/CONTINUATION.md
+python test_spider.py
+python -m pytest tests/test_crawl.py -v</pre><p>The first command restores the saved state. Subsequent commands test the change; file contents are not automatically injected.</p></article><article id="case-test" class="case-panel"><p class="tiny-label">ROUND 30 · TERMINAL OUTCOME</p><h3>Hidden tests passed</h3><div class="case-result">1.00<span>terminal return</span></div><p>Completed within the 40-round budget. A real training trajectory, shown as an example—not a held-out result or proof of what would happen without memory.</p></article></div>
+<p class="chart-note">Published Figure 5 / Appendix A.4.3. Text excerpts are shortened for presentation. All three stages remain available without JavaScript.</p>
+</section>
+<section id="paper" class="section paper-section"><div class="wrap">
+<p class="eyebrow">Paper &amp; resources</p><h2>Coding Agent Memory Post-training</h2><p class="paper-subtitle">Unlocking the Memory Potential of Pre-trained File Operations for Long-Horizon Tasks via Reinforcement Learning</p><p class="paper-authors">Lirui Luo · Kelong Mao · Heming Xia · Rongqing Li · Xinwei Yang · Luyu Chen · Kieran Wong · Yudong Guo · Xinrui Wang · Jiayin Zhu · Simiu Gu · Sulong Xu · Cong Fang</p><p class="affiliation">JD.com</p>
+<div class="resource-grid"><a href="https://arxiv.org/abs/2609.34422"><span>01 / PAPER</span><strong>Read on arXiv ↗</strong><small>Version history and latest public manuscript</small></a><a href="assets/slides/coding-agent-memory-post-training-slides.pdf"><span>02 / PRESENTATION</span><strong>Slides · PDF ↗</strong><small>16-slide research talk · updated November 14</small></a><a href="assets/slides/coding-agent-memory-post-training-slides.pptx"><span>03 / EDITABLE</span><strong>Slides · PowerPoint ↗</strong><small>Native editable text, diagrams and charts</small></a><a href="https://github.com/jd-opensource/CodingAgentMemoryGym"><span>04 / IMPLEMENTATION</span><strong>Code on GitHub ↗</strong><small>Shared CodingAgentMemoryGym repository</small></a></div>
+<div id="versions" class="version-note"><h3>Two evidence versions, clearly separated</h3><p><strong>Published results</strong> refer to the September 2026 arXiv release. <strong>November additions</strong> are author-reported results supplied for the revised manuscript; they are not represented as already present in that arXiv release. Raw run receipts were not independently re-verified for this presentation update.</p><p>The website and slides share <a href="data/research.json">one downloadable results file</a>, with experiment-specific protocols and limitations. The <a href="assets/paper.pdf">archived local paper PDF</a> is the original v1; use arXiv above for the current public version.</p></div>
+<details class="citation"><summary>Cite this work</summary><pre id="citation-text">@article{luo2026coding,
+  title={Coding Agent Memory Post-training: Unlocking the Memory Potential of Pre-trained File Operations for Long-Horizon Tasks via Reinforcement Learning},
+  author={Luo, Lirui and Mao, Kelong and Xia, Heming and Li, Rongqing and Yang, Xinwei and Chen, Luyu and Wong, Kieran and Guo, Yudong and Wang, Xinrui and Zhu, Jiayin and Gu, Simiu and Xu, Sulong and Fang, Cong},
+  journal={arXiv preprint arXiv:2609.34422},
+  year={2026}
+}</pre><button type="button" id="copy-citation" class="button">Copy BibTeX</button><span id="copy-status" role="status" aria-live="polite"></span></details>
+<div class="related"><span class="tiny-label">RELATED WORK · SEPARATE PROJECT</span><p><a href="https://liruiluo.github.io/agentmemorygym-v2/">CAMP-II ↗</a> explores on-policy distillation with the five-environment CAMG-II suite. Its <a href="https://huggingface.co/datasets/LiruiLuo/CAMG-II">dataset ↗</a> is a separate release, not the four-environment data used in this paper.</p></div>
+</div></section>
+</main>
+<footer class="wrap"><a class="brand" href="#top">CAMG<span class="brand-rl">-RL</span></a><p>Familiar operations. Learned memory. Longer-horizon work.</p><span>Updated 14 Nov 2026</span></footer>
+</body></html>

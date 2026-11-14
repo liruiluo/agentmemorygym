@@ -5,3 +5,10 @@ Thumbs.db
 # Local preview artifacts
 *.log
 *.tmp
+
+# Python / local build and QA caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+qa/

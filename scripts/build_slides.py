@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
-"""Build the public paper talk using the author's CRG/SPHERE academic layout.
+"""Build the 16-slide CAMP talk from data/research.json.
 
-Native text, diagrams, and tables stay editable. Plots use public arXiv v1 values;
-generated assets and draft decks belong outside the website repository.
+All charts, diagrams and text are native PowerPoint objects. No chart screenshots,
+invented observations or private research paths are embedded. PDF export is a
+separate, checked step; see render_slides_pdf.py.
 """
 from __future__ import annotations
-
 import argparse
+import hashlib
+import json
 from pathlib import Path
-
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import numpy as np
-from PIL import Image
+from research_data import load, stats, source_caption
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.dml import MSO_LINE_DASH_STYLE
@@ -22,536 +19,284 @@ from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.oxml.xmlchemy import OxmlElement
 from pptx.util import Inches, Pt
 
-SW, SH = 10.0, 5.625
-FONT, CODE = "Arial", "Menlo"
-INK, MID, LIGHT, LINE = "111111", "555555", "888888", "CCD2D8"
-BLUE, PALE, RED, GREEN, WHITE = "285F91", "EAF1F8", "C8192E", "19806A", "FFFFFF"
-PROJECT = "https://liruiluo.github.io/agentmemorygym/"
-PAPER = "https://arxiv.org/abs/2609.34422"
+ROOT=Path(__file__).resolve().parents[1]
+INK,MID,LIGHT,LINE='17232D','586773','667580','DCE3E8'
+BLUE,PALE,RED,GRAY,WHITE='2066A4','EDF4FA','B43437','A9B6C1','FFFFFF'
+FONT,CODE='Arial','Menlo'
 
 
-def rgb(value):
-    return RGBColor.from_string(value)
-
-
-def text(slide, content, x, y, w, h, size=18, color=INK, bold=False,
-         align=PP_ALIGN.LEFT, valign=MSO_ANCHOR.TOP, font=FONT):
-    box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
-    tf = box.text_frame
-    tf.clear()
-    tf.word_wrap = True
-    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
-    tf.vertical_anchor = valign
-    for i, row in enumerate(str(content).split("\n")):
-        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        p.text = row or " "
-        p.alignment = align
-        p.line_spacing = 1.08
-        p.space_after = Pt(0)
+def text(s,content,x,y,w,h,size=18,color=INK,bold=False,align=PP_ALIGN.LEFT,font=FONT):
+    box=s.shapes.add_textbox(Inches(x),Inches(y),Inches(w),Inches(h))
+    tf=box.text_frame;tf.clear();tf.word_wrap=True
+    tf.margin_left=tf.margin_right=tf.margin_top=tf.margin_bottom=0
+    for i,row in enumerate(str(content).split('\n')):
+        p=tf.paragraphs[0] if i==0 else tf.add_paragraph();p.text=row or ' ';p.alignment=align
+        p.line_spacing=1.12;p.space_after=Pt(0)
         for r in p.runs:
-            r.font.name = font
-            r.font.size = Pt(size)
-            r.font.bold = bold
-            r.font.color.rgb = rgb(color)
+            r.font.name=font;r.font.size=Pt(size);r.font.bold=bold;r.font.color.rgb=RGBColor.from_string(color)
     return box
 
 
-def rich(slide, spans, x, y, w, h, size=17, align=PP_ALIGN.LEFT):
-    box = text(slide, "", x, y, w, h, size, align=align)
-    p = box.text_frame.paragraphs[0]
-    p.clear()
-    for spec in spans:
-        if isinstance(spec, str):
-            spec = (spec, INK, False)
-        r = p.add_run()
-        r.text = spec[0]
-        r.font.name = FONT
-        r.font.size = Pt(size)
-        r.font.color.rgb = rgb(spec[1] if len(spec) > 1 else INK)
-        r.font.bold = spec[2] if len(spec) > 2 else False
-    return box
+def rect(s,x,y,w,h,fill=WHITE,stroke=LINE,width=1,oval=False):
+    o=s.shapes.add_shape(MSO_SHAPE.OVAL if oval else MSO_SHAPE.RECTANGLE,Inches(x),Inches(y),Inches(w),Inches(h))
+    o.fill.solid();o.fill.fore_color.rgb=RGBColor.from_string(fill);o.line.color.rgb=RGBColor.from_string(stroke);o.line.width=Pt(width)
+    return o
 
 
-def rect(slide, x, y, w, h, fill=WHITE, stroke=INK, width=1.1, oval=False):
-    kind = MSO_SHAPE.OVAL if oval else MSO_SHAPE.RECTANGLE
-    s = slide.shapes.add_shape(kind, Inches(x), Inches(y), Inches(w), Inches(h))
-    s.fill.solid()
-    s.fill.fore_color.rgb = rgb(fill)
-    s.line.color.rgb = rgb(stroke)
-    s.line.width = Pt(width)
-    return s
-
-
-def line(slide, x1, y1, x2, y2, color=LINE, width=1.1, arrow=False, dash=False):
-    s = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT,
-                                  Inches(x1), Inches(y1), Inches(x2), Inches(y2))
-    s.line.color.rgb = rgb(color)
-    s.line.width = Pt(width)
-    if dash:
-        s.line.dash_style = MSO_LINE_DASH_STYLE.DASH
+def line(s,x1,y1,x2,y2,color=LINE,width=1,arrow=False,dash=False):
+    o=s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT,Inches(x1),Inches(y1),Inches(x2),Inches(y2))
+    o.line.color.rgb=RGBColor.from_string(color);o.line.width=Pt(width)
+    if dash:o.line.dash_style=MSO_LINE_DASH_STYLE.DASH
     if arrow:
-        tail = OxmlElement("a:tailEnd")
-        tail.set("type", "triangle")
-        tail.set("w", "med")
-        tail.set("len", "med")
-        s.line._get_or_add_ln().append(tail)
-    return s
+        tail=OxmlElement('a:tailEnd');tail.set('type','triangle');tail.set('w','med');tail.set('len','med');o.line._get_or_add_ln().append(tail)
+    return o
 
 
-def image(slide, path, x, y, w, h):
-    with Image.open(path) as im:
-        iw, ih = im.size
-    scale = min(w / iw, h / ih)
-    ww, hh = iw * scale, ih * scale
-    return slide.shapes.add_picture(str(path), Inches(x+(w-ww)/2),
-                                   Inches(y+(h-hh)/2), Inches(ww), Inches(hh))
+def label(s,copy,x,y,w=8.8,color=MID):return text(s,copy,x,y,w,.23,10,color)
+
+def footer(s,copy,num):
+    line(s,.45,5.23,9.55,5.23)
+    text(s,copy,.45,5.34,8.65,.19,8.5,MID)
+    text(s,f'{num:02}',9.15,5.32,.4,.23,10,MID,align=PP_ALIGN.RIGHT)
 
 
-def title(slide, heading):
-    size = 21.5 if len(heading) < 50 else 20.2
-    text(slide, heading, .13, .06, 8.94, .52, size=size,
-         valign=MSO_ANCHOR.MIDDLE)
-    text(slide, "JD.com", 9.16, .19, .68, .24, size=12, bold=True,
-         color=RED, align=PP_ALIGN.RIGHT)
+def takeaway(s,copy):text(s,copy,.5,4.72,9,.42,17,BLUE,bold=True)
+
+def big(s,value,caption,x=7.25,y=1.9,w=2.25,caption_h=1.1):
+    text(s,value,x,y,w,.67,36,BLUE,bold=True)
+    text(s,caption,x,y+.83,w,caption_h,14,MID)
 
 
-def conclusion(slide, spans, y=4.91, size=17):
-    return rich(slide, spans, .42, y, 9.16, .55, size, PP_ALIGN.CENTER)
+def filebox(s,title,body,x,y,w,h,size=13):
+    rect(s,x,y,w,h,'F6F8FA',LINE)
+    rect(s,x,y,.035,h,BLUE,BLUE,0)
+    label(s,title,x+.18,y+.13,w-.36,BLUE)
+    line(s,x+.15,y+.47,x+w-.15,y+.47)
+    text(s,body,x+.2,y+.66,w-.4,h-.8,size,INK,font=CODE)
 
 
-def source(slide, copy):
-    text(slide, copy, .46, 5.42, 9.1, .15, size=8, color=LIGHT,
-         align=PP_ALIGN.CENTER)
+def hbars(s,rows,x=.55,y=1.45,w=6.3,row_h=.49,maxval=60,label_w=1.8,colors=None,unit=''):
+    plot_x=x+label_w;plot_w=w-label_w-.65
+    n=len(rows)
+    for tick in range(0,int(maxval)+1,20 if maxval>=40 else 10):
+        xx=plot_x+tick/maxval*plot_w
+        line(s,xx,y-.04,xx,y+n*row_h-.12,'E5E9ED',.6)
+        text(s,str(tick),xx-.12,y+n*row_h+.03,.3,.2,9,MID,align=PP_ALIGN.CENTER)
+    for i,(name,v) in enumerate(rows):
+        yy=y+i*row_h;col=colors[i] if colors else (BLUE if 'CAMG' in name else GRAY)
+        text(s,name,x,yy+.025,label_w-.12,row_h-.06,12.5,INK,bold=col==BLUE)
+        if v>0:rect(s,plot_x,yy+.035,v/maxval*plot_w,.24,col,col,0)
+        text(s,f'{v:.1f}{unit}',plot_x+v/maxval*plot_w+.09,yy+.015,.6,.3,13,col if col==BLUE else MID,bold=col==BLUE)
 
 
-def metric(slide, value, label, y, color=RED, x=7.18, w=2.42):
-    text(slide, value, x, y, w, .49, size=29, color=color, bold=True,
-         align=PP_ALIGN.CENTER)
-    text(slide, label, x, y+.55, w, .48, size=12.5, color=MID,
-         align=PP_ALIGN.CENTER)
+def grouped(s,groups,series,x=.8,y=1.6,w=6.0,h=2.65,maximum=100,ticks=None,decimals=1,legend=True,label_h=.44):
+    """Zero-based native bars; series = [(name, values, color), ...]."""
+    ticks=ticks if ticks is not None else [0,maximum/2,maximum]
+    for t in ticks:
+        yy=y+h-t/maximum*h
+        line(s,x,yy,x+w,yy,'E5E9ED',.6)
+        text(s,f'{t:g}',x-.46,yy-.09,.33,.2,9,MID,align=PP_ALIGN.RIGHT)
+    cell=w/len(groups);barw=min(.38,cell*.23)
+    for i,g in enumerate(groups):
+        center=x+cell*(i+.5)
+        text(s,g,center-cell/2,y+h+.12,cell,label_h,12,INK,align=PP_ALIGN.CENTER)
+        for j,(_,vs,col) in enumerate(series):
+            v=vs[i];xx=center+(j-(len(series)-1)/2)*(barw+.09)-barw/2;hh=v/maximum*h
+            if hh>0:rect(s,xx,y+h-hh,barw,hh,col,col,0)
+            text(s,f'{v:.{decimals}f}',xx-.16,y+h-hh-.31,barw+.32,.27,12,col if col==BLUE else MID,bold=col==BLUE,align=PP_ALIGN.CENTER)
+    pos=x
+    for name,_,col in (series if legend else []):
+        rect(s,pos,y-.56,.13,.13,col,col,0);text(s,name,pos+.22,y-.61,2.8,.3,12,MID);pos+=3.05
 
 
-def node(slide, label, x, y, w, h=.67, color=BLUE, fill=WHITE, size=17):
-    rect(slide, x, y, w, h, fill, color)
-    text(slide, label, x+.06, y+.04, w-.12, h-.08, size=size, bold=True,
-         color=color, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
-
-
-def terminal(slide, label, rows, x, y, w, h, size=14, accent=BLUE):
-    rect(slide, x, y, w, h, WHITE, accent)
-    rect(slide, x, y, w, .36, PALE, accent, .6)
-    text(slide, label, x+.13, y+.065, w-.26, .23, size=12.5, color=accent, bold=True)
-    text(slide, rows, x+.17, y+.57, w-.34, h-.69, size=size, font=CODE)
-
-
-def links(slide, y, size=11):
-    box = rich(slide, [("Project: ", INK, True),
-                       ("liruiluo.github.io/agentmemorygym", BLUE)],
-               .55, y, 5.0, .25, size)
-    box.text_frame.paragraphs[0].runs[1].hyperlink.address = PROJECT
-    box = rich(slide, [("Paper: ", INK, True), ("arXiv:2609.34422", BLUE)],
-               6.15, y, 3.25, .25, size)
-    box.text_frame.paragraphs[0].runs[1].hyperlink.address = PAPER
-
-
-def charts(out):
-    out.mkdir(parents=True, exist_ok=True)
-    # Set sizes for their physical slide dimensions, not a page-sized figure.
-    plt.rcParams.update({"font.family": "Arial", "font.size": 13,
-                         "axes.labelsize": 14, "xtick.labelsize": 12,
-                         "ytick.labelsize": 12, "text.color": "#111111",
-                         "axes.labelcolor": "#555555", "axes.edgecolor": "#A8AFB6",
-                         "xtick.color": "#555555", "ytick.color": "#555555"})
-    blue, grey, red = "#"+BLUE, "#BAC2CB", "#"+RED
-
-    def base(width=6.6, height=3.95):
-        f, a = plt.subplots(figsize=(width, height), dpi=220)
-        a.spines[["top", "right"]].set_visible(False)
-        a.set_axisbelow(True)
-        a.tick_params(length=0, pad=7)
-        return f, a
-
-    def save(fig, name):
-        fig.savefig(out/name, facecolor="white")
-        plt.close(fig)
-
-    f, a = base()
-    names = ["Qwen3.5-4B", "Mem0", "Letta Code", "CompactionRL", "AgeMem", "CAMG-RL"]
-    vals = [17.4, 19.7, 17.8, 48.0, 25.3, 54.4]
-    bars = a.barh(np.arange(6), vals, color=[grey]*5+[blue], height=.62)
-    a.set_yticks(np.arange(6), names)
-    a.invert_yaxis()
-    a.set_xlim(0, 64)
-    a.set_xticks([0, 20, 40, 60])
-    a.set_xlabel("Average task success (%)", labelpad=10)
-    a.grid(axis="x", color="#E5E8EB", linewidth=.7)
-    a.spines["left"].set_visible(False)
-    for b, v in zip(bars, vals):
-        a.text(v+1.3, b.get_y()+b.get_height()/2, f"{v:.1f}", va="center", size=14,
-               color=blue if v==54.4 else "#444444", weight="bold" if v==54.4 else "normal")
-    f.subplots_adjust(left=.25, right=.97, bottom=.18, top=.98)
-    save(f, "main.png")
-
-    f, a = base()
-    x = np.arange(4)
-    camg = [97.1, 26.6, 55.5, 38.3]
-    compact = [97.5, 19.5, 50.8, 24.2]
-    for dx, values, color, lab in [(-.19, compact, grey, "CompactionRL"),
-                                   (.19, camg, blue, "CAMG-RL")]:
-        bs = a.bar(x+dx, values, .36, color=color, label=lab)
-        for b, v in zip(bs, values):
-            a.text(b.get_x()+b.get_width()/2, v+2, f"{v:.1f}", ha="center", size=11)
-    a.set_xticks(x, ["Shop", "Coding", "Deep\nResearch", "Auto\nResearch"])
-    a.set_ylim(0, 112)
-    a.set_yticks([0, 25, 50, 75, 100])
-    a.set_ylabel("Task success (%)")
-    a.grid(axis="y", color="#E5E8EB", linewidth=.7)
-    a.legend(frameon=False, ncol=2, loc="upper center", bbox_to_anchor=(.5, 1.17), fontsize=12)
-    f.subplots_adjust(left=.115, right=.98, bottom=.18, top=.84)
-    save(f, "domains.png")
-
-    f, a = base()
-    x = np.arange(4)
-    # Rounded point estimates shown in the original Fig. 3a. No reconstructed error bars.
-    files = [1.19, .08, .25, .27]
-    tools = [1.40, .47, .27, .33]
-    for i, (v1, v2) in enumerate(zip(files, tools)):
-        a.plot([i-.11, i+.11], [v1, v2], color="#CBD3DB", lw=2, zorder=1)
-    a.scatter(x-.11, files, s=100, color=blue, label="Filesystem actions", zorder=3)
-    a.scatter(x+.11, tools, s=100, color=grey, edgecolor="#6F7F8C", label="Dedicated tools", zorder=3)
-    for i, (v1, v2) in enumerate(zip(files, tools)):
-        a.annotate(f"{v1:.2f}", (i-.11, v1), xytext=(-8,-19), textcoords="offset points",
-                   ha="center", size=12, color=blue, weight="bold")
-        a.annotate(f"{v2:.2f}", (i+.11, v2), xytext=(8,11), textcoords="offset points",
-                   ha="center", size=12, color="#666666")
-    a.set_xticks(x, ["Store", "Retrieve", "Revise", "Remove"])
-    a.set_xlim(-.5, 3.5)
-    a.set_ylim(-.10, 1.68)
-    a.set_yticks([0, .5, 1.0, 1.5])
-    a.set_ylabel("NLL (nats / action token)")
-    a.grid(axis="y", color="#E5E8EB", linewidth=.7)
-    a.legend(frameon=False, ncol=2, loc="upper center", bbox_to_anchor=(.5, 1.17), fontsize=12)
-    f.subplots_adjust(left=.15, right=.98, bottom=.15, top=.85)
-    save(f, "prior.png")
-
-    f, a = base()
-    x = np.arange(2)
-    for dx, vals, color, lab in [(-.17, [8.0,20.9],blue,"CAMG-RL"),
-                                (.17,[0,0],grey,"AgeMem")]:
-        bs=a.bar(x+dx, vals, .31, color=color, label=lab)
-        for b,v in zip(bs,vals):
-            a.text(b.get_x()+b.get_width()/2,v+.8,f"{v:.1f}%",ha="center",size=16,
-                   color=color if color==blue else "#666666",weight="bold")
-    a.set_ylim(0,27)
-    a.set_yticks([0,5,10,15,20,25])
-    a.set_xticks(x, ["First quarter\nupdates 1–50", "Final quarter\nupdates 151–200"])
-    a.set_ylabel("Episodes with a complete chain (%)")
-    a.grid(axis="y",color="#E5E8EB",linewidth=.7)
-    a.legend(frameon=False,ncol=2,loc="upper center",bbox_to_anchor=(.5,1.15))
-    f.subplots_adjust(left=.14,right=.98,bottom=.19,top=.85)
-    save(f,"chains.png")
-
-    f,a=base()
-    vals=[54.4,21.1,41.8,28.1]
-    labels=["Full\nCAMG-RL", "No memory\ngradients", "Continuation\nonly: retrain", "Continuation\nonly: eval"]
-    colors=[blue,"#8FAECC","#ACC4D9",grey]
-    bs=a.bar(np.arange(4),vals,color=colors,width=.62)
-    a.set_ylim(0,65)
-    a.set_xticks(np.arange(4),labels)
-    a.set_yticks([0,20,40,60])
-    a.set_ylabel("Average task success (%)")
-    a.grid(axis="y",color="#E5E8EB",linewidth=.7)
-    for b,v in zip(bs,vals):
-        a.text(b.get_x()+b.get_width()/2,v+1.3,f"{v:.1f}",ha="center",size=16,weight="bold")
-    a.axvline(2.5,color="#CCD2D8",lw=1,ls="--")
-    f.subplots_adjust(left=.12,right=.98,bottom=.20,top=.96)
-    save(f,"ablation.png")
-
-    f,a=base()
-    y=np.arange(4)
-    for dy,values,c,lab in [(-.18,[-29.4,-13.8,-4.8,-8.3],red,"Blank"),
-                            (.18,[-14.4,-6.5,-16.7,-8.3],blue,"Shuffled")]:
-        bs=a.barh(y+dy,values,.33,color=c,label=lab)
-        for b,v in zip(bs,values):
-            a.text(v-.7,b.get_y()+b.get_height()/2,f"{v:.1f}",ha="right",va="center",size=12,color=c)
-    a.set_yticks(y,["Shop", "Coding", "DeepResearch", "AutoResearch"])
-    a.invert_yaxis()
-    a.set_xlim(-37,1)
-    a.set_xticks([-30,-20,-10,0])
-    a.set_xlabel("Success change vs. intact memory (pp)",labelpad=10)
-    a.grid(axis="x",color="#E5E8EB",linewidth=.7)
-    a.axvline(0,color="#9AA4AD",lw=1)
-    a.spines[["left","top","right"]].set_visible(False)
-    a.legend(frameon=False,ncol=2,loc="upper center",bbox_to_anchor=(.5,1.15))
-    f.subplots_adjust(left=.235,right=.98,bottom=.18,top=.86)
-    save(f,"intervention.png")
-
-
-def build(out_pptx: Path, site_root: Path):
-    work=out_pptx.parent/"generated"
-    charts(work)
-    prs=Presentation()
-    prs.slide_width=Inches(SW)
-    prs.slide_height=Inches(SH)
-    blank=prs.slide_layouts[6]
-    def new(heading=None, note=None):
-        s=prs.slides.add_slide(blank)
-        if heading: title(s,heading)
-        if note: s.notes_slide.notes_text_frame.text=note
+def build(out,root=ROOT):
+    raw=(root/'data/research.json').read_bytes();d=load(root);k=stats(d);sha=hashlib.sha256(raw).hexdigest()
+    prs=Presentation();prs.slide_width=Inches(10);prs.slide_height=Inches(5.625)
+    prs.core_properties.title=d['project']+': '+d['subtitle'];prs.core_properties.author=', '.join(d['authors'])
+    prs.core_properties.subject='CAMP V1 · published results and November 2026 additions'
+    prs.core_properties.keywords='CAMG, CAMG-RL, reinforcement learning, file memory'
+    prs.core_properties.comments='Shared research data SHA256: '+sha
+    outline=[]
+    def slide(heading,source,notes):
+        s=prs.slides.add_slide(prs.slide_layouts[6]);num=len(prs.slides)
+        text(s,heading,.42,.18,8.65,.65,24,INK,bold=False)
+        text(s,'JD.com',8.96,.23,.68,.25,11,RED,bold=True,align=PP_ALIGN.RIGHT)
+        footer(s,source,num)
+        s.notes_slide.notes_text_frame.text=notes+'\n\nSource: '+source+'\nData SHA256: '+sha
+        outline.append((num,heading,source,notes))
         return s
 
-    # 1 — Full centered academic cover.
-    s=new(note="Public paper: arXiv:2609.34422v1. Approximately 15 minutes.")
-    text(s,"JD.com",.26,.22,1.35,.36,size=23,color=RED,bold=True)
-    text(s,"Coding Agent Memory Post-training",.48,1.15,9.04,.56,size=27,bold=True,align=PP_ALIGN.CENTER)
-    text(s,"Unlocking the Memory Potential of Pre-trained File Operations\nfor Long-Horizon Tasks via Reinforcement Learning",
-         .48,1.85,9.04,.75,size=20,bold=True,align=PP_ALIGN.CENTER)
-    text(s,"Lirui Luo · Kelong Mao · Heming Xia · Rongqing Li · Xinwei Yang · Luyu Chen\nKieran Wong · Yudong Guo · Xinrui Wang · Jiayin Zhu · Simiu Gu · Sulong Xu · Cong Fang",
-         .55,3.02,8.9,.56,size=11.4,color=MID,align=PP_ALIGN.CENTER)
-    text(s,"JD.com",.6,3.72,8.8,.28,size=13,bold=True,align=PP_ALIGN.CENTER)
-    links(s,4.27,10.4)
-    line(s,.65,4.76,9.35,4.76)
-    conclusion(s,[("Files as learned memory",BLUE,True),(": 54.4% success across four task worlds.")],4.98,16.5)
+    # 1. Opening: complete identity, not an acronym-only poster.
+    s=slide('','CAMP V1 · 14 November 2026 · arXiv:2609.34422',
+       'The thesis is that ordinary file operations offer a familiar starting point, and task reward teaches a shared policy to use those files as useful memory. This is CAMP V1: four environments and reinforcement learning. Blue-labelled November additions are author-reported revised-manuscript results, not already part of the September arXiv release.')
+    label(s,'REINFORCEMENT LEARNING FOR LONG-HORIZON AGENTS',.5,.55,8.7,BLUE)
+    text(s,'Coding Agent Memory\nPost-training',.5,1.02,7.0,1.28,34,bold=True)
+    text(s,d['subtitle'],.52,2.42,7.0,1.0,18,MID)
+    text(s,'Familiar file operations → learned, useful memory',.52,3.62,8.9,.47,21,BLUE,bold=True)
+    text(s,' · '.join(d['authors']),.52,4.2,8.9,.7,10.5,MID)
+    for i,(t,st) in enumerate([('Files','pre-trained interface'),('RL','native task reward'),('Memory','persistent state')]):
+        y=1.1+i*.79;rect(s,8.05,y,1.42,.56,PALE if i==2 else WHITE,BLUE if i==2 else LINE)
+        text(s,t,8.12,y+.1,1.28,.3,17,BLUE,bold=i==2,align=PP_ALIGN.CENTER)
+        if i<2:line(s,8.76,y+.57,8.76,y+.77,BLUE,1,True)
+    b=text(s,'Project · code · slides',.52,4.97,4,.23,10,BLUE);b.text_frame.paragraphs[0].runs[0].hyperlink.address=d['project_url']
 
-    # 2 — Recompose the teaser into two legible native lanes.
-    s=new("Long tasks need state that outlives context")
-    text(s,"Earlier work",2.05,.94,2.6,.32,size=16,bold=True,align=PP_ALIGN.CENTER)
-    text(s,"After context replacement",6.28,.94,3.05,.32,size=16,bold=True,align=PP_ALIGN.CENTER)
-    line(s,5.51,1.3,5.51,4.51,color=LIGHT,dash=True)
-    text(s,"Context\nonly",.42,1.72,1.12,.65,size=17,bold=True)
-    terminal(s,"Active history", "plan + evidence\nintermediate results",1.84,1.49,3.1,1.18,12.5)
-    line(s,4.99,2.0,6.07,2.0,color=RED,width=1.7,arrow=True)
-    node(s,"Recover lost state",6.18,1.63,2.98,.75,RED,size=17)
-    text(s,"Repeated work",6.18,2.59,2.98,.29,size=14,color=RED,align=PP_ALIGN.CENTER)
-    text(s,"CAMG-RL",.42,3.37,1.29,.4,size=17,bold=True,color=BLUE)
-    terminal(s,"Save working state", "notes.md\nCONTINUATION.md",1.84,3.12,3.1,1.11,13)
-    line(s,4.99,3.66,6.07,3.66,color=BLUE,width=1.7,arrow=True)
-    node(s,"Read → act → finish",6.18,3.28,2.98,.75,BLUE,size=17)
-    text(s,"Files persist across the boundary",2.0,4.4,7.15,.27,size=14,color=BLUE,align=PP_ALIGN.CENTER)
-    conclusion(s,[("Durable state",RED,True),(" lets the next context continue the same task.")])
-    source(s,"Figure 1 · schematic of context-only and file-memory execution")
+    # 2. Motivate with the real sequence, no invented counterfactual.
+    s=slide('What should survive a context boundary?','Published · Figure 5 / Appendix A.4.3 · recorded training trajectory',
+       'Start with the real Scrapy episode. The agent has already edited scheduler.py. At round 18 it writes a continuation record. At round 19, after context replacement, it reads that record. The excerpts are shortened. Do not imply a measured failure of the same task without memory; that counterfactual was not run.')
+    text(s,'Task: fix response logging in Scrapy',.5,.99,9,.42,21)
+    filebox(s,'ROUND 18 / SAVE THE STATE',d['case']['note'],.5,1.65,4.15,2.65,13)
+    line(s,5.04,1.62,5.04,4.32,GRAY,1,dash=True)
+    text(s,'context replaced',4.23,4.37,1.65,.22,9,MID,align=PP_ALIGN.CENTER)
+    filebox(s,'ROUND 19 / PICK UP THE WORK',d['case']['commands'][0]+'\n\n# resume the next checks',5.45,1.65,4.05,2.65,11.3)
+    takeaway(s,'Preserve the diagnosis, the evidence, and the next action.')
 
-    # 3 — Familiar operations on the left, a task-driven learning cycle on the right.
-    s=new("Can task reward unlock the prior in file operations?")
-    text(s,"A familiar action language",.55,.91,4.2,.36,size=18,bold=True,align=PP_ALIGN.CENTER)
-    terminal(s,"shell_command", "cat > notes.md       # store\ngrep -n fact notes.md # find\ncat notes.md         # read\npython revise.py     # revise",.58,1.56,4.24,1.82,13.5)
-    text(s,"Available from pre-training",.62,3.66,4.12,.3,size=15,color=MID,align=PP_ALIGN.CENTER)
-    text(s,"A learned memory strategy",5.48,.91,4.0,.36,size=18,bold=True,align=PP_ALIGN.CENTER)
-    node(s,"Write",5.57,1.67,1.45)
-    node(s,"Read",7.77,1.67,1.45)
-    line(s,7.05,2.01,7.65,2.01,color=BLUE,arrow=True)
-    node(s,"Task reward",6.55,3.12,2.14,.66,RED)
-    line(s,8.51,2.39,8.51,3.02,color=BLUE,arrow=True)
-    text(s,"use in the task",7.0,2.59,1.47,.27,size=12,color=MID,align=PP_ALIGN.CENTER)
-    line(s,6.5,3.45,6.3,3.45,color=RED)
-    line(s,6.3,3.45,6.3,2.42,color=RED,arrow=True)
-    text(s,"learn when / what to retain",5.42,4.03,4.12,.31,size=15,color=RED,align=PP_ALIGN.CENTER)
-    conclusion(s,[("CAMG-RL",RED,True),(" trains the use of ordinary files from downstream task reward.")])
-    source(s,"Introduction · the commands illustrate the common executable interface")
+    # 3. Interface prior.
+    s=slide('The file interface is familiar before RL','Published · Figure 3a · frozen Qwen3.5-4B · rounded point estimates',
+       'Lower negative log-likelihood means these valid action tokens are more likely under the frozen model. The strongest contrast here is retrieval. This is evidence of interface familiarity, not proof of which pre-training corpus caused it. No uncertainty bars have been reconstructed.')
+    label(s,'NEGATIVE LOG-LIKELIHOOD · NATS PER ACTION TOKEN · LOWER IS BETTER',.55,.99)
+    r=d['prior']['rows'];grouped(s,[x[0] for x in r],[('File operations',[x[1] for x in r],BLUE),('Dedicated tools',[x[2] for x in r],GRAY)],y=1.83,h=2.35,maximum=1.5,ticks=[0,.5,1,1.5],decimals=2)
+    big(s,'0.08','Retrieval NLL with files\nvs. 0.47 with dedicated tools',y=2.05)
+    takeaway(s,'Build on an interface the model already knows.')
 
-    # 4 — Four native task vignettes, with short task objects instead of a full paper thumbnail.
-    s=new("CAMG connects four long-horizon task worlds")
-    cols=[.46,2.86,5.26,7.66]
-    headings=["Shop","Coding","DeepResearch","AutoResearch"]
-    for x,heading in zip(cols,headings):
-        text(s,heading,x,.99,2.12,.35,size=18,color=BLUE,bold=True,align=PP_ALIGN.CENTER)
-        line(s,x,1.43,x+2.12,1.43,color=BLUE)
-    text(s,"Earlier choice",.58,1.7,1.9,.26,size=13,color=MID)
-    rect(s,.62,2.15,.43,.56,"23272B","23272B")
-    text(s,"Black case",1.19,2.3,1.22,.29,size=13,bold=True)
-    line(s,1.49,2.89,1.49,3.3,color=BLUE,arrow=True)
-    text(s,"Later purchase",.58,3.49,1.9,.26,size=13,color=MID)
-    text(s,"Match the earlier\ncolor preference",.58,3.86,1.98,.55,size=14)
-    terminal(s,"Repository", "items()\n → wrong order\n\npatch + tests",2.91,1.69,2.02,1.88,12.5)
-    text(s,"Carry fixes and\ntest evidence",2.94,3.91,1.96,.56,size=14)
-    for yy,lab in [(1.8,"Search"),(2.49,"Visit sources"),(3.18,"Answer")]:
-        node(s,lab,5.46,yy,1.72,.45,size=13)
-        if yy<3: line(s,6.32,yy+.47,6.32,yy+.63,color=BLUE,arrow=True)
-    text(s,"Retain facts and\nsource evidence",5.35,3.91,1.96,.56,size=14)
-    terminal(s,"ML workspace", "train.csv\nmodel.py\nsubmission.csv",7.71,1.69,2.03,1.88,12)
-    text(s,"Reuse experiments\nand intermediate files",7.70,3.91,2.07,.56,size=14)
-    conclusion(s,[("Native tasks + shell access + episode-persistent workspace",BLUE,True)],4.98,17)
-    source(s,"Section 4 · task vignettes redrawn from the public examples in Appendix A")
+    # 4. Environment identity.
+    s=slide('One shared policy, four kinds of work','CAMG environments · V1 suite · four domains',
+       'CAMG is the environment suite, CAMG-RL is the learning method, and fully asynchronous PPO is its system implementation. Native task semantics and grading remain with the environments. The final policy is shared, not four separately deployed environment policies. Do not substitute CAMP-II’s General/Visual domains.')
+    domains=[('Shop','WebShop','Preferences, budget,\nproduct evidence'),('Coding','SWE-smith','Diagnosis, patches,\ntest status'),('DeepResearch','LiteResearcher','Sources, findings,\nopen questions'),('AutoResearch','OpenMLE packages','Hypotheses, trials,\nintermediate results')]
+    for i,(name,sub,mem) in enumerate(domains):
+        x=.5+i*2.28;line(s,x,1.35,x+2.05,1.35,INK,1.4);label(s,f'0{i+1}',x,1.51,2)
+        text(s,name,x,1.92,2.08,.4,19,bold=True);label(s,sub,x,2.39,2.08,BLUE);text(s,mem,x,2.91,2.08,.85,14,MID)
+    rect(s,1.55,4.02,6.9,.46,PALE,PALE,0);text(s,'Shared policy  +  episode-persistent workspace',1.7,4.1,6.6,.3,17,BLUE,bold=True,align=PP_ALIGN.CENTER)
+    takeaway(s,'Learn a memory behavior across heterogeneous tasks.')
 
-    # 5 — System diagram with explicit flow and shared learning ownership.
-    s=new("One policy learns across all four environments")
-    node(s,"CAMG-RL policy",.66,1.56,2.46,1.0,BLUE,PALE,21)
-    text(s,"native task + file actions",3.23,1.39,2.47,.28,size=12,color=BLUE,align=PP_ALIGN.CENTER)
-    line(s,3.2,1.91,5.72,1.91,color=BLUE,width=1.7,arrow=True)
-    line(s,5.72,2.26,3.2,2.26,color=MID,width=1.5,arrow=True)
-    text(s,"observation + task reward",3.23,2.43,2.47,.3,size=12,color=MID,align=PP_ALIGN.CENTER)
-    node(s,"Shop",5.91,1.42,1.54,.59,size=16)
-    node(s,"Coding",7.74,1.42,1.73,.59,size=16)
-    node(s,"DeepResearch",5.91,2.14,1.54,.59,size=12.5)
-    node(s,"AutoResearch",7.74,2.14,1.73,.59,size=12.5)
-    text(s,"Parallel environment episodes",5.89,.91,3.67,.28,size=16,bold=True,align=PP_ALIGN.CENTER)
-    node(s,"Persistent files",.66,3.23,2.25,.65,BLUE,size=17)
-    line(s,1.71,2.62,1.71,3.13,color=BLUE,arrow=True)
-    line(s,2.12,3.13,2.12,2.62,color=BLUE,arrow=True)
-    text(s,"write / read",.77,4.02,2.2,.27,size=13,color=MID,align=PP_ALIGN.CENTER)
-    node(s,"Episode queue",5.58,3.71,2.02,.70,BLUE,size=17)
-    line(s,8.64,2.82,8.64,4.06,color=BLUE)
-    line(s,8.64,4.06,7.73,4.06,color=BLUE,arrow=True)
-    text(s,"completed\ntrajectories",8.71,3.25,1.08,.56,size=11,color=MID)
-    node(s,"Actor + critic",3.01,3.71,2.0,.70,RED,size=17)
-    line(s,5.47,4.06,5.14,4.06,color=RED,arrow=True)
-    line(s,4.0,3.61,4.0,3.07,color=RED)
-    line(s,4.0,3.07,2.79,3.07,color=RED)
-    line(s,2.79,3.07,2.79,2.63,color=RED,arrow=True)
-    text(s,"publish weights",3.38,2.82,1.59,.22,size=11,color=RED)
-    conclusion(s,[("Fully asynchronous PPO",RED,True),(" overlaps rollouts and learning.")])
-    source(s,"Figure 2 · shared policy and learner; task semantics remain in each environment")
+    # 5. One learning path.
+    s=slide('Task reward trains both acting and remembering','CAMG-RL method · ordinary file operations · fully asynchronous PPO',
+       'The policy samples task and file actions as part of one trajectory; a shell action can contain both. Native task rewards supply credit through PPO. The environment owns context-replacement timing and the mechanical reset. Before reset the policy writes the bounded continuation file, and after reset it gets only the path and reads it normally. There is no separate memory-writing reward and the reset has no policy token or optimizer row. Responses may include free-form reasoning; do not reintroduce the obsolete no-thinking claim.')
+    stages=[('Policy','task + file actions'),('Environment','persistent workspace'),('Task outcome','native reward'),('PPO update','shared parameters')]
+    for i,(a,b) in enumerate(stages):
+        x=.5+i*2.31;rect(s,x,1.65,1.98,1.1,PALE if i==0 else WHITE,BLUE if i==0 else LINE)
+        text(s,a,x+.12,1.84,1.74,.3,18,BLUE if i==0 else INK,bold=True,align=PP_ALIGN.CENTER)
+        text(s,b,x+.08,2.28,1.82,.3,11,MID,align=PP_ALIGN.CENTER)
+        if i<3:line(s,x+2,2.2,x+2.29,2.2,BLUE,1.4,True)
+    line(s,8.4,2.9,8.4,3.28,BLUE,1);line(s,8.4,3.28,1.5,3.28,BLUE,1);line(s,1.5,3.28,1.5,2.9,BLUE,1,True)
+    text(s,'At a context boundary:',.55,3.8,2.7,.35,16,bold=True)
+    text(s,'write continuation  →  reset context  →  read the file',3.15,3.8,6.2,.35,16,BLUE)
+    takeaway(s,'No separate reward for writing a memory file.')
 
-    # 6 — Explicit context transition with a durable file underneath.
-    s=new("Context changes; the working files remain")
-    text(s,"Current context",.69,.94,2.9,.31,size=17,bold=True,align=PP_ALIGN.CENTER)
-    text(s,"Mechanical reset",3.61,.94,2.75,.31,size=17,color=RED,bold=True,align=PP_ALIGN.CENTER)
-    text(s,"Fresh context",6.63,.94,2.7,.31,size=17,bold=True,align=PP_ALIGN.CENTER)
-    terminal(s,"Policy-authored file", "CONTINUATION.md\n\nplan + evidence\nnext steps",.61,1.61,2.92,1.66,14)
-    text(s,"Clear active history\nKeep task + file paths",3.85,1.94,2.30,.67,size=16,align=PP_ALIGN.CENTER)
-    terminal(s,"Ordinary read action", "cd .agent_memory\ncat CONTINUATION.md",6.59,1.61,2.92,1.66,14)
-    line(s,3.56,2.41,3.81,2.41,color=RED,arrow=True)
-    line(s,6.19,2.41,6.50,2.41,color=RED,arrow=True)
-    rect(s,1.31,3.73,7.4,.57,WHITE,BLUE)
-    text(s,"Episode workspace: continuation · notes · evidence · task files",1.41,3.88,7.2,.3,size=16,color=BLUE,align=PP_ALIGN.CENTER)
-    line(s,2.1,3.31,2.1,3.62,color=BLUE,arrow=True)
-    line(s,8.05,3.64,8.05,3.31,color=BLUE,arrow=True)
-    conclusion(s,[("The policy writes and reads.",BLUE,True),(" The reset contributes no policy action.")])
-    source(s,"Section 5.1 · reset supplies paths; it does not inject saved file contents")
+    # 6. Main result.
+    s=slide(f"CAMG-RL reaches {k['MAIN_AVG']}% average task success",source_caption(d,'main',slide=True)+' · 4 × 128 held-out tasks · equal-weight environment average',
+       'All six original comparisons are visible. The same Qwen3.5-4B backbone reaches 54.4, compared with CompactionRL 48.0; paired 95% CI for the 6.4-point gap is 3.3 to 9.5. Shop is saturated and slightly favors CompactionRL; the largest improvements are Coding and AutoResearch. DeepResearch’s gap is not statistically significant. Displayed averages are from unrounded paper scores.')
+    label(s,'AVERAGE TASK SUCCESS (%)',.55,.99);hbars(s,[(r[0],r[-1]) for r in d['main']['rows']],y=1.5,row_h=.48)
+    big(s,f"+{k['MAIN_GAP']} pp",f"vs. CompactionRL\nPaired 95% CI\n[{k['CI_LO']}, {k['CI_HI']}] pp",y=1.9)
+    takeaway(s,f"Largest gains: Coding +{k['CODING_GAIN']} pp · AutoResearch +{k['AUTO_GAIN']} pp")
 
-    # 7 — Shared response-level credit, including file operations.
-    s=new("Task reward trains the entire memory-use chain")
-    text(s,"One sampled action trajectory",.65,.94,8.7,.32,size=18,bold=True,align=PP_ALIGN.CENTER)
-    xs=[.55,2.43,4.31,6.19,8.07]
-    labels=["Task action","Write","Retrieve","Use","Outcome"]
-    for i,(x,lab) in enumerate(zip(xs,labels)):
-        col=RED if i==4 else BLUE
-        node(s,lab,x,1.86,1.38,.81,col,PALE if i in [1,2] else WHITE,16)
-        if i<4: line(s,x+1.43,2.26,x+1.78,2.26,color=BLUE,arrow=True)
-    text(s,"files as policy actions",2.47,2.91,3.17,.31,size=14,color=BLUE,align=PP_ALIGN.CENTER)
-    text(s,"native task\nreward",8.06,2.96,1.42,.63,size=15,color=RED,align=PP_ALIGN.CENTER)
-    line(s,8.78,3.65,8.78,3.88,color=RED)
-    line(s,8.78,3.88,1.25,3.88,color=RED,width=1.6,arrow=True)
-    for x in xs[:-1]: line(s,x+.69,3.84,x+.69,2.83,color=RED,arrow=True)
-    text(s,"GAE returns → token-level PPO",2.72,4.11,4.6,.34,size=18,color=RED,bold=True,align=PP_ALIGN.CENTER)
-    conclusion(s,[("Task and memory responses share downstream credit.",INK,True)])
-    source(s,"Section 5; Appendix B · no separate memory reward or reset optimizer row")
+    # 7. Syntax-controlled probe, new not published.
+    s=slide('Fixing syntax does not eliminate the interface gap',source_caption(d,'constrained',slide=True),
+       d['constrained']['boundary']+' Constrained decoding gives AgeMem a larger boost, 6.6 points versus Bash 2.9. After both get masking, Bash remains at 20.3 versus AgeMem 16.0, a 4.3-point residual. Do not infer significance or an all-confounds-removed causal conclusion. These results are November additions, not already in the September arXiv release.')
+    label(s,'SUCCESS (%) · FROZEN QWEN3.5-4B · NO RL · 512 TASKS',.55,.99,8.8,BLUE)
+    rows=d['constrained']['rows'];grouped(s,['Unconstrained','Constrained\ndecoding'],[('Bash',[rows[0][-1],rows[1][-1]],BLUE),('AgeMem',[rows[2][-1],rows[3][-1]],GRAY)],x=.9,y=1.83,w=5.7,h=2.35,maximum=25,ticks=[0,10,20,25])
+    big(s,f"{k['CD_GAP']} pp",'Bash advantage after\nboth interfaces receive\ngrammar + schema masks',y=1.9)
+    takeaway(s,'Both improve with valid syntax; a residual gap remains.')
 
-    # 8–11 — Large exhibits plus the prominent metric column used in CRG.
-    s=new("CAMG-RL reaches 54.4% average task success")
-    image(s,work/"main.png",.22,.84,6.62,3.97)
-    metric(s,"54.4%","four-environment average",1.49,BLUE)
-    line(s,7.50,2.76,9.26,2.76)
-    metric(s,"+6.4 pp","over CompactionRL",3.02,RED)
-    conclusion(s,[("Learning to use files",RED,True),(" outperforms the strongest memory baseline.")])
-    source(s,"Table 2 · 128 test tasks per environment · paired difference 95% CI: [3.3, 9.5] pp")
+    # 8. Chains, accurately scoped.
+    s=slide('Training increases complete memory chains','Published · Figure 3b · designated-interface metric · continuation writes excluded',
+       d['acquisition']['boundary']+' CAMG-RL rises from 7.97% to 20.9% over its first and last training quarters. AgeMem’s designated six-tool chain rate is zero. This does not mean no memory use: the additional Coding-only analysis reports AgeMem workspace chains in 80.5% of episodes and CAMG-RL workspace chains in 20.3%. Do not mix those with these pooled training-quarter values.')
+    label(s,'COMPLETE DESIGNATED MEMORY CHAINS (% OF EPISODES)',.55,.99)
+    grouped(s,['First quarter\nupdates 1–50','Last quarter\nupdates 151–200'],[('CAMG-RL',d['acquisition']['camg'],BLUE),('AgeMem',d['acquisition']['agemem'],GRAY)],x=.9,y=1.83,w=5.7,h=2.35,maximum=25,ticks=[0,10,20,25])
+    text(s,'Store → retrieve\n→ use',7.05,1.93,2.45,.85,21,BLUE,bold=True)
+    text(s,'Measured through the\ndesignated memory interface.\n\nNative workspace behavior\nis a separate metric.',7.05,2.88,2.45,1.5,13,MID)
+    takeaway(s,'Count a complete chain, not just a file write.')
 
-    s=new("The largest gains are in Coding and AutoResearch")
-    image(s,work/"domains.png",.23,.80,6.63,3.97)
-    metric(s,"+7.1 pp","Coding",1.47,BLUE)
-    line(s,7.50,2.76,9.26,2.76)
-    metric(s,"+14.1 pp","AutoResearch",3.02,RED)
-    conclusion(s,[("Shop is near saturation; "),("Coding and AutoResearch",RED,True),(" open the gap.")],size=16.5)
-    source(s,"Table 2; Appendix C.1 · paired improvements significant in Coding and AutoResearch")
+    # 9. Same-state intervention, zero anchored.
+    s=slide('The saved content changes what happens next','Published · Appendix D.3 · same-state continuations · eligible tasks only',
+       d['intervention']['boundary']+' Negative bars are percentage-point changes relative to intact files. The eligible counts are 128, 29, 60, and 23. Equal-environment mean losses are 14.1 for blank and 11.5 for shuffled memory. This is stronger local evidence than an uncontrolled correlation between writing and success, but not a population-wide treatment effect.')
+    label(s,'CHANGE IN SUCCESS FROM INTACT MEMORY (PERCENTAGE POINTS)',.55,.99)
+    for j,(lab,col) in enumerate([('Blank',BLUE),('Shuffled',GRAY)]):
+        rect(s,1.95+j*2,1.43,.12,.12,col,col,0);text(s,lab,2.15+j*2,1.39,1.7,.27,12,MID)
+    left,right,top,bottom=1.95,6.5,1.93,4.32
+    for t in [-30,-20,-10,0]:
+        x=right+t/32*(right-left);line(s,x,top-.1,x,bottom,LINE,.7);text(s,str(t),x-.18,bottom+.08,.42,.2,10,MID,align=PP_ALIGN.CENTER)
+    for i,(name,b,sh,n) in enumerate(d['intervention']['rows']):
+        y=top+i*.58;text(s,name,.5,y-.03,1.36,.3,12.5);text(s,f'n = {n}',.5,y+.24,1.36,.2,9,MID)
+        for j,(v,col) in enumerate([(b,BLUE),(sh,GRAY)]):
+            x=right+v/32*(right-left);rect(s,x,y+j*.23,right-x,.17,col,col,0);text(s,f'{v:.1f}',right+.13,y+j*.23-.03,.55,.23,11,col if col==BLUE else MID)
+    big(s,f"−{k['BLANK_DROP']} pp",'Equal-environment mean\nwhen memory is blanked',x=7.35,y=2.05,w=2.1)
+    takeaway(s,'Erase or shuffle the memory: success falls in every domain.')
 
-    s=new("The frozen base already favors filesystem actions")
-    image(s,work/"prior.png",.23,.85,6.63,3.97)
-    metric(s,"≤ 0.013","nats/token change\nwhen the shell tool is renamed",1.44,BLUE)
-    line(s,7.50,2.96,9.26,2.96)
-    text(s,"The prior extends\nbeyond the tool name.",7.18,3.34,2.42,.83,size=17,bold=True,align=PP_ALIGN.CENTER)
-    conclusion(s,[("Familiar action rendering",RED,True),(" gives reinforcement learning a usable starting point.")],size=16.5)
-    source(s,"Figure 3a; Appendix C.1 · frozen Qwen3.5-4B · lower NLL means more likely actions")
+    # 10. Resolve the unresolved content table by using established ablations.
+    s=slide('Memory actions need the learning signal',source_caption(d,'ablation',slide=True)+' · average task success (%)',
+       d['ablation']['boundary']+' The four rows are distinct interventions. Full training reaches 54.4, no memory-action actor gradients reaches 21.1, restricting to continuation during both training and evaluation gives 41.8, and restricting only at evaluation gives 28.1.')
+    label(s,'AVERAGE TASK SUCCESS (%)',.55,.99)
+    hbars(s,[(name,row[1]) for name,row in zip(['CAMG-RL','No memory-action\nactor gradients','Continuation only:\ntrain + evaluate','Continuation only:\nevaluate'],d['ablation']['rows'])],y=1.53,w=8.7,row_h=.67,label_w=2.6)
+    takeaway(s,'Task reward can train what to save—and how to use it.')
 
-    s=new("RL turns familiar actions into complete memory chains")
-    image(s,work/"chains.png",.23,.80,6.63,3.97)
-    metric(s,"8.0 → 20.9%","episodes with a complete chain",1.44,BLUE,x=7.02,w=2.74)
-    line(s,7.50,2.88,9.26,2.88)
-    text(s,"Store → retrieve → use",7.02,3.16,2.74,.67,size=17,bold=True,align=PP_ALIGN.CENTER)
-    text(s,"Beyond the mandatory\ncontinuation write",7.15,4.0,2.48,.51,size=13,color=MID,align=PP_ALIGN.CENTER)
-    conclusion(s,[("Voluntary memory use grows",RED,True),(" while AgeMem completes no chain.")])
-    source(s,"Figure 3b; Appendix C.1 · first and last quarters of the common 200-update training protocol")
+    # 11. Interface transfer with fixed task executor.
+    s=slide('The learned memory policy transfers across interfaces',source_caption(d,'transfer',slide=True),
+       d['transfer']['boundary']+' The gains are 11.4 points with Claude Code file tools and 6.4 with AgeMem memory tools. Only the memory-writing and reading policy changes. This is not a claim about changing the entire task actor, and no uncertainty or sample size should be invented.')
+    label(s,'AVERAGE SUCCESS (%) · FROZEN EXECUTOR · NO FURTHER TRAINING',.55,.99,8.8,BLUE)
+    r=d['transfer']['rows'];grouped(s,['Claude Code\nfile tools','AgeMem\nmemory tools'],[('Frozen memory policy',[r[0][-1],r[2][-1]],GRAY),('Trained memory policy',[r[1][-1],r[3][-1]],BLUE)],x=.9,y=1.83,w=5.7,h=2.35,maximum=32,ticks=[0,10,20,30])
+    big(s,f"+{k['TRANSFER_FILE_GAIN']} pp",'Claude Code file tools',y=1.75,caption_h=.42);text(s,f"+{k['TRANSFER_TOOL_GAIN']} pp",7.25,3.43,2.25,.6,30,BLUE,bold=True);text(s,'AgeMem memory tools',7.25,4.04,2.25,.35,13,MID)
+    takeaway(s,'Keep task execution fixed; change only who manages memory.')
 
-    # 12 — Native readable table, deliberately selected comparisons.
-    s=new("Trained competence transfers to external benchmarks")
-    text(s,"Success rate (%)",.61,.95,3.4,.31,size=14,color=MID)
-    text(s,"SWE-bench Verified",4.66,.95,2.27,.61,size=16,bold=True,align=PP_ALIGN.CENTER)
-    text(s,"MLE-bench Lite",7.16,.95,2.13,.61,size=16,bold=True,align=PP_ALIGN.CENTER)
-    line(s,.6,1.48,9.4,1.48,color=INK)
-    rows=[("Qwen3.5-4B",7.6,0.0,False),
-          ("CAMG-RL-4B",15.8,4.5,True),
-          ("Qwen3.5-35B-A3B",15.6,4.5,False),
-          ("Qwen3.5-9B",14.8,4.5,False),
-          ("CAMG-RL-9B",27.6,9.1,True),
-          ("Qwen3.5-122B-A10B",22.0,9.1,False)]
-    for i,(lab,swe,mle,ours) in enumerate(rows):
-        yy=1.65+i*.45+(0.18 if i>=3 else 0)
-        if ours: rect(s,.62,yy-.06,8.77,.43,PALE,PALE,0)
-        text(s,lab,.78,yy,3.9,.32,size=17,bold=ours,color=BLUE if ours else INK)
-        text(s,f"{swe:.1f}",4.8,yy,2.0,.32,size=18,bold=ours,color=BLUE if ours else INK,align=PP_ALIGN.CENTER)
-        text(s,f"{mle:.1f}",7.23,yy,2.0,.32,size=18,bold=ours,color=BLUE if ours else INK,align=PP_ALIGN.CENTER)
-        if i==2: line(s,.63,yy+.36,9.37,yy+.36)
-    line(s,.6,4.58,9.4,4.58,color=INK)
-    conclusion(s,[("4B and 9B policies",RED,True),(" are competitive with much larger frozen models.")],size=16.5)
-    source(s,"Selected rows from Table 3 · matched tasks, decoding, budgets and graders; all failures included")
+    # 12. Practical long-context reference, not single-factor causal evidence.
+    s=slide('Learned file memory beats a 262K-context reference',source_caption(d,'long_context',slide=True),
+       d['long_context']['boundary']+' The reference scores 49.2 average and CAMG-RL scores 54.4 with 30,720 active tokens, a 5.2-point advantage. Do not describe this as strict isolation of memory, because compaction and context settings differ. Do not claim a cost advantage without cost measurements.')
+    label(s,'AVERAGE SUCCESS (%) · SAME BASE, PPO, REWARDS AND 200 UPDATES',.55,.99,8.8,BLUE)
+    hbars(s,[('262K + automatic\ncompaction',d['long_context']['rows'][0][-1]),('CAMG-RL\n30,720 active tokens',d['long_context']['rows'][1][-1])],y=2.03,w=6.3,row_h=.88,label_w=2.45)
+    big(s,f"+{k['CONTEXT_GAIN']} pp",'Average task success\n\nA practical comparison,\nnot a one-factor test.',y=1.85)
+    takeaway(s,'More context and learned file memory solve different constraints.')
 
-    s=new("Memory-action credit and general files both matter")
-    image(s,work/"ablation.png",.23,.83,6.63,3.97)
-    metric(s,"−33.3 pp","without memory-action gradients",1.46,RED)
-    line(s,7.50,2.79,9.26,2.79)
-    metric(s,"−12.6 pp","retrained with\ncontinuation-only memory",3.03,BLUE)
-    conclusion(s,[("Learning the file actions",RED,True),(" and using general memory files both help.")],size=16.5)
-    source(s,"Figure 4 · last bar restricts the full policy only at evaluation; it is not a retrained model")
+    # 13. Robustness with SD, not fake seed dots.
+    s=slide('The advantage persists across training runs',source_caption(d,'robustness',slide=True),
+       d['robustness']['boundary']+' CAMG-RL averages 55.3 with SD 2.9, CompactionRL 47.1 with SD 3.5. The original 54.4 and 48.0 values are individual main-table runs, not the means. A separate model-family replication on the website trains Gemma 3 4B from 15.0 to 47.7; this is not zero-shot transfer of Qwen weights.')
+    label(s,'AVERAGE TASK SUCCESS (%) · FIVE RUNS PER METHOD',.55,.99,8.8,BLUE)
+    x0=2.1;w=4.5;y0=1.8;y1=3.9
+    for tick in [0,20,40,60]:
+        x=x0+tick/60*w;line(s,x,y0,x,y1,LINE,.7);text(s,str(tick),x-.15,y1+.12,.35,.22,10,MID,align=PP_ALIGN.CENTER)
+    for i,(name,m,sd) in enumerate(d['robustness']['rows']):
+        y=2.3+i*1.1;x=x0+m/60*w;lo=x0+(m-sd)/60*w;hi=x0+(m+sd)/60*w;col=BLUE if i else MID
+        text(s,name,.5,y-.12,1.5,.35,14,INK,bold=i==1);line(s,lo,y,hi,y,col,2.2);line(s,lo,y-.1,lo,y+.1,col,1.4);line(s,hi,y-.1,hi,y+.1,col,1.4);rect(s,x-.055,y-.055,.11,.11,col,col,0,True)
+        text(s,f'{m:.1f} ± {sd:.1f}',x-.7,y-.46,1.4,.3,17,col,bold=i==1,align=PP_ALIGN.CENTER)
+    big(s,f"+{k['ROBUST_GAIN']} pp",'Difference of means\n\nWhiskers show SD,\nnot confidence intervals.',y=1.85)
+    takeaway(s,'The headline result is not a single-run observation.')
 
-    s=new("Changing saved content reduces subsequent success")
-    image(s,work/"intervention.png",.23,.81,6.63,3.97)
-    metric(s,"−14.1 pp","blank memory\nequal-environment average",1.40,RED)
-    line(s,7.50,2.89,9.26,2.89)
-    metric(s,"−11.5 pp","task-mismatched memory\nequal-environment average",3.08,BLUE)
-    conclusion(s,[("Saved content affects later decisions",RED,True),(" at the same post-reset state.")],size=16.5)
-    source(s,"Appendix D.3 · eligible n = 128 / 29 / 60 / 23 · shuffled donors matched within environment and by length")
+    # 14. External table with editable grouped bars, small and large base scales.
+    s=slide('Gains carry over to external benchmarks','Published · Table 3 · benchmark success (%) · no compute-equivalence claim',
+       d['external']['boundary']+' Focus on matched base-to-trained gains at each scale: SWE-bench Verified 7.6 to 15.8 for 4B and 14.8 to 27.6 for 9B; MLE-bench Lite 0.0 to 4.5 and 4.5 to 9.1. Larger frozen MoE models remain capability references, visible in the website’s full table.')
+    label(s,'FROZEN BASE VS. CAMG-RL · SAME MODEL SCALE',.55,.99)
+    er=d['external']['rows']
+    for j,(lab,col) in enumerate([('Frozen base',GRAY),('CAMG-RL',BLUE)]):
+        rect(s,.9+j*2.1,1.32,.13,.13,col,col,0);text(s,lab,1.12+j*2.1,1.28,1.8,.3,12,MID)
+    grouped(s,['4B','9B'],[('Frozen base',[er[0][1],er[3][1]],GRAY),('CAMG-RL',[er[1][1],er[4][1]],BLUE)],x=.9,y=1.84,w=3.7,h=2.25,maximum=30,ticks=[0,10,20,30],legend=False,label_h=.24)
+    grouped(s,['4B','9B'],[('Frozen base',[er[0][2],er[3][2]],GRAY),('CAMG-RL',[er[1][2],er[4][2]],BLUE)],x=5.85,y=1.84,w=3.65,h=2.25,maximum=10,ticks=[0,5,10],legend=False,label_h=.24)
+    text(s,'SWE-bench Verified',.85,4.45,3.9,.3,14,INK,bold=True,align=PP_ALIGN.CENTER)
+    text(s,'MLE-bench Lite',5.75,4.45,3.9,.3,14,INK,bold=True,align=PP_ALIGN.CENTER)
+    takeaway(s,'Improve the trained policy’s own base on both benchmarks.')
 
-    # 15 — Large file contents and genuine commands from the public training case.
-    s=new("A coding episode shows the write–read–use chain")
-    text(s,"Scrapy: repair broken response logging",.53,.89,8.92,.37,size=18,bold=True)
-    terminal(s,"Before reset · round 18", "objective: fix response logging\nevidence: added _mqpush\n  in scrapy/core/scheduler.py\ntested: no _mqpush error\nnext: run tests, confirm\n  logging, then submit",.53,1.56,4.24,2.51,13.2)
-    text(s,".agent_memory/CONTINUATION.md",.56,4.22,4.16,.29,size=13,color=BLUE,font=CODE)
-    line(s,5.04,1.54,5.04,4.52,color=RED,dash=True)
-    terminal(s,"After reset · rounds 19–30", "$ cat \\\n    .agent_memory/CONTINUATION.md\n$ python test_spider.py\n$ python -m pytest \\\n    tests/test_crawl.py -v",5.32,1.56,4.15,2.08,13.2)
-    text(s,"Hidden tests passed",5.51,3.86,3.73,.32,size=18,color=GREEN,bold=True)
-    text(s,"Return 1.00 · submitted at step 30 / 40",5.51,4.28,3.84,.31,size=12.5,color=MID)
-    conclusion(s,[("The saved fix and verification plan",RED,True),(" guide work in the fresh context.")],size=16.5)
-    source(s,"Figure 5; Appendix A.4.3 · training trajectory · excerpts shortened for presentation; wrapped commands")
+    # 15. Resolve the opening story, without making it a causal control.
+    s=slide('The remembered state becomes the next action','Published · Figure 5 / Appendix A.4.3 · shortened training-episode excerpts',
+       d['case']['boundary']+' Timeline: edit scheduler.py at round 12, write CONTINUATION.md at round 18, reset, read at round 19, later run test_spider.py and pytest tests/test_crawl.py -v, terminal round 30 within a 40-round budget with return 1.00 and hidden tests passed. Test commands are subsequent actions, not all asserted to occur at round 19.')
+    steps=[('12','Edit','Add _mqpush'),('18','Write','Preserve the state'),('19','Read','Recover the state'),('30','Finish','Hidden tests passed')]
+    for i,(n,t,desc) in enumerate(steps):
+        x=.65+i*2.36;rect(s,x,1.42,.48,.48,PALE,BLUE,1,True);text(s,n,x+.02,1.53,.44,.25,13,BLUE,bold=True,align=PP_ALIGN.CENTER)
+        if i<3:line(s,x+.52,1.66,x+2.2,1.66,LINE,1,True)
+        text(s,t,x,2.06,2.12,.35,21,bold=True);text(s,desc,x,2.54,2.1,.53,13,MID)
+    filebox(s,'SUBSEQUENT CHECKS','\n'.join(d['case']['commands'][1:]),.65,3.24,6.22,1.22,13)
+    text(s,'1.00',7.6,3.25,1.8,.63,37,BLUE,bold=True);label(s,'TERMINAL RETURN',7.6,4.02,1.8)
+    takeaway(s,'The file carries the work forward; the agent still has to do it.')
 
-    # 16 — Clean closing page that can remain on screen during questions.
-    s=new("Takeaways")
-    rich(s,[("• CAMG ",RED,True),("makes long-horizon memory testable across four native task worlds.")],.64,1.09,8.77,.66,19)
-    rich(s,[("• CAMG-RL ",RED,True),("learns to write, retrieve and reuse files from downstream task reward.")],.64,2.11,8.77,.66,19)
-    rich(s,[("• Familiar file operations ",RED,True),("support learned memory chains and stronger task performance.")],.64,3.13,8.77,.70,19)
-    links(s,4.43,10.7)
-    line(s,.53,4.90,9.48,4.90)
-    text(s,"Coding Agent Memory Post-training",.57,5.08,8.09,.29,size=15,bold=True)
-    text(s,"JD.com",8.52,5.07,.93,.29,size=15,color=RED,bold=True,align=PP_ALIGN.RIGHT)
+    # 16. End on the scientific takeaways, not an unasked appendix.
+    s=slide('Familiar operations. Learned memory.','CAMP V1 · published paper + labelled November additions · data/research.json',
+       'Close with three scoped statements. Familiarity is measured before training. Task reward teaches useful memory behaviors, supported by acquisition, ablation and local content intervention. The benefits extend to external benchmarks and, in November additions, new memory interfaces. Do not claim universal causality or compute savings. Full experiment tables, protocol boundaries, source/version labels and editable slides are on the project page.')
+    for i,(a,b) in enumerate([('Start from a familiar interface.','Use ordinary file operations instead of inventing a new memory language.'),('Train memory through the task.','Preserve and reuse useful state with downstream reward.'),('Test the behavior beyond its original form.','Probe content, new interfaces, larger contexts and external tasks.')]):
+        y=1.23+i*1.05;text(s,f'0{i+1}',.55,y,.55,.38,19,BLUE);text(s,a,1.35,y,8.0,.42,23,bold=True);text(s,b,1.35,y+.52,8.0,.4,14,MID)
+    b=text(s,'liruiluo.github.io/agentmemorygym',1.35,4.67,7.8,.38,18,BLUE,bold=True);b.text_frame.paragraphs[0].runs[0].hyperlink.address=d['project_url']
 
-    # Grounded notes travel with the editable deck; no unpublished run state is embedded.
-    for index,s in enumerate(prs.slides,1):
-        tf=s.notes_slide.notes_text_frame
-        if not tf.text.strip():
-            tf.text=f"Slide {index}. Source: public arXiv:2609.34422v1. See slides/outline.md for provenance and speaking notes."
-    out_pptx.parent.mkdir(parents=True,exist_ok=True)
-    prs.core_properties.title="Coding Agent Memory Post-training"
-    prs.core_properties.subject="Public paper talk · arXiv:2609.34422v1 · CRG/SPHERE academic style"
-    prs.core_properties.author="Lirui Luo et al. · JD.com"
-    prs.save(out_pptx)
-    print(out_pptx)
+    out.parent.mkdir(parents=True,exist_ok=True);prs.save(out)
+    notes='# CAMP V1 · 16-slide research talk\n\nUpdated 2026-11-14. Approximately 15 minutes. White academic house style; all exhibits are native editable objects. Results are loaded from `data/research.json`. November additions are author-reported revised-manuscript results, separately labelled from published September results.\n\n'
+    for n,t,src,body in outline:notes+=f'## {n:02}. {t or d["project"]}\n\n**Source:** {src}\n\n{body}\n\n'
+    (out.parent/'speaker-notes.md').write_text(notes)
+    (out.parent/'deck-manifest.json').write_text(json.dumps({'slides':len(prs.slides),'data_sha256':sha,'raster_images':0,'updated':d['updated'],'slides_outline':[{'number':n,'title':t or d['project'],'source':src} for n,t,src,_ in outline]},indent=2)+'\n')
+    print(json.dumps({'pptx':str(out),'slides':len(prs.slides),'raster_images':0,'data_sha256':sha}))
 
-
-def main():
-    p=argparse.ArgumentParser()
-    p.add_argument("--site-root",type=Path,default=Path(__file__).resolve().parents[1])
-    p.add_argument("--out",type=Path,required=True)
-    a=p.parse_args()
-    build(a.out.resolve(),a.site_root.resolve())
-
-
-if __name__=="__main__":
-    main()
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('--out',type=Path,required=True);p.add_argument('--site-root',type=Path,default=ROOT);a=p.parse_args();build(a.out,a.site_root)
