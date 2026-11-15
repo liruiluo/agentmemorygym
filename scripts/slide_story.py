@@ -59,7 +59,7 @@ STORY=[
     entry('Results & analysis','Case study','Complete original Figure 5: error, repair, memory write and readback, success','Scrapy case · Figure 5 · recorded training episode','Q2'),
     entry('Results & analysis','Transfer','New memory interfaces, fixed task executor','Frozen task executor · memory policy changed · no further training','Q3','transfer'),
     entry('Results & analysis','Transfer','Matched base vs. trained external results','SWE-bench Verified / MLE-bench Lite · matched model scales','Q3','external'),
-    entry(None,'Conclusion','Three takeaways and project link','CAMP · paper, code and slides'),
+    entry(None,'Conclusion','Two core insights and project link','CAMP · paper, code and slides'),
 ]
 
 # Fourteen and a half minutes of speaking plus transitions.
@@ -152,5 +152,11 @@ def assert_slide_story(deck):
         else:
             assert not navigation,'Do not add navigation to non-chapter pages'
     assert STORY[-1]['role']=='Conclusion' and deck.slides[-1].shapes[0].text=='Takeaways','Final slide must be titled Takeaways'
+    ending=text_at(len(STORY))
+    for insight in ['Memory interfaces should build on pre-trained skills.','Giving agents memory tools is not enough.']:
+        assert insight in ending,'Missing core takeaway insight'
+    markers=[o.text for o in deck.slides[-1].shapes if o.has_text_frame and re.fullmatch(r'0[123]',o.text)]
+    assert markers==['01','02'],'Takeaways must contain exactly two insights'
+    assert 'Learn a behavior that can be reused.' not in ending,'Do not restore the generic third takeaway'
     assert 'What should survive a context boundary?' not in visible
     return visible

@@ -1,6 +1,6 @@
 # CAMP · 17-slide research story
 
-Updated 2026-11-14. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Result footers retain only necessary figure references and page numbers, with no repeated experimental conditions. Q2.1 asks whether the gains come from better memory; Q2.2 asks whether pre-trained file-operation skills help. The case closes Q2 without a third subquestion. Text and charts are editable. The Figure 1 context crop, Figure 2 environment crop and full Figures 1, 2 and 5 are pictures in PPTX and original vectors in PDF. The case page displays the complete original Figure 5. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
+Updated 2026-11-15. Approximately 15 minutes (14.5 minutes of speaking plus transitions). White academic house style. Small chapter navigation and experimental questions sit above each chapter page’s larger title; a concise comparison/intervention line introduces each experimental plot. Result footers retain only necessary figure references and page numbers, with no repeated experimental conditions. Q2.1 asks whether the gains come from better memory; Q2.2 asks whether pre-trained file-operation skills help. The case closes Q2 without a third subquestion. Text and charts are editable. The Figure 1 context crop, Figure 2 environment crop and full Figures 1, 2 and 5 are pictures in PPTX and original vectors in PDF. The case page displays the complete original Figure 5. The memory-underuse visual is a GPT-image-2 raster asset. Results come from `data/research.json`. Source-version boundaries below are speaker preparation, not slide labels.
 
 ## 01. Coding Agent Memory Post-training
 
@@ -164,9 +164,9 @@ Benchmark success percentages. Larger frozen models are capability references, n
 
 **Chapter:** Conclusion · **Role:** Conclusion · **Target:** 40 seconds
 
-**Source:** CAMP V1 · published paper + labelled November additions · data/research.json
+**Source:** CAMP V1 · pre-trained interface prior and learned memory use · data/research.json
 
-Close with three scoped statements. Familiarity is measured before training. Task reward teaches useful memory behaviors, supported by acquisition, ablation and local content intervention. The benefits extend to external benchmarks and, in November additions, new memory interfaces. Do not claim universal causality or compute savings. The project page links the paper, code and slides. Detailed protocol and source-version boundaries stay in these speaker notes and shared data, not the audience-facing story.
+Close with two core insights. First, memory interfaces should build on skills already present in the pre-trained model; the file-operation familiarity comparison motivates this design principle. Second, providing tools does not ensure effective memory use: task reward can train what information to retain and how to use it, supported by the memory-learning ablations and same-state content intervention. Cross-interface and external-task transfer remain supporting evidence on the preceding Q3 slides, not a third takeaway. The project link remains on screen for questions.
 
 ## Additional Q&A material (not extra slides)
 
