@@ -164,9 +164,9 @@ Benchmark success percentages. Larger frozen models are capability references, n
 
 **Chapter:** Conclusion · **Role:** Conclusion · **Target:** 40 seconds
 
-**Source:** CAMP V1 · pre-trained interface prior and learned memory use · data/research.json
+**Source:** CAMP V1 · pre-trained interface prior and task generalization · data/research.json
 
-Close with two core insights. First, memory interfaces should build on skills already present in the pre-trained model; the file-operation familiarity comparison motivates this design principle. Second, providing tools does not ensure effective memory use: task reward can train what information to retain and how to use it, supported by the memory-learning ablations and same-state content intervention. Cross-interface and external-task transfer remain supporting evidence on the preceding Q3 slides, not a third takeaway. The project link remains on screen for questions.
+Close with two connected insights: familiar pre-trained file operations provide a starting point for memory learning, and the resulting memory-enabled policy can serve new long-horizon tasks. The four-environment results show broad applicability; external benchmarks show transfer to new tasks. Cross-interface reuse remains supplementary evidence on Q3. External benchmark gains compare whole policies and do not isolate a memory-only transfer effect; the jointly trained environments are not unseen-environment tests. The project link remains on screen for questions.
 
 ## Additional Q&A material (not extra slides)
 

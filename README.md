@@ -83,7 +83,7 @@ which factors are held fixed. The chart remains dominant and the takeaway states
 the finding. Result footers keep only necessary figure references and page numbers;
 experimental conditions are not repeated below the plot. The recorded case uses the complete original Figure 5 at full width, with all four
 panels and the context-replacement boundary intact. It has no added protocol line. The final slide is titled **Takeaways** and retains two core insights and the project link: build memory interfaces on pre-trained skills,
-and train effective memory use beyond merely providing tools. Transfer evidence remains in Q3. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
+and generalize learned memory behaviors to new tasks. Multi-environment results establish applicability, while external benchmarks support task transfer. Cross-interface reuse remains supplementary, with the detailed results in Q3. Secondary checks stay in speaker notes. Visuals are selected by explanatory value, not an image quota: the roadmap, contribution preview and conclusion retain concise text.
 
 The shared result file retains the source references for each experiment. Website
 selection does not change the data used by the 17-slide talk. The paper link leads

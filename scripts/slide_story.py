@@ -153,7 +153,7 @@ def assert_slide_story(deck):
             assert not navigation,'Do not add navigation to non-chapter pages'
     assert STORY[-1]['role']=='Conclusion' and deck.slides[-1].shapes[0].text=='Takeaways','Final slide must be titled Takeaways'
     ending=text_at(len(STORY))
-    for insight in ['Memory interfaces should build on pre-trained skills.','Giving agents memory tools is not enough.']:
+    for insight in ['Memory interfaces should build on pre-trained skills.','Learned memory behaviors generalize to new tasks.']:
         assert insight in ending,'Missing core takeaway insight'
     markers=[o.text for o in deck.slides[-1].shapes if o.has_text_frame and re.fullmatch(r'0[123]',o.text)]
     assert markers==['01','02'],'Takeaways must contain exactly two insights'

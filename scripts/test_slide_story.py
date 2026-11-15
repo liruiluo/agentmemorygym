@@ -17,7 +17,7 @@ class SlideStoryTest(unittest.TestCase):
     def test_final_slide_is_explicit_takeaways(self):
         self.assertEqual(self.deck.slides[-1].shapes[0].text,'Takeaways')
         content='\n'.join(o.text for o in self.deck.slides[-1].shapes if o.has_text_frame)
-        for phrase in ['Memory interfaces should build on pre-trained skills.','Giving agents memory tools is not enough.','File operations give memory learning a familiar starting point.','Task reward teaches agents what to retain and how to use it.','liruiluo.github.io/agentmemorygym']:
+        for phrase in ['Memory interfaces should build on pre-trained skills.','Learned memory behaviors generalize to new tasks.','File operations give memory learning a familiar starting point.','A shared policy uses memory across environments and external tasks.','liruiluo.github.io/agentmemorygym']:
             self.assertIn(phrase,content)
     def test_third_takeaway_cannot_return(self):
         d=Presentation(self.path)
@@ -26,7 +26,17 @@ class SlideStoryTest(unittest.TestCase):
     def test_takeaway_requires_insight_not_method_step(self):
         d=Presentation(self.path)
         for o in d.slides[-1].shapes:
-            if o.has_text_frame and o.text=='Giving agents memory tools is not enough.':o.text='Train memory through the task.'
+            if o.has_text_frame and o.text=='Learned memory behaviors generalize to new tasks.':o.text='Train memory through the task.'
+        with self.assertRaisesRegex(AssertionError,'Missing core takeaway insight'):assert_slide_story(d)
+    def test_takeaway_cannot_repeat_background_premise(self):
+        d=Presentation(self.path)
+        for o in d.slides[-1].shapes:
+            if o.has_text_frame and o.text=='Learned memory behaviors generalize to new tasks.':o.text='Giving agents memory tools is not enough.'
+        with self.assertRaisesRegex(AssertionError,'Missing core takeaway insight'):assert_slide_story(d)
+    def test_takeaway_cannot_narrow_to_interface_transfer(self):
+        d=Presentation(self.path)
+        for o in d.slides[-1].shapes:
+            if o.has_text_frame and o.text=='Learned memory behaviors generalize to new tasks.':o.text='Learned memory strategies transfer across interfaces.'
         with self.assertRaisesRegex(AssertionError,'Missing core takeaway insight'):assert_slide_story(d)
     def test_slogan_cannot_replace_takeaways_heading(self):
         d=Presentation(self.path);d.slides[-1].shapes[0].text='Familiar operations. Learned memory.'
